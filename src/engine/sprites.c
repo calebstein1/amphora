@@ -5,9 +5,9 @@
 
 #include <SDL2/SDL.h>
 
-#include "globals.h"
-#include "palette.h"
-#include "sprites.h"
+#include "engine/globals.h"
+#include "engine/palette.h"
+#include "engine/sprites.h"
 
 /* Prototypes for private functions */
 void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size);

@@ -1,0 +1,6 @@
+#ifndef UNTITLED_PLATFORMER_CONFIG_H
+#define UNTITLED_PLATFORMER_CONFIG_H
+
+#define GAME_TITLE "Untitled Platformer"
+
+#endif /* UNTITLED_PLATFORMER_CONFIG_H */

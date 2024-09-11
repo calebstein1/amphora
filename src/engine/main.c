@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
-#include "gameplay.h"
-#include "globals.h"
-#include "screen.h"
-#include "sprites.h"
+#include "engine/game_loop.h"
+#include "engine/globals.h"
+#include "engine/screen.h"
+#include "engine/sprites.h"
 
-#define GAME_TITLE "Untitled Platformer"
+#include "config.h"
 
 int
 main(void) {

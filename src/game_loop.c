@@ -1,5 +1,5 @@
-#include "gameplay.h"
-#include "sprites.h"
+#include "engine/game_loop.h"
+#include "engine/sprites.h"
 
 /* Game globals */
 struct sprite_slot_t *p_char = NULL;
