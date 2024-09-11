@@ -4,7 +4,6 @@
 
 #include "engine/game_loop.h"
 #include "engine/input.h"
-#include "engine/screen.h"
 #include "engine/sprites.h"
 #include "engine/util.h"
 
@@ -86,8 +85,8 @@ main(void) {
 		SDL_RenderPresent(renderer);
 
 		frame_end = SDL_GetTicks();
-		if ((frame_time = frame_end - frame_start) < SCREEN_TICKS_PER_FRAME) {
-			SDL_Delay(SCREEN_TICKS_PER_FRAME - frame_time);
+		if ((frame_time = frame_end - frame_start) < (1000 / FRAMERATE)) {
+			SDL_Delay((1000 / FRAMERATE) - frame_time);
 		}
 	}
 

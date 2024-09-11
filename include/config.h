@@ -3,6 +3,7 @@
 
 #define GAME_TITLE "Untitled Platformer"
 
+#define FRAMERATE 60
 #define WINDOW_X 800
 #define WINDOW_Y 600
 #define START_FULLSCREEN false
