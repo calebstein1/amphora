@@ -107,10 +107,10 @@ free_spriteslot(struct sprite_slot_t *spr) {
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size) {
 	u8 i;
-	u8 *s_addr = spritesheet + (spr->spr_num << 4);
+	u8 *s_addr = spritesheet + (spr->num << 4);
 	u8 c, cur_pxl;
-	int spr_x = spr->spr_x * p_size;
-	int spr_y = spr->spr_y * p_size;
+	int spr_x = spr->x * p_size;
+	int spr_y = spr->y * p_size;
 	/* initialize y to 255 since we increment y each 8 pixels, and 0 is a multiple of 8 */
 	u8 x_off = 0, y_off = 255;
 	SDL_Rect pxl;
@@ -120,7 +120,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 
 	for (i = 0; i < SPR_NUM_PIXELS; i++) {
 		/* i & 7 == i % 8 */
-		if (spr->spr_flip) {
+		if (spr->flip) {
 			if ((i & 7) == 0) {
 				x_off = 0;
 				y_off++;
@@ -139,11 +139,11 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		cur_pxl = get_cur_pixel(spr, *(s_addr + (i >> 3)), *(s_addr + 8 + (i >> 3)), i & 7);
 		if (!cur_pxl) continue;
 
-		c = *(user_palettes + spr->spr_pal + cur_pxl);
+		c = *(user_palettes + spr->pal + cur_pxl);
 		SDL_SetRenderDrawColor(renderer, pal[c].r, pal[c].g, pal[c].b, 0xff);
 
-		pxl.x = spr_x + (x_off * p_size) + ((spr->spr_subp_x * p_size) >> SUBPIXEL_STEPS);
-		pxl.y = spr_y + (y_off * p_size) + ((spr->spr_subp_y * p_size) >> SUBPIXEL_STEPS);
+		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) >> SUBPIXEL_STEPS);
+		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) >> SUBPIXEL_STEPS);
 
 		SDL_RenderFillRect(renderer, &pxl);
 	}
@@ -164,7 +164,7 @@ get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 i) 
 			return 3;
 		default:
 			fprintf(stderr, "Processing sprite %u resulted in an impossible pixel color on pixel %u, got %x\n\n",
-				spr->spr_num, i, ((hi << 8) + low));
+				spr->num, i, ((hi << 8) + low));
 	}
 
 	return 0;

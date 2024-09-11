@@ -15,15 +15,15 @@
 #include "engine/util.h"
 
 struct sprite_slot_t {
-    unsigned int spr_num;
-    int spr_x;
-    int spr_y;
-    u8 spr_subp_x : 4;
-    u8 spr_subp_y : 4;
-    u8 spr_pal;
-    bool spr_flip : 1;
-    bool reserved : 1;
-    bool display : 1;
+    unsigned int num; /* The sprite to draw from the spritesheet */
+    int x; /* The sprite's x position */
+    int y; /* The sprite's y position */
+    u8 x_subp : 4; /* The sprite's x subpixel position */
+    u8 y_subp : 4; /* The sprite's y subpixel position */
+    u8 pal; /* The sprite's color palette */
+    bool flip : 1; /* Whether or not the sprite should be flipped horizontally */
+    bool reserved : 1; /* Whether the sprite slot is reserved or free */
+    bool display : 1; /* Whether the sprite should be drawn or not */
 };
 
 int init_spritesheet(void); /* Run once to load spritesheet and palette data */
