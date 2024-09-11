@@ -1,7 +1,9 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
 #include "engine/game_loop.h"
+#include "engine/input.h"
 #include "engine/screen.h"
 #include "engine/sprites.h"
 #include "engine/util.h"
@@ -17,7 +19,8 @@ main(void) {
 	SDL_Window *win;
 	SDL_Renderer *renderer;
 	SDL_Event e;
-	unsigned char running = 1;
+	input_state key_actions;
+	bool running = true;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Failed to init SDL: %s\n", SDL_GetError());
@@ -55,15 +58,23 @@ main(void) {
 		(void)frame_count;
 
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) {
-				running = 0;
+			switch (e.type) {
+				case SDL_QUIT:
+					running = false;
+					break;
+				case SDL_KEYDOWN:
+					handle_keydown(&key_actions, &e);
+					break;
+				case SDL_KEYUP:
+					handle_keyup(&key_actions, &e);
+					break;
 			}
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 		SDL_RenderClear(renderer);
 
-		game_loop(frame_count);
+		game_loop(frame_count, &key_actions);
 
 		draw_all_sprites(renderer, pixel_size);
 
