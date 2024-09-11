@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
+#include "gameplay.h"
 #include "globals.h"
-#include "palette.h"
 #include "screen.h"
 #include "sprites.h"
 
@@ -43,6 +43,8 @@ main(void) {
 		return -1;
 	}
 
+	game_init();
+
 	while (running) {
 		frame_start = SDL_GetTicks();
 		frame_count++;
@@ -60,6 +62,8 @@ main(void) {
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 		SDL_RenderClear(renderer);
+
+		game_loop(frame_count);
 
 		draw_all_sprites(renderer, pixel_size);
 
