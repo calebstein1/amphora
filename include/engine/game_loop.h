@@ -4,6 +4,6 @@
 #include "engine/input.h"
 
 void game_init(void); /* One-time init tasks */
-void game_loop(unsigned long int frame, const input_state *key_actions); /* Main gameplay loop */
+void game_loop(unsigned long int frame, const input_state *key_actions); /* Main gameplay loop, runs once per frame */
 
 #endif /* UNTITLED_PLATFORMER_GAME_LOOP_H */
