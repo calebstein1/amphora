@@ -2,7 +2,7 @@ TARGET = bin/untitled-platformer
 SRC = $(wildcard src/*.c src/**/*.c)
 OBJ = $(patsubst src/%.c, obj/%.o, $(SRC))
 CC = cc
-CFLAGS=-O2 -std=gnu99 -Werror=all -Werror=pedantic -Wextra -Wno-gnu-empty-initializer -fsanitize=address,undefined -Iinclude
+CFLAGS=-O2 -std=c99 -Werror=all -Werror=pedantic -Wextra -fsanitize=address,undefined -Iinclude
 LDFLAGS=-lSDL2
 
 all: clean $(TARGET)
