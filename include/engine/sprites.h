@@ -11,8 +11,8 @@
 
 #include <SDL2/SDL.h>
 
-#include "globals.h"
-#include "palette.h"
+#include "engine/palette.h"
+#include "engine/util.h"
 
 struct sprite_slot_t {
     unsigned int spr_num;

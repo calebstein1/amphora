@@ -2,9 +2,9 @@
 #include <SDL2/SDL.h>
 
 #include "engine/game_loop.h"
-#include "engine/globals.h"
 #include "engine/screen.h"
 #include "engine/sprites.h"
+#include "engine/util.h"
 
 #include "config.h"
 
