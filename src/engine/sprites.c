@@ -85,7 +85,7 @@ get_spriteslot(struct sprite_slot_t **spr) {
 	if (*spr) return *spr;
 	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
 		if (!sprite_slots[i].spr_num) {
-			sprite_slots[i].reserved = 1;
+			sprite_slots[i].reserved = true;
 			*spr = &sprite_slots[i];
 			break;
 		}
@@ -96,8 +96,8 @@ get_spriteslot(struct sprite_slot_t **spr) {
 
 void
 free_spriteslot(struct sprite_slot_t *spr) {
-	spr->display = 0;
-	spr->reserved = 0;
+	spr->display = false;
+	spr->reserved = false;
 }
 
 /*

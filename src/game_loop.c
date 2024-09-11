@@ -11,6 +11,7 @@ game_init(void) {
 	p_char->spr_x = 64;
 	p_char->spr_y = 64;
 	p_char->spr_pal = 0;
+	p_char->display = true;
 }
 
 void
