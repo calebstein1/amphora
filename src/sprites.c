@@ -14,7 +14,7 @@ void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_
 u8 get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 i);
 
 /* Globals */
-static struct sprite_slot_t sprite_slots[MAX_SPRITES] = {};
+static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN] = {};
 static struct color_t pal[MAX_COLORS];
 static u8 spritesheet[SPRITESHEET_SIZE];
 static u8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
@@ -62,25 +62,41 @@ init_spritesheet(void) {
 	close(pal_fd);
 	close(p_tbl_fd);
 
-	sprite_slots[0].spr_num = 1;
-	sprite_slots[0].spr_x = 64;
-	sprite_slots[0].spr_y = 64;
-	sprite_slots[0].spr_pal = 0;
-
 	return 0;
 }
 
 void
 draw_all_sprites(SDL_Renderer *renderer, int p_size) {
-	unsigned char i;
+	int i;
 	struct sprite_slot_t *cur_spr;
 
-	for (i = 0; i < MAX_SPRITES; i++) {
+	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
 		cur_spr = &sprite_slots[i];
-		if (!cur_spr->spr_num) continue;
+		if (!cur_spr->reserved) continue;
 
 		draw_sprite(cur_spr, renderer, p_size);
 	}
+}
+
+struct sprite_slot_t *
+get_spriteslot(struct sprite_slot_t **spr) {
+	int i;
+
+	if (*spr) return *spr;
+	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
+		if (!sprite_slots[i].spr_num) {
+			sprite_slots[i].reserved = 1;
+			*spr = &sprite_slots[i];
+			break;
+		}
+	}
+
+	return *spr;
+}
+
+void
+free_spriteslot(struct sprite_slot_t *spr) {
+	spr->reserved = 0;
 }
 
 /*
@@ -94,8 +110,6 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 	u8 c, cur_pxl;
 	int spr_x = spr->spr_x * p_size;
 	int spr_y = spr->spr_y * p_size;
-	u8 spr_subp_x = spr->spr_subp_x >> 4;
-	u8 spr_subp_y = spr->spr_subp_y >> 4;
 	/* initialize y to 255 since we increment y each 8 pixels, and 0 is a multiple of 8 */
 	u8 x_off = 0, y_off = 255;
 	SDL_Rect pxl;
@@ -118,8 +132,8 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		c = *(user_palettes + spr->spr_pal + cur_pxl);
 		SDL_SetRenderDrawColor(renderer, pal[c].r, pal[c].g, pal[c].b, 0xff);
 
-		pxl.x = spr_x + (x_off * p_size) + ((spr_subp_x * p_size) >> SUBPIXEL_STEPS);
-		pxl.y = spr_y + (y_off * p_size) + ((spr_subp_y * p_size) >> SUBPIXEL_STEPS);
+		pxl.x = spr_x + (x_off * p_size) + ((spr->spr_subp_x * p_size) >> SUBPIXEL_STEPS);
+		pxl.y = spr_y + (y_off * p_size) + ((spr->spr_subp_y * p_size) >> SUBPIXEL_STEPS);
 
 		SDL_RenderFillRect(renderer, &pxl);
 	}
