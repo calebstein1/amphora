@@ -3,6 +3,10 @@
 
 #define GAME_TITLE "Untitled Platformer"
 
+#define WINDOW_X 800
+#define WINDOW_Y 600
+#define START_FULLSCREEN false
+
 #define ACTIONS				\
 	/* (action, key1, key2) */	\
 	X(left, SDLK_a, SDLK_LEFT)	\
