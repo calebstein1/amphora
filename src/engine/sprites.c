@@ -72,7 +72,7 @@ draw_all_sprites(SDL_Renderer *renderer, int p_size) {
 
 	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
 		cur_spr = &sprite_slots[i];
-		if (!cur_spr->reserved) continue;
+		if (!cur_spr->reserved || !cur_spr->display) continue;
 
 		draw_sprite(cur_spr, renderer, p_size);
 	}
@@ -96,6 +96,7 @@ get_spriteslot(struct sprite_slot_t **spr) {
 
 void
 free_spriteslot(struct sprite_slot_t *spr) {
+	spr->display = 0;
 	spr->reserved = 0;
 }
 

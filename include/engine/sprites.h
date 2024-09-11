@@ -19,8 +19,9 @@ struct sprite_slot_t {
     u8 spr_subp_x : 4;
     u8 spr_subp_y : 4;
     u8 spr_pal;
-    u8 spr_prop;
-    u8 reserved;
+    u8 spr_flip : 1;
+    u8 reserved : 1;
+    u8 display : 1;
 };
 
 int init_spritesheet(void); /* Run once to load spritesheet and palette data */
