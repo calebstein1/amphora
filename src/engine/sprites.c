@@ -120,11 +120,20 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 
 	for (i = 0; i < SPR_NUM_PIXELS; i++) {
 		/* i & 7 == i % 8 */
-		if ((i & 7) == 0) {
-			x_off = 7;
-			y_off++;
+		if (spr->spr_flip) {
+			if ((i & 7) == 0) {
+				x_off = 0;
+				y_off++;
+			} else {
+				x_off++;
+			}
 		} else {
-			x_off--;
+			if ((i & 7) == 0) {
+				x_off = 7;
+				y_off++;
+			} else {
+				x_off--;
+			}
 		}
 
 		cur_pxl = get_cur_pixel(spr, *(s_addr + (i >> 3)), *(s_addr + 8 + (i >> 3)), i & 7);
