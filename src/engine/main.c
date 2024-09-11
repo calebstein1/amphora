@@ -54,15 +54,18 @@ main(void) {
 		frame_start = SDL_GetTicks();
 		frame_count++;
 
-		SDL_GetWindowSize(win, &win_size_x, &win_size_y);
-		pixel_size = MIN_OF(win_size_x, win_size_y) >> 7;
-
 		(void)frame_count;
 
 		while (SDL_PollEvent(&e)) {
 			switch (e.type) {
 				case SDL_QUIT:
 					running = false;
+					break;
+				case SDL_WINDOWEVENT:
+					if (e.window.event != SDL_WINDOWEVENT_RESIZED) break;
+
+					SDL_GetWindowSize(win, &win_size_x, &win_size_y);
+					pixel_size = MIN_OF(win_size_x, win_size_y) >> 7;
 					break;
 				case SDL_KEYDOWN:
 					handle_keydown(&key_actions, &e);
