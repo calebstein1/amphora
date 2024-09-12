@@ -18,11 +18,18 @@ static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
 static struct color_t pal[MAX_COLORS];
 static u8 spritesheet[SPRITESHEET_SIZE];
 static u8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
+static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
+static int *next_free_sprite_slot = free_sprite_slots;
 
 int
 init_spritesheet(void) {
 	int spr_fd, pal_fd, p_tbl_fd;
 	struct stat spr_stat, pal_stat, p_tbl_stat;
+	int i;
+
+	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
+		free_sprite_slots[i] = i;
+	}
 
 	if ((spr_fd = open(SPRITESHEET_PATH, O_RDONLY)) == -1) {
 		perror("open");
@@ -79,25 +86,30 @@ draw_all_sprites(SDL_Renderer *renderer, int p_size) {
 }
 
 struct sprite_slot_t *
-get_spriteslot(struct sprite_slot_t **spr) {
-	int i;
-
+reserve_sprite_slot(struct sprite_slot_t **spr) {
+	printf("Allocating slot %d\n", *next_free_sprite_slot);
 	if (*spr) return *spr;
-	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
-		if (!sprite_slots[i].reserved) {
-			sprite_slots[i].reserved = true;
-			*spr = &sprite_slots[i];
-			break;
-		}
-	}
+	if (next_free_sprite_slot == free_sprite_slots + (MAX_SPRITES_ON_SCREEN - 1)) return NULL;
+
+	sprite_slots[*next_free_sprite_slot].reserved = true;
+	*spr = &sprite_slots[*next_free_sprite_slot];
+	next_free_sprite_slot++;
 
 	return *spr;
 }
 
-void
-free_spriteslot(struct sprite_slot_t *spr) {
-	spr->display = false;
-	spr->reserved = false;
+void *
+release_sprite_slot(struct sprite_slot_t **spr) {
+	if (next_free_sprite_slot == free_sprite_slots) return *spr;
+	if (!(*spr)->reserved) return *spr;
+
+	next_free_sprite_slot--;
+	*next_free_sprite_slot = (int)(*spr - sprite_slots);
+	(*spr)->display = false;
+	(*spr)->reserved = false;
+	*spr = NULL;
+
+	return NULL;
 }
 
 /*
