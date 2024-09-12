@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
+#include "engine/events.h"
 #include "engine/game_loop.h"
 #include "engine/input.h"
 #include "engine/sprites.h"
@@ -50,30 +51,10 @@ main(void) {
 	game_init();
 
 	while (running) {
-		frame_start = SDL_GetTicks();
+		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		(void)frame_count;
-
-		while (SDL_PollEvent(&e)) {
-			switch (e.type) {
-				case SDL_QUIT:
-					running = false;
-					break;
-				case SDL_WINDOWEVENT:
-					if (e.window.event != SDL_WINDOWEVENT_RESIZED) break;
-
-					SDL_GetWindowSize(win, &win_size_x, &win_size_y);
-					pixel_size = MIN_OF(win_size_x, win_size_y) >> 7;
-					break;
-				case SDL_KEYDOWN:
-					handle_keydown(&key_actions, &e);
-					break;
-				case SDL_KEYUP:
-					handle_keyup(&key_actions, &e);
-					break;
-			}
-		}
+		event_loop(&e, &running, &pixel_size, &key_actions, &win_size_x, &win_size_y, win);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 		SDL_RenderClear(renderer);
@@ -84,7 +65,7 @@ main(void) {
 
 		SDL_RenderPresent(renderer);
 
-		frame_end = SDL_GetTicks();
+		frame_end = SDL_GetTicks64();
 		if ((frame_time = frame_end - frame_start) < (1000 / FRAMERATE)) {
 			SDL_Delay((1000 / FRAMERATE) - frame_time);
 		}
