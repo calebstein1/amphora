@@ -10,9 +10,9 @@
 #define PALETTE_TABLE_PATH "content/palettes/table.pal"
 
 struct color_t {
-    u8 r;
-    u8 g;
-    u8 b;
+	u8 r;
+	u8 g;
+	u8 b;
 };
 
 #endif /* UNTITLED_PLATFORMER_PALETTE_H */
