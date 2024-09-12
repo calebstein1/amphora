@@ -4,20 +4,21 @@
 
 #include "config.h"
 
-SDL_Keycode key1[] = {
+/* Private function prototypes */
+unsigned int rotate_left(unsigned int n, int c); /* Rotate an the bits of an int to the left by n bits (MSB becomes LSB) */
+
+/* File-scoped variables */
+static SDL_Keycode key1[] = {
 #define X(action, key1, ...) key1,
     	ACTIONS
 #undef X
 };
 
-SDL_Keycode key2[] = {
+static SDL_Keycode key2[] = {
 #define X(action, key1, key2) key2,
 	ACTIONS
 #undef X
 };
-
-/* Private function prototypes */
-unsigned int rotate_left(unsigned int n, int c); /* Rotate an the bits of an int to the left by n bits (MSB becomes LSB) */
 
 void
 handle_keydown(input_state *key_actions, const SDL_Event *e) {

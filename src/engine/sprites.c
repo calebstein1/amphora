@@ -13,7 +13,7 @@
 void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size);
 u8 get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 i);
 
-/* Globals */
+/* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
 static struct color_t pal[MAX_COLORS];
 static u8 spritesheet[SPRITESHEET_SIZE];
