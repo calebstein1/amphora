@@ -5,7 +5,7 @@
 #include "config.h"
 
 /* Private function prototypes */
-unsigned int rotate_left(unsigned int n, int c); /* Rotate an the bits of an int to the left by n bits (MSB becomes LSB) */
+unsigned int rotate_left(unsigned int n, int c); /* Rotate the bits of n to the left by c bits (MSB becomes LSB) */
 
 /* File-scoped variables */
 static SDL_Keycode key1[] = {
