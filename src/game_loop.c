@@ -10,12 +10,7 @@ struct sprite_slot_t *p_char = NULL;
 
 void
 game_init(void) {
-	reserve_sprite_slot(&p_char);
-	p_char->num = 1;
-	p_char->x = 64;
-	p_char->y = 64;
-	p_char->pal = 0;
-	p_char->display = true;
+	init_sprite_slot(&p_char, 1, 64, 64, 0, false);
 }
 
 void

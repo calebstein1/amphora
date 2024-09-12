@@ -15,7 +15,7 @@ u8 get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 
 
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
-static struct color_t pal[MAX_COLORS];
+static struct color_t colors[MAX_COLORS];
 static u8 spritesheet[SPRITESHEET_SIZE];
 static u8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
@@ -64,7 +64,7 @@ init_spritesheet(void) {
 	lseek(pal_fd, 0, SEEK_SET);
 	read(pal_fd, user_palettes, PALETTE_SIZE * MAX_USER_PALETTES);
 	lseek(p_tbl_fd, 0, SEEK_SET);
-	read(p_tbl_fd, pal, PALETTE_SIZE * MAX_USER_PALETTES);
+	read(p_tbl_fd, colors, PALETTE_SIZE * MAX_USER_PALETTES);
 	close(spr_fd);
 	close(pal_fd);
 	close(p_tbl_fd);
@@ -87,15 +87,39 @@ draw_all_sprites(SDL_Renderer *renderer, int p_size) {
 
 struct sprite_slot_t *
 reserve_sprite_slot(struct sprite_slot_t **spr) {
-	printf("Allocating slot %d\n", *next_free_sprite_slot);
 	if (*spr) return *spr;
 	if (next_free_sprite_slot == free_sprite_slots + (MAX_SPRITES_ON_SCREEN - 1)) return NULL;
 
 	sprite_slots[*next_free_sprite_slot].reserved = true;
+	sprite_slots[*next_free_sprite_slot].display = false;
 	*spr = &sprite_slots[*next_free_sprite_slot];
 	next_free_sprite_slot++;
 
 	return *spr;
+}
+
+struct sprite_slot_t *
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, int x, int y, u8 pal, bool flip) {
+	reserve_sprite_slot(spr);
+
+	(*spr)->num = num;
+	(*spr)->x = x;
+	(*spr)->y = y;
+	(*spr)->pal = pal;
+	(*spr)->flip = flip;
+	(*spr)->display = true;
+
+	return *spr;
+}
+
+void
+show_sprite(struct sprite_slot_t *spr) {
+	spr->display = true;
+}
+
+void
+hide_sprite(struct sprite_slot_t *spr) {
+	spr->display = false;
 }
 
 void *
@@ -152,7 +176,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		if (!cur_pxl) continue;
 
 		c = *(user_palettes + spr->pal + cur_pxl);
-		SDL_SetRenderDrawColor(renderer, pal[c].r, pal[c].g, pal[c].b, 0xff);
+		SDL_SetRenderDrawColor(renderer, colors[c].r, colors[c].g, colors[c].b, 0xff);
 
 		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) >> SUBPIXEL_STEPS);
 		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) >> SUBPIXEL_STEPS);

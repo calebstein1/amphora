@@ -28,7 +28,15 @@ struct sprite_slot_t {
 
 int init_spritesheet(void); /* Run once to load spritesheet and palette data */
 void draw_all_sprites(SDL_Renderer *renderer, int p_size); /* Draw all active sprite slots */
+/* Reserve a sprite slot and get a pointer to it */
 struct sprite_slot_t *reserve_sprite_slot(struct sprite_slot_t **spr);
+/* Reserve a sprite slot and initialize it with default values */
+struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, int x, int y, u8 pal, bool flip);
+/* Display the supplied sprite_slot */
+void show_sprite(struct sprite_slot_t *spr);
+/* Hide a sprite slot without releasing it */
+void hide_sprite(struct sprite_slot_t *spr);
+/* Release a sprite slot for reuse */
 void *release_sprite_slot(struct sprite_slot_t **spr);
 
 #endif /* UNTITLED_PLATFORMER_SPRITES_H */
