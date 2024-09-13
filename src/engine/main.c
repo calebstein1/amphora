@@ -33,8 +33,7 @@ main(void) {
 		MAX_OF(win_size_x, win_size_y) / RESOLUTION :
 		MIN_OF(win_size_x, win_size_y) / RESOLUTION;
 	win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			       win_size_x, win_size_y,
-			       START_FULLSCREEN ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE);
+			       win_size_x, win_size_y, WINDOW_MODE);
 	if (!win) {
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
 		return -1;

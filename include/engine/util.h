@@ -6,6 +6,9 @@
 
 #define min false
 #define max true
+#define fullscreen SDL_WINDOW_FULLSCREEN_DESKTOP
+#define fixed SDL_WINDOW_SHOWN
+#define resizable SDL_WINDOW_RESIZABLE
 
 typedef unsigned char u8;
 

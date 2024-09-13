@@ -8,7 +8,14 @@
 #define FRAMERATE 60
 #define WINDOW_X 800
 #define WINDOW_Y 600
-#define START_FULLSCREEN false
+
+/*
+ * fullscreen: display fullscreen
+ * fixed: window size fixed to WINDOW_X * WINDOW_Y
+ * resizable: default window size of WINDOW_X * WINDOW_Y
+ */
+#define WINDOW_MODE resizable
+
 /*
  * min: the smaller window dimension will contain RESOLUTION pixels
  * max: the larger window dimension will contain RESOLUTION pixels
