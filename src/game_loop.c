@@ -17,9 +17,15 @@ game_init(void) {
 
 void
 game_loop(unsigned long int frame, const input_state *key_actions) {
-	(void)frame;
+	static unsigned long int anim_timer = 0;
+
 	if (key_actions->state.left) puts("You pressed left!");
 	if (key_actions->state.right) puts("You pressed right!");
 	if (key_actions->state.up) puts("You pressed up!");
 	if (key_actions->state.down) puts("You pressed down!");
+
+	if (frame - anim_timer > 30) {
+		p_char2->num = p_char2->num == 1 ? 2 : 1;
+		anim_timer = frame;
+	}
 }
