@@ -5,6 +5,8 @@
 #define SPRITESHEET_SIZE 0x4000
 #define SPRITESHEET_PATH "content/img/sprites.chr"
 #define SPR_NUM_PIXELS 64
+#define SPR_NUM_BYTES 16
+#define SPR_SIDE 8
 #define SUBPIXEL_STEPS 4 /* Used for bit shifts, not directly */
 
 #include <stdbool.h>
@@ -16,6 +18,8 @@
 
 struct sprite_slot_t {
 	unsigned int num; /* The sprite to draw from the spritesheet */
+	short int x_size;
+	short int y_size;
 	int x; /* The sprite's x position */
 	int y; /* The sprite's y position */
 	u8 x_subp : 4; /* The sprite's x subpixel position */
@@ -31,7 +35,7 @@ void draw_all_sprites(SDL_Renderer *renderer, int p_size); /* Draw all active sp
 /* Reserve a sprite slot and get a pointer to it */
 struct sprite_slot_t *reserve_sprite_slot(struct sprite_slot_t **spr);
 /* Reserve a sprite slot and initialize it with default values */
-struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, int x, int y, u8 pal, bool flip);
+struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, u8 pal, bool flip);
 /* Display the supplied sprite_slot */
 void show_sprite(struct sprite_slot_t *spr);
 /* Hide a sprite slot without releasing it */

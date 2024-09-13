@@ -99,10 +99,12 @@ reserve_sprite_slot(struct sprite_slot_t **spr) {
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, int x, int y, u8 pal, bool flip) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, u8 pal, bool flip) {
 	reserve_sprite_slot(spr);
 
 	(*spr)->num = num;
+	(*spr)->x_size = x_size;
+	(*spr)->y_size = y_size;
 	(*spr)->x = x;
 	(*spr)->y = y;
 	(*spr)->pal = pal;
@@ -142,41 +144,52 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size) {
-	u8 i;
+	int i;
 	u8 *s_addr = spritesheet + (spr->num << 4);
-	u8 c, cur_pxl;
+	u8 color, cur_pxl;
+	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
 	int spr_x = spr->x * p_size;
 	int spr_y = spr->y * p_size;
-	/* initialize y to 255 since we increment y each 8 pixels, and 0 is a multiple of 8 */
-	u8 x_off = 0, y_off = 255;
+	u8 x_off = 0, y_off = 0xff;
 	SDL_Rect pxl;
 
 	pxl.h = p_size;
 	pxl.w = p_size;
 
-	for (i = 0; i < SPR_NUM_PIXELS; i++) {
-		/* i & 7 == i % 8 */
+	for (i = 0; i < num_pixels; i++) {
+		if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
+			s_addr += (0x100 - ((spr->x_size - 1) * SPR_NUM_BYTES));
+			spr_x -= ((spr->x_size - 1) * (p_size * SPR_SIDE));
+		} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
+			s_addr += SPR_NUM_BYTES;
+			spr_x += (p_size * SPR_SIDE);
+			y_off -= SPR_SIDE;
+		}
+		cur_pxl = get_cur_pixel(spr, *(s_addr + ((i % SPR_NUM_PIXELS) >> 3)),
+					*(s_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)), i % SPR_SIDE);
+
+		/*
+		 * TODO: Fix flip for sprites bigger than 1x1 tile
+		 */
 		if (spr->flip) {
-			if ((i & 7) == 0) {
+			if (i % SPR_SIDE == 0) {
 				x_off = 0;
 				y_off++;
 			} else {
 				x_off++;
 			}
 		} else {
-			if ((i & 7) == 0) {
+			if (i % SPR_SIDE == 0) {
 				x_off = 7;
 				y_off++;
 			} else {
 				x_off--;
 			}
 		}
-
-		cur_pxl = get_cur_pixel(spr, *(s_addr + (i >> 3)), *(s_addr + 8 + (i >> 3)), i & 7);
 		if (!cur_pxl) continue;
 
-		c = *(user_palettes + spr->pal + cur_pxl);
-		SDL_SetRenderDrawColor(renderer, colors[c].r, colors[c].g, colors[c].b, 0xff);
+		color = *(user_palettes + spr->pal + cur_pxl);
+		SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, 0xff);
 
 		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) >> SUBPIXEL_STEPS);
 		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) >> SUBPIXEL_STEPS);
@@ -192,7 +205,7 @@ get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 i) 
 	switch ((hi << 8) + low) {
 		case 0x0:
 			return 0;
-		case 0x01:
+		case 0x1:
 			return 1;
 		case 0x100:
 			return 2;
