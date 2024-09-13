@@ -11,7 +11,6 @@
 
 /* Prototypes for private functions */
 void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size);
-u8 get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 i);
 
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
@@ -146,6 +145,7 @@ void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size) {
 	int i;
 	u8 *s_addr = spritesheet + (spr->num << 4);
+	u8 p_low, p_hi;
 	u8 color, cur_pxl;
 	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
 	int spr_x = spr->x * p_size;
@@ -165,8 +165,23 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 			spr_x += (p_size * SPR_SIDE);
 			y_off -= SPR_SIDE;
 		}
-		cur_pxl = get_cur_pixel(spr, *(s_addr + ((i % SPR_NUM_PIXELS) >> 3)),
-					*(s_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)), i % SPR_SIDE);
+
+		p_low = ((*(s_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_hi = ((*(s_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		switch ((p_hi << 8) + p_low) {
+			case 0x0:
+				cur_pxl = 0;
+				break;
+			case 0x1:
+				cur_pxl = 1;
+				break;
+			case 0x100:
+				cur_pxl = 2;
+				break;
+			case 0x101:
+				cur_pxl = 3;
+				break;
+		}
 
 		/*
 		 * TODO: Fix flip for sprites bigger than 1x1 tile
@@ -191,30 +206,9 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		color = *(user_palettes + spr->pal + cur_pxl);
 		SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, 0xff);
 
-		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) >> SUBPIXEL_STEPS);
-		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) >> SUBPIXEL_STEPS);
+		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) / SUBPIXEL_STEPS);
+		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) / SUBPIXEL_STEPS);
 
 		SDL_RenderFillRect(renderer, &pxl);
 	}
-}
-
-u8
-get_cur_pixel(const struct sprite_slot_t *spr, u8 s_pxl_low, u8 s_pxl_hi, u8 i) {
-	u8 low = (s_pxl_low >> i) & 1;
-	u8 hi = (s_pxl_hi >> i) & 1;
-	switch ((hi << 8) + low) {
-		case 0x0:
-			return 0;
-		case 0x1:
-			return 1;
-		case 0x100:
-			return 2;
-		case 0x101:
-			return 3;
-		default:
-			fprintf(stderr, "Processing sprite %u resulted in an impossible pixel color on pixel %u, got %x\n\n",
-				spr->num, i, ((hi << 8) + low));
-	}
-
-	return 0;
 }

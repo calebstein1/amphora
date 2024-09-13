@@ -7,7 +7,7 @@
 #define SPR_NUM_PIXELS 64
 #define SPR_NUM_BYTES 16
 #define SPR_SIDE 8
-#define SUBPIXEL_STEPS 4 /* Used for bit shifts, not directly */
+#define SUBPIXEL_STEPS 16
 
 #include <stdbool.h>
 
