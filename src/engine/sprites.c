@@ -99,7 +99,7 @@ reserve_sprite_slot(struct sprite_slot_t **spr) {
 
 struct sprite_slot_t *
 init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, u8 pal, bool flip) {
-	reserve_sprite_slot(spr);
+	if (!reserve_sprite_slot(spr)) return NULL;
 
 	(*spr)->num = num;
 	(*spr)->x_size = x_size;
