@@ -63,14 +63,10 @@ handle_keyup(input_state *key_actions, const SDL_Event *e) {
 
 unsigned int
 rotate_left(unsigned int n, int c) {
-	unsigned char carry;
-	int i;
+	int int_size = sizeof(unsigned int) * 8;
 
-	for (i = 0; i < c; i++) {
-		carry = (n >> (sizeof(int) - 1)) & 1;
-		n <<= 1;
-		if (carry) n |= 1;
-	}
+	if (c == 0) return n;
+	c %= int_size;
 
-	return n;
+	return (n << c) | (n >> (int_size - c));
 }
