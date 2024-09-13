@@ -24,7 +24,9 @@ event_loop(SDL_Event *e, bool *running, unsigned short *pixel_size, input_state 
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 
 				SDL_GetWindowSize(win, win_size_x, win_size_y);
-				*pixel_size = MIN_OF(*win_size_x, *win_size_y) >> 7;
+				*pixel_size = RESOLUTION_MODE ?
+					     MAX_OF(*win_size_x, *win_size_y) / RESOLUTION :
+					     MIN_OF(*win_size_x, *win_size_y) / RESOLUTION;
 				break;
 		}
 	}
