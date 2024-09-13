@@ -167,21 +167,8 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		}
 
 		p_low = ((*(s_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		p_hi = ((*(s_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		switch ((p_hi << 8) + p_low) {
-			case 0x0:
-				cur_pxl = 0;
-				break;
-			case 0x1:
-				cur_pxl = 1;
-				break;
-			case 0x100:
-				cur_pxl = 2;
-				break;
-			case 0x101:
-				cur_pxl = 3;
-				break;
-		}
+		p_hi = ((*(s_addr + (SPR_NUM_BYTES / 2) + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		cur_pxl = (p_hi << 1) | p_low;
 
 		/*
 		 * TODO: Fix flip for sprites bigger than 1x1 tile
