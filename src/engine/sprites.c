@@ -146,7 +146,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 	int i;
 	u8 *s_addr = spritesheet + (spr->num << 4);
 	u8 p_low, p_hi;
-	u8 color, cur_pxl;
+	u8 color, last_color = 0, cur_pxl;
 	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
 	int spr_x = spr->x * p_size;
 	int spr_y = spr->y * p_size;
@@ -191,7 +191,10 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		if (!cur_pxl) continue;
 
 		color = *(user_palettes + spr->pal + cur_pxl);
-		SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, 0xff);
+		if (color != last_color) {
+			SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, 0xff);
+			last_color = color;
+		}
 
 		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) / SUBPIXEL_STEPS);
 		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) / SUBPIXEL_STEPS);
