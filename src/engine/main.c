@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
@@ -14,14 +13,13 @@ int
 main(void) {
 	unsigned long int frame_start, frame_end, frame_time, frame_count = 0;
 	int win_size_x, win_size_y;
-	unsigned short pixel_size;
+	unsigned short int pixel_size;
 
 	SDL_Window *win;
 	SDL_Renderer *renderer;
 	SDL_Event e;
 	input_state key_actions;
 	struct save_data_t save_data;
-	bool running = true;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Failed to init SDL: %s\n", SDL_GetError());
@@ -52,11 +50,11 @@ main(void) {
 
 	game_init();
 
-	while (running) {
+	while (1) {
 		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		event_loop(&e, &running, &pixel_size, &key_actions, &win_size_x, &win_size_y, win);
+		if (event_loop(&e, &pixel_size, &key_actions, &win_size_x, &win_size_y, win) == SDL_QUIT) break;
 		clear_bg(renderer);
 		game_loop(frame_count, &key_actions, &save_data);
 		draw_all_sprites(renderer, pixel_size);

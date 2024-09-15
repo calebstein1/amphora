@@ -6,14 +6,13 @@
 #include "engine/input.h"
 #include "engine/util.h"
 
-void
-event_loop(SDL_Event *e, bool *running, unsigned short *pixel_size, input_state *key_actions,
+Uint32
+event_loop(SDL_Event *e, unsigned short *pixel_size, input_state *key_actions,
 	   int *win_size_x, int *win_size_y, SDL_Window *win) {
 	while (SDL_PollEvent(e)) {
 		switch (e->type) {
 			case SDL_QUIT:
-				*running = false;
-				break;
+				return e->type;
 			case SDL_KEYDOWN:
 				handle_keydown(key_actions, e);
 				break;
@@ -30,4 +29,6 @@ event_loop(SDL_Event *e, bool *running, unsigned short *pixel_size, input_state 
 				break;
 		}
 	}
+
+	return 0;
 }
