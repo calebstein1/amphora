@@ -10,6 +10,4 @@
 #define fixed SDL_WINDOW_SHOWN
 #define resizable SDL_WINDOW_RESIZABLE
 
-typedef unsigned char u8;
-
 #endif /* UNTITLED_PLATFORMER_UTIL_H */

@@ -7,7 +7,6 @@
 
 #include "engine/palette.h"
 #include "engine/render.h"
-#include "engine/util.h"
 
 /* Prototypes for private functions */
 void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size);
@@ -15,8 +14,8 @@ void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
 static struct color_t colors[MAX_COLORS];
-static u8 spritesheet[SPRITESHEET_SIZE];
-static u8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
+static Uint8 spritesheet[SPRITESHEET_SIZE];
+static Uint8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
 static int *next_free_sprite_slot = free_sprite_slots;
 static struct color_t bg_color = { 0, 0, 0 };
@@ -73,7 +72,7 @@ init_spritesheet(void) {
 }
 
 void
-set_bg(u8 r, u8 g, u8 b) {
+set_bg(Uint8 r, Uint8 g, Uint8 b) {
 	bg_color.r = r;
 	bg_color.g = g;
 	bg_color.b = b;
@@ -117,7 +116,7 @@ reserve_sprite_slot(struct sprite_slot_t **spr) {
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, u8 pal, bool flip) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, Uint8 pal, bool flip) {
 	if (!reserve_sprite_slot(spr)) return NULL;
 
 	(*spr)->num = num;
@@ -163,13 +162,13 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size) {
 	int i;
-	u8 *s_addr = spritesheet + (spr->num << 4);
-	u8 p_low, p_hi;
-	u8 color, last_color = 0, cur_pxl;
+	Uint8 *s_addr = spritesheet + (spr->num << 4);
+	Uint8 p_low, p_hi;
+	Uint8 color, last_color = 0, cur_pxl;
 	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
 	int spr_x = spr->x * p_size;
 	int spr_y = spr->y * p_size;
-	u8 x_off = 0, y_off = 0xff;
+	Uint8 x_off = 0, y_off = 0xff;
 	SDL_Rect pxl;
 
 	pxl.h = p_size;
