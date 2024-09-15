@@ -5,7 +5,7 @@
 #include "engine/events.h"
 #include "engine/game_loop.h"
 #include "engine/input.h"
-#include "engine/sprites.h"
+#include "engine/render.h"
 #include "engine/util.h"
 
 #include "config.h"
@@ -57,12 +57,8 @@ main(void) {
 		frame_count++;
 
 		event_loop(&e, &running, &pixel_size, &key_actions, &win_size_x, &win_size_y, win);
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
-		SDL_RenderClear(renderer);
-
+		clear_bg(renderer);
 		game_loop(frame_count, &key_actions, &save_data);
-
 		draw_all_sprites(renderer, pixel_size);
 
 		SDL_RenderPresent(renderer);

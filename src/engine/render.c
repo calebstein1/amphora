@@ -6,7 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "engine/palette.h"
-#include "engine/sprites.h"
+#include "engine/render.h"
 #include "engine/util.h"
 
 /* Prototypes for private functions */
@@ -19,6 +19,7 @@ static u8 spritesheet[SPRITESHEET_SIZE];
 static u8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
 static int *next_free_sprite_slot = free_sprite_slots;
+static struct color_t bg_color = { 0, 0, 0 };
 
 int
 init_spritesheet(void) {
@@ -69,6 +70,24 @@ init_spritesheet(void) {
 	close(p_tbl_fd);
 
 	return 0;
+}
+
+void
+set_bg(u8 r, u8 g, u8 b) {
+	bg_color.r = r;
+	bg_color.g = g;
+	bg_color.b = b;
+}
+
+struct color_t
+get_bg(void) {
+	return bg_color;
+}
+
+void
+clear_bg(SDL_Renderer *renderer) {
+	SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, 0xff);
+	SDL_RenderClear(renderer);
 }
 
 void

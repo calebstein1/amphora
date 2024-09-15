@@ -1,5 +1,5 @@
-#ifndef UNTITLED_PLATFORMER_SPRITES_H
-#define UNTITLED_PLATFORMER_SPRITES_H
+#ifndef UNTITLED_PLATFORMER_RENDER_H
+#define UNTITLED_PLATFORMER_RENDER_H
 
 #define MAX_SPRITES_ON_SCREEN 256
 #define SPRITESHEET_SIZE 0x4000
@@ -18,8 +18,8 @@
 
 struct sprite_slot_t {
 	unsigned int num; /* The sprite to draw from the spritesheet */
-	short int x_size;
-	short int y_size;
+	short int x_size; /* The number of horizontal tiles in the sprite */
+	short int y_size; /* The number of vertical tiles in the sprite */
 	int x; /* The sprite's x position */
 	int y; /* The sprite's y position */
 	u8 x_subp : 4; /* The sprite's x subpixel position */
@@ -31,6 +31,9 @@ struct sprite_slot_t {
 };
 
 int init_spritesheet(void); /* Run once to load spritesheet and palette data */
+void set_bg(u8 r, u8 g, u8 b); /* Set the screen background color */
+struct color_t get_bg(void); /* Get the current screen backgroundn color */
+void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
 void draw_all_sprites(SDL_Renderer *renderer, int p_size); /* Draw all active sprite slots */
 /* Reserve a sprite slot and get a pointer to it */
 struct sprite_slot_t *reserve_sprite_slot(struct sprite_slot_t **spr);
@@ -43,4 +46,4 @@ void hide_sprite(struct sprite_slot_t *spr);
 /* Release a sprite slot for reuse */
 void *release_sprite_slot(struct sprite_slot_t **spr);
 
-#endif /* UNTITLED_PLATFORMER_SPRITES_H */
+#endif /* UNTITLED_PLATFORMER_RENDER_H */
