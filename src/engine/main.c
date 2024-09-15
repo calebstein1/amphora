@@ -20,6 +20,7 @@ main(void) {
 	SDL_Renderer *renderer;
 	SDL_Event e;
 	input_state key_actions;
+	struct save_data_t save_data;
 	bool running = true;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -60,7 +61,7 @@ main(void) {
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 		SDL_RenderClear(renderer);
 
-		game_loop(frame_count, &key_actions);
+		game_loop(frame_count, &key_actions, &save_data);
 
 		draw_all_sprites(renderer, pixel_size);
 

@@ -16,9 +16,11 @@ game_init(void) {
 }
 
 void
-game_loop(unsigned long int frame, const input_state *key_actions) {
+game_loop(unsigned long int frame, const input_state *key_actions, struct save_data_t *save_data) {
 	static unsigned long int wave_timer = 0, walk_timer = 0;
 	static int last_pspr = 3;
+
+	(void)save_data;
 
 	if (key_actions->state.left) puts("You pressed left!");
 	if (key_actions->state.right) puts("You pressed right!");
