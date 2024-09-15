@@ -25,9 +25,15 @@
 
 #define ACTIONS				\
 	/* X(action, key1, key2) */	\
-	X(left, SDLK_a, SDLK_LEFT)	\
-	X(right, SDLK_d, SDLK_RIGHT)	\
-	X(up, SDLK_w, SDLK_UP)		\
-	X(down, SDLK_s, SDLK_DOWN)
+	KMAP(left, SDLK_a, SDLK_LEFT)	\
+	KMAP(right, SDLK_d, SDLK_RIGHT)	\
+	KMAP(up, SDLK_w, SDLK_UP)	\
+	KMAP(down, SDLK_s, SDLK_DOWN)
+
+/* The fields to be saved to the game's save file */
+struct save_data_t {
+	char player_name[256];
+	unsigned int high_score;
+};
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */
