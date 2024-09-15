@@ -11,7 +11,7 @@
 
 int
 main(void) {
-	unsigned long int frame_start, frame_end, frame_time, frame_count = 0;
+	Uint64 frame_start, frame_end, frame_time, frame_count = 0;
 	int win_size_x, win_size_y;
 	unsigned short int pixel_size;
 

@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <SDL2/SDL.h>
+
 #include "engine/game_loop.h"
 #include "engine/input.h"
 #include "engine/render.h"
@@ -17,8 +19,8 @@ game_init(void) {
 }
 
 void
-game_loop(unsigned long int frame, const input_state *key_actions, struct save_data_t *save_data) {
-	static unsigned long int wave_timer = 0, walk_timer = 0;
+game_loop(Uint64 frame, const input_state *key_actions, struct save_data_t *save_data) {
+	static Uint64 wave_timer = 0, walk_timer = 0;
 	static int last_pspr = 3;
 
 	(void)save_data;
