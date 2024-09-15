@@ -9,15 +9,15 @@ unsigned int rotate_left(unsigned int n, int c); /* Rotate the bits of n to the 
 
 /* File-scoped variables */
 static SDL_Keycode key1[] = {
-#define X(action, key1, ...) key1,
+#define KMAP(action, key1, ...) key1,
     	ACTIONS
-#undef X
+#undef KMAP
 };
 
 static SDL_Keycode key2[] = {
-#define X(action, key1, key2) key2,
+#define KMAP(action, key1, key2) key2,
 	ACTIONS
-#undef X
+#undef KMAP
 };
 
 void

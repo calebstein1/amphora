@@ -8,9 +8,9 @@
 #include "config.h"
 
 struct input_bitfield {
-#define X(action, ...) bool action : 1;
+#define KMAP(action, ...) bool action : 1;
 	ACTIONS
-#undef X
+#undef KMAP
 };
 
 typedef union input_state {
@@ -19,9 +19,9 @@ typedef union input_state {
 } input_state;
 
 enum input_actions {
-#define X(action, ...) action,
+#define KMAP(action, ...) action,
     	ACTIONS
-#undef X
+#undef KMAP
 	ACTION_COUNT
 };
 
