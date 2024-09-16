@@ -54,7 +54,7 @@ init_render(void) {
 		goto free_spr;
 	}
 	fstat(p_tbl_fd, &p_tbl_stat);
-	if (!(colors = malloc(p_tbl_stat.st_size * sizeof(struct color_t)))) {
+	if (!(colors = malloc(p_tbl_stat.st_size))) {
 		perror("malloc");
 		goto free_pal;
 	}
