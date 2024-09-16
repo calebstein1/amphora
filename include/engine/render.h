@@ -2,18 +2,16 @@
 #define UNTITLED_PLATFORMER_RENDER_H
 
 #define MAX_SPRITES_ON_SCREEN 256
-#define SPRITESHEET_SIZE 0x4000
-#define SPRITESHEET_PATH "content/img/sprites.chr"
 #define SPR_NUM_PIXELS 64
 #define SPR_NUM_BYTES 16
 #define SPR_SIDE 8
 #define SUBPIXEL_STEPS 16
+#define PALETTE_SIZE 4
 
 #include <stdbool.h>
 
 #include <SDL2/SDL.h>
 
-#include "engine/palette.h"
 #include "engine/util.h"
 
 struct sprite_slot_t {
@@ -30,7 +28,14 @@ struct sprite_slot_t {
 	bool display : 1; /* Whether the sprite should be drawn or not */
 };
 
-int init_spritesheet(void); /* Run once to load spritesheet and palette data */
+struct color_t {
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+};
+
+int init_render(void); /* Run once to load spritesheet and palette data */
+void cleanup_render(void); /* Free allocated memory for spritesheet, palettes, and colors */
 void set_bg(Uint8 r, Uint8 g, Uint8 b); /* Set the screen background color */
 struct color_t get_bg(void); /* Get the current screen backgroundn color */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */

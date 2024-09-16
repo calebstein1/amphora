@@ -43,8 +43,8 @@ main(void) {
 		return -1;
 	}
 
-	if (init_spritesheet() == -1) {
-		fputs("Failed to init spritesheet\n", stderr);
+	if (init_render() == -1) {
+		fputs("Failed to init render data\n", stderr);
 		return -1;
 	}
 
@@ -67,10 +67,11 @@ main(void) {
 		}
 	}
 
+	cleanup_render();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
 
-    return 0;
+	return 0;
 }
 

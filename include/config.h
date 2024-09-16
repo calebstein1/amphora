@@ -23,6 +23,11 @@
 #define RESOLUTION_MODE min
 #define RESOLUTION 256
 
+/* Content paths */
+#define SPRITESHEET_PATH "content/img/sprites.chr"
+#define USER_PALETTES_PATH "content/palettes/user_palettes.dat"
+#define COLOR_TABLE_PATH "content/palettes/table.pal"
+
 #define ACTIONS				\
 	/* X(action, key1, key2) */	\
 	KMAP(left, SDLK_a, SDLK_LEFT)	\

@@ -5,23 +5,24 @@
 
 #include <SDL2/SDL.h>
 
-#include "engine/palette.h"
 #include "engine/render.h"
+
+#include "config.h"
 
 /* Prototypes for private functions */
 void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size);
 
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
-static struct color_t colors[MAX_COLORS];
-static Uint8 spritesheet[SPRITESHEET_SIZE];
-static Uint8 user_palettes[PALETTE_SIZE * MAX_USER_PALETTES];
+static struct color_t *colors;
+static Uint8 *spritesheet;
+static Uint8 *user_palettes;
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
 static int *next_free_sprite_slot = free_sprite_slots;
 static struct color_t bg_color = { 0, 0, 0 };
 
 int
-init_spritesheet(void) {
+init_render(void) {
 	int spr_fd, pal_fd, p_tbl_fd;
 	struct stat spr_stat, pal_stat, p_tbl_stat;
 	int i;
@@ -38,37 +39,52 @@ init_spritesheet(void) {
 		perror("open");
 		return -1;
 	}
-	if ((p_tbl_fd = open(PALETTE_TABLE_PATH, O_RDONLY)) == -1) {
+	if ((p_tbl_fd = open(COLOR_TABLE_PATH, O_RDONLY)) == -1) {
 		perror("open");
 		return -1;
 	}
 	fstat(spr_fd, &spr_stat);
-	if (spr_stat.st_size > SPRITESHEET_SIZE) {
-		fputs("Spritesheet too large\n", stderr);
-		return -1;
+	if (!(spritesheet = malloc(spr_stat.st_size))) {
+		perror("malloc");
+		goto leave;
 	}
 	fstat(pal_fd, &pal_stat);
-	if (pal_stat.st_size > PALETTE_SIZE * MAX_USER_PALETTES) {
-		fputs("User palettes too large\n", stderr);
-		return -1;
+	if (!(user_palettes = malloc(pal_stat.st_size))) {
+		perror("malloc");
+		goto free_spr;
 	}
 	fstat(p_tbl_fd, &p_tbl_stat);
-	if (p_tbl_stat.st_size > MAX_COLORS * (long)sizeof(struct color_t)) {
-		fputs("Palette table too large\n", stderr);
-		return -1;
+	if (!(colors = malloc(p_tbl_stat.st_size * sizeof(struct color_t)))) {
+		perror("malloc");
+		goto free_pal;
 	}
 
 	lseek(spr_fd, 0, SEEK_SET);
-	read(spr_fd, spritesheet, SPRITESHEET_SIZE);
+	read(spr_fd, spritesheet, spr_stat.st_size);
 	lseek(pal_fd, 0, SEEK_SET);
-	read(pal_fd, user_palettes, PALETTE_SIZE * MAX_USER_PALETTES);
+	read(pal_fd, user_palettes, pal_stat.st_size);
 	lseek(p_tbl_fd, 0, SEEK_SET);
-	read(p_tbl_fd, colors, PALETTE_SIZE * MAX_USER_PALETTES);
+	read(p_tbl_fd, colors, p_tbl_stat.st_size * sizeof(struct color_t));
 	close(spr_fd);
 	close(pal_fd);
 	close(p_tbl_fd);
 
 	return 0;
+
+	/* Error cleanup */
+	free_pal:
+	free(user_palettes);
+	free_spr:
+	free(spritesheet);
+	leave:
+	return -1;
+}
+
+void
+cleanup_render(void) {
+	free(spritesheet);
+	free(user_palettes);
+	free(colors);
 }
 
 void
