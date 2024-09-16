@@ -208,7 +208,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		}
 		if (!cur_pxl) continue;
 
-		color = *(user_palettes + spr->pal + cur_pxl);
+		color = *(user_palettes + (spr->pal * PALETTE_SIZE) + cur_pxl);
 		if (color != last_color) {
 			SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, 0xff);
 			last_color = color;
