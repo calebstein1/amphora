@@ -21,7 +21,7 @@
  * max: the larger window dimension will contain RESOLUTION pixels
  */
 #define RESOLUTION_MODE min
-#define RESOLUTION 128
+#define RESOLUTION 256
 
 #define ACTIONS				\
 	/* X(action, key1, key2) */	\

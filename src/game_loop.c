@@ -10,17 +10,18 @@
 /* Game globals */
 struct sprite_slot_t *p_char = NULL;
 struct sprite_slot_t *p_char2 = NULL;
+struct sprite_slot_t *p_char3 = NULL;
 
 void
 game_init(void) {
 	set_bg(0x2e, 0x34, 0x40);
 	init_sprite_slot(&p_char, 3, 3, 4, 64, 64, 0, false);
-	init_sprite_slot(&p_char2, 1, 1, 1, 48, 32, 0, true);
+	init_sprite_slot(&p_char2, 0, 2, 3, 48, 32, 2, false);
 }
 
 void
 game_loop(Uint64 frame, const input_state *key_actions, struct save_data_t *save_data) {
-	static Uint64 wave_timer = 0, walk_timer = 0;
+	static Uint64 wave_timer = 0;
 	static int last_pspr = 3;
 
 	(void)save_data;
@@ -46,9 +47,5 @@ game_loop(Uint64 frame, const input_state *key_actions, struct save_data_t *save
 				break;
 		}
 		wave_timer = frame;
-	}
-	if (frame - walk_timer > 30) {
-		p_char2->num = p_char2->num == 1 ? 2 : 1;
-		walk_timer = frame;
 	}
 }
