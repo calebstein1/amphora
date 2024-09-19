@@ -26,6 +26,7 @@ event_loop(SDL_Event *e, unsigned short *pixel_size, input_state *key_actions,
 				*pixel_size = RESOLUTION_MODE ?
 					     MAX_OF(*win_size_x, *win_size_y) / RESOLUTION :
 					     MIN_OF(*win_size_x, *win_size_y) / RESOLUTION;
+				if (!*pixel_size) *pixel_size = 1;
 				break;
 		}
 	}

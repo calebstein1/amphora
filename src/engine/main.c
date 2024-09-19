@@ -31,6 +31,7 @@ main(void) {
 	pixel_size = RESOLUTION_MODE ?
 		MAX_OF(win_size_x, win_size_y) / RESOLUTION :
 		MIN_OF(win_size_x, win_size_y) / RESOLUTION;
+	if (!pixel_size) pixel_size = 1;
 	win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			       win_size_x, win_size_y, WINDOW_MODE);
 	if (!win) {
