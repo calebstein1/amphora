@@ -14,7 +14,7 @@
  * fixed: window size fixed to WINDOW_X * WINDOW_Y
  * resizable: default window size of WINDOW_X * WINDOW_Y
  */
-#define WINDOW_MODE resizable
+#define WINDOW_MODE fullscreen
 
 /*
  * min: the smaller window dimension will contain RESOLUTION pixels

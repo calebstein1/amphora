@@ -10,13 +10,12 @@
 /* Game globals */
 struct sprite_slot_t *p_char = NULL;
 struct sprite_slot_t *p_char2 = NULL;
-struct sprite_slot_t *p_char3 = NULL;
 
 void
 game_init(void) {
 	set_bg(0x2e, 0x34, 0x40);
-	init_sprite_slot(&p_char, 3, 3, 4, 64, 64, 0, false);
-	init_sprite_slot(&p_char2, 0, 2, 3, 48, 32, 2, false);
+	init_sprite_slot(&p_char, 3, 3, 4, 64, 64, 2, false);
+	init_sprite_slot(&p_char2, 0, 2, 3, 48, 32, 0, false);
 }
 
 void
