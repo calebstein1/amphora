@@ -53,9 +53,14 @@ cleanup_render(void) {
 	free(spritesheet);
 }
 
-struct color_t
-get_bg(void) {
-	return white;
+void
+set_black(Uint8 r, Uint8 g, Uint8 b) {
+	black = (struct color_t){ r, g, b };
+}
+
+void
+set_white(Uint8 r, Uint8 g, Uint8 b) {
+	white = (struct color_t){ r, g, b };
 }
 
 void

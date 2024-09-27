@@ -13,9 +13,6 @@
 
 #include "engine/util.h"
 
-#define A_OPAQUE 0xff
-#define A_TRANSPARENT 0
-
 struct sprite_slot_t {
 	unsigned int num; /* The sprite to draw from the spritesheet */
 	short int x_size; /* The number of horizontal tiles in the sprite */
@@ -37,7 +34,8 @@ struct color_t {
 
 int init_render(void); /* Run once to load spritesheet and palette data */
 void cleanup_render(void); /* Free allocated memory for spritesheet, palettes, and colors */
-struct color_t get_bg(void); /* Get the current screen backgroundn color */
+void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
+void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
 void draw_all_sprites(SDL_Renderer *renderer, int p_size); /* Draw all active sprite slots */
 /* Reserve a sprite slot and get a pointer to it */
