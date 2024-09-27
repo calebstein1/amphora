@@ -17,8 +17,8 @@ static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
 static Uint8 *spritesheet;
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
 static int *next_free_sprite_slot = free_sprite_slots;
-static struct color_t bg_color = BACKGROUND_COLOR;
-static struct color_t fg_color = FOREGROUND_COLOR;
+static struct color_t black = BLACK;
+static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
 
 int
@@ -55,12 +55,12 @@ cleanup_render(void) {
 
 struct color_t
 get_bg(void) {
-	return bg_color;
+	return white;
 }
 
 void
 clear_bg(SDL_Renderer *renderer) {
-	SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, 0xff);
+	SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, 0xff);
 	SDL_RenderClear(renderer);
 }
 
@@ -186,7 +186,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 
 		zone = zones[cur_pxl];
 		if (zone != last_zone) {
-			SDL_SetRenderDrawColor(renderer, fg_color.r, fg_color.g, fg_color.b, zone);
+			SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, zone);
 			last_zone = zone;
 		}
 

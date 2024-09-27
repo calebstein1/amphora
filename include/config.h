@@ -24,8 +24,8 @@
 #define RESOLUTION 256
 
 /* Colors used for drawing in 24-bit rgb format */
-#define BACKGROUND_COLOR { 0xfc, 0xd5, 0xb3 }
-#define FOREGROUND_COLOR { 0x1c, 0x0f, 0x00 }
+#define BLACK { 0x1c, 0x0f, 0x00 }
+#define WHITE { 0xfc, 0xd5, 0xb3 }
 
 /* Content paths */
 #define SPRITESHEET_PATH "content/img/sprites.asht"
