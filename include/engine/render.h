@@ -14,6 +14,9 @@
 
 #include "engine/util.h"
 
+#define A_OPAQUE 0xff
+#define A_TRANSPARENT 0
+
 struct sprite_slot_t {
 	unsigned int num; /* The sprite to draw from the spritesheet */
 	short int x_size; /* The number of horizontal tiles in the sprite */
@@ -23,15 +26,16 @@ struct sprite_slot_t {
 	Uint8 x_subp : 4; /* The sprite's x subpixel position */
 	Uint8 y_subp : 4; /* The sprite's y subpixel position */
 	Uint8 pal; /* The sprite's color palette */
+	Uint8 alpha;
 	bool flip : 1; /* Whether or not the sprite should be flipped horizontally */
 	bool reserved : 1; /* Whether the sprite slot is reserved or free */
 	bool display : 1; /* Whether the sprite should be drawn or not */
 };
 
 struct color_t {
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
+	Uint8 r;
+	Uint8 g;
+	Uint8 b;
 };
 
 int init_render(void); /* Run once to load spritesheet and palette data */
@@ -43,7 +47,7 @@ void draw_all_sprites(SDL_Renderer *renderer, int p_size); /* Draw all active sp
 /* Reserve a sprite slot and get a pointer to it */
 struct sprite_slot_t *reserve_sprite_slot(struct sprite_slot_t **spr);
 /* Reserve a sprite slot and initialize it with default values */
-struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, Uint8 pal, bool flip);
+struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, Uint8 pal, Uint8 alpha, bool flip);
 /* Display the supplied sprite_slot */
 void show_sprite(struct sprite_slot_t *spr);
 /* Hide a sprite slot without releasing it */

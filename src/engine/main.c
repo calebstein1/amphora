@@ -49,6 +49,8 @@ main(void) {
 		return -1;
 	}
 
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
 	game_init();
 
 	while (1) {

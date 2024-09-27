@@ -14,8 +14,8 @@ struct sprite_slot_t *p_char2 = NULL;
 void
 game_init(void) {
 	set_bg(0x2e, 0x34, 0x40);
-	init_sprite_slot(&p_char, 3, 3, 4, 64, 64, 2, false);
-	init_sprite_slot(&p_char2, 0, 2, 3, 48, 32, 0, false);
+	init_sprite_slot(&p_char, 3, 3, 4, 64, 64, 2, A_OPAQUE, false);
+	init_sprite_slot(&p_char2, 1, 2, 3, 48, 32, 0, A_OPAQUE, false);
 }
 
 void

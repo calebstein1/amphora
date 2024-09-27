@@ -132,7 +132,7 @@ reserve_sprite_slot(struct sprite_slot_t **spr) {
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, Uint8 pal, bool flip) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, Uint8 pal, Uint8 alpha, bool flip) {
 	if (!reserve_sprite_slot(spr)) return NULL;
 
 	(*spr)->num = num;
@@ -141,6 +141,7 @@ init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size,
 	(*spr)->x = x;
 	(*spr)->y = y;
 	(*spr)->pal = pal;
+	(*spr)->alpha = alpha;
 	(*spr)->flip = flip;
 	(*spr)->display = true;
 
@@ -226,7 +227,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 
 		color = *(user_palettes + (spr->pal * PALETTE_SIZE) + cur_pxl);
 		if (color != last_color) {
-			SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, 0xff);
+			SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, spr->alpha);
 			last_color = color;
 		}
 
