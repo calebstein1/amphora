@@ -14,17 +14,17 @@ void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_
 
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
-static struct color_t *colors;
 static Uint8 *spritesheet;
-static Uint8 *user_palettes;
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
 static int *next_free_sprite_slot = free_sprite_slots;
-static struct color_t bg_color = { 0, 0, 0 };
+static struct color_t bg_color = BACKGROUND_COLOR;
+static struct color_t fg_color = FOREGROUND_COLOR;
+static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
 
 int
 init_render(void) {
-	int spr_fd, pal_fd, p_tbl_fd;
-	struct stat spr_stat, pal_stat, p_tbl_stat;
+	int spr_fd;
+	struct stat spr_stat;
 	int i;
 
 	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
@@ -35,63 +35,22 @@ init_render(void) {
 		perror("open");
 		return -1;
 	}
-	if ((pal_fd = open(USER_PALETTES_PATH, O_RDONLY)) == -1) {
-		perror("open");
-		return -1;
-	}
-	if ((p_tbl_fd = open(COLOR_TABLE_PATH, O_RDONLY)) == -1) {
-		perror("open");
-		return -1;
-	}
 	fstat(spr_fd, &spr_stat);
 	if (!(spritesheet = malloc(spr_stat.st_size))) {
 		perror("malloc");
-		goto leave;
-	}
-	fstat(pal_fd, &pal_stat);
-	if (!(user_palettes = malloc(pal_stat.st_size))) {
-		perror("malloc");
-		goto free_spr;
-	}
-	fstat(p_tbl_fd, &p_tbl_stat);
-	if (!(colors = malloc(p_tbl_stat.st_size))) {
-		perror("malloc");
-		goto free_pal;
+		return -1;
 	}
 
 	lseek(spr_fd, 0, SEEK_SET);
 	read(spr_fd, spritesheet, spr_stat.st_size);
-	lseek(pal_fd, 0, SEEK_SET);
-	read(pal_fd, user_palettes, pal_stat.st_size);
-	lseek(p_tbl_fd, 0, SEEK_SET);
-	read(p_tbl_fd, colors, p_tbl_stat.st_size * sizeof(struct color_t));
 	close(spr_fd);
-	close(pal_fd);
-	close(p_tbl_fd);
 
 	return 0;
-
-	/* Error cleanup */
-	free_pal:
-	free(user_palettes);
-	free_spr:
-	free(spritesheet);
-	leave:
-	return -1;
 }
 
 void
 cleanup_render(void) {
 	free(spritesheet);
-	free(user_palettes);
-	free(colors);
-}
-
-void
-set_bg(Uint8 r, Uint8 g, Uint8 b) {
-	bg_color.r = r;
-	bg_color.g = g;
-	bg_color.b = b;
 }
 
 struct color_t
@@ -132,7 +91,7 @@ reserve_sprite_slot(struct sprite_slot_t **spr) {
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, Uint8 pal, Uint8 alpha, bool flip) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip) {
 	if (!reserve_sprite_slot(spr)) return NULL;
 
 	(*spr)->num = num;
@@ -140,8 +99,6 @@ init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size,
 	(*spr)->y_size = y_size;
 	(*spr)->x = x;
 	(*spr)->y = y;
-	(*spr)->pal = pal;
-	(*spr)->alpha = alpha;
 	(*spr)->flip = flip;
 	(*spr)->display = true;
 
@@ -179,9 +136,9 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size) {
 	int i;
-	Uint8 *s_addr = spritesheet + (spr->num << 4);
-	Uint8 p_low, p_hi;
-	Uint8 color, last_color = 0, cur_pxl;
+	Uint8 *s_addr = spritesheet + (spr->num * 0x20);
+	Uint8 p_0, p_1, p_2, p_3;
+	Uint8 zone, last_zone = 0, cur_pxl;
 	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
 	int spr_x = spr->x * p_size;
 	int spr_y = spr->y * p_size;
@@ -193,7 +150,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 
 	for (i = 0; i < num_pixels; i++) {
 		if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
-			s_addr += (0x100 - ((spr->x_size - 1) * SPR_NUM_BYTES));
+			s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
 			spr_x -= ((spr->x_size - 1) * (p_size * SPR_SIDE));
 		} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
 			s_addr += SPR_NUM_BYTES;
@@ -201,9 +158,11 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 			y_off -= SPR_SIDE;
 		}
 
-		p_low = ((*(s_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		p_hi = ((*(s_addr + (SPR_NUM_BYTES / 2) + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		cur_pxl = (p_hi << 1) | p_low;
+		p_0 = ((*(s_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_1 = ((*(s_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_2 = ((*(s_addr + 16 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_3 = ((*(s_addr + 24 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		cur_pxl = (p_3 << 3) | (p_2 << 2) | (p_1 << 1) | p_0;
 
 		/*
 		 * TODO: Fix flip for sprites bigger than 1x1 tile
@@ -225,10 +184,10 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 		}
 		if (!cur_pxl) continue;
 
-		color = *(user_palettes + (spr->pal * PALETTE_SIZE) + cur_pxl);
-		if (color != last_color) {
-			SDL_SetRenderDrawColor(renderer, colors[color].r, colors[color].g, colors[color].b, spr->alpha);
-			last_color = color;
+		zone = zones[cur_pxl];
+		if (zone != last_zone) {
+			SDL_SetRenderDrawColor(renderer, fg_color.r, fg_color.g, fg_color.b, zone);
+			last_zone = zone;
 		}
 
 		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) / SUBPIXEL_STEPS);

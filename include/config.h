@@ -23,13 +23,15 @@
 #define RESOLUTION_MODE min
 #define RESOLUTION 256
 
+/* Colors used for drawing in 24-bit rgb format */
+#define BACKGROUND_COLOR { 0xfc, 0xd5, 0xb3 }
+#define FOREGROUND_COLOR { 0x1c, 0x0f, 0x00 }
+
 /* Content paths */
-#define SPRITESHEET_PATH "content/img/sprites.chr"
-#define USER_PALETTES_PATH "content/palettes/user_palettes.dat"
-#define COLOR_TABLE_PATH "content/palettes/table.pal"
+#define SPRITESHEET_PATH "content/img/sprites.asht"
 
 #define ACTIONS				\
-	/* X(action, key1, key2) */	\
+	/* KMAP(action, key1, key2) */	\
 	KMAP(left, SDLK_a, SDLK_LEFT)	\
 	KMAP(right, SDLK_d, SDLK_RIGHT)	\
 	KMAP(up, SDLK_w, SDLK_UP)	\
