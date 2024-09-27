@@ -11,7 +11,7 @@ Non-engine game files are located in `src` and `include`.
 Amphora games are written in C with SDL2 and extra utility functions provided by the engine.
 There is a demo skeleton project demonstrating the structure in `src/game_loop.c` and `include/config.h`.
 
-In the C sources, there are two required functions: `void game_init(void)`, and `void game_loop(Uint64 frame, const input_state *key_actions, struct save_data_t *save_data)`.
+In the C sources, there are two required functions: `void game_init(void)`, and `void game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data)`.
 `game_init` is called once at game start, and `game_loop` runs once per frame.
 
 Configuration options can be set in `include/config.h`.
