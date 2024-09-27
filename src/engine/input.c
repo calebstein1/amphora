@@ -21,7 +21,7 @@ static SDL_Keycode key2[] = {
 };
 
 void
-handle_keydown(input_state *key_actions, const SDL_Event *e) {
+handle_keydown(union input_state_u *key_actions, const SDL_Event *e) {
 	int i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
@@ -39,7 +39,7 @@ handle_keydown(input_state *key_actions, const SDL_Event *e) {
 }
 
 void
-handle_keyup(input_state *key_actions, const SDL_Event *e) {
+handle_keyup(union input_state_u *key_actions, const SDL_Event *e) {
 	int i;
 	unsigned int mask = 0xfffffffe;
 

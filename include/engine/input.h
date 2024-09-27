@@ -7,16 +7,16 @@
 
 #include "config.h"
 
-struct input_bitfield {
+struct input_state_t {
 #define KMAP(action, ...) bool action : 1;
 	ACTIONS
 #undef KMAP
 };
 
-typedef union input_state {
-	struct input_bitfield state; /* Individual flags for the named input actions */
+union input_state_u {
+	struct input_state_t state; /* Individual flags for the named input actions */
 	unsigned int bits; /* The raw input bitfield */
-} input_state;
+};
 
 enum input_actions {
 #define KMAP(action, ...) action,
@@ -25,7 +25,7 @@ enum input_actions {
 	ACTION_COUNT
 };
 
-void handle_keydown(input_state *key_actions, const SDL_Event *e);
-void handle_keyup(input_state *key_actions, const SDL_Event *e);
+void handle_keydown(union input_state_u *key_actions, const SDL_Event *e);
+void handle_keyup(union input_state_u *key_actions, const SDL_Event *e);
 
 #endif /* UNTITLED_PLATFORMER_INPUT_H */

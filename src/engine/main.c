@@ -18,7 +18,7 @@ main(void) {
 	SDL_Window *win;
 	SDL_Renderer *renderer;
 	SDL_Event e;
-	input_state key_actions;
+	union input_state_u key_actions;
 	struct save_data_t save_data;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -59,7 +59,7 @@ main(void) {
 
 		if (event_loop(&e, &pixel_size, &key_actions, &win_size_x, &win_size_y, win) == SDL_QUIT) break;
 		clear_bg(renderer);
-		game_loop(frame_count, &key_actions, &save_data);
+		game_loop(frame_count, &key_actions.state, &save_data);
 		draw_all_sprites(renderer, pixel_size);
 
 		SDL_RenderPresent(renderer);

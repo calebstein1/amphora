@@ -19,13 +19,13 @@ game_init(void) {
 }
 
 void
-game_loop(Uint64 frame, const input_state *key_actions, struct save_data_t *save_data) {
+game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data) {
 	static Uint64 walk_timer = 0;
 
 	(void)save_data;
 
 	walking=false;
-	if (key_actions->state.left) {
+	if (key_actions->left) {
 		p_char2->flip = true;
 		if (p_char2->x_subp <= 3) {
 			p_char2->x--;
@@ -33,7 +33,7 @@ game_loop(Uint64 frame, const input_state *key_actions, struct save_data_t *save
 		p_char2->x_subp -= 4;
 		walking = true;
 	}
-	if (key_actions->state.right) {
+	if (key_actions->right) {
 		p_char2->flip = false;
 		if(p_char2->x_subp >= 12) {
 			p_char2->x++;
