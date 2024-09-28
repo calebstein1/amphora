@@ -1,7 +1,4 @@
-#include <fcntl.h>
 #include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <SDL2/SDL.h>
 
@@ -24,27 +21,25 @@ static struct camera_t camera = { 0, 0 };
 
 int
 init_render(void) {
-	int spr_fd;
-	struct stat spr_stat;
+	SDL_RWops *spr_ops;
 	int i;
 
 	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
 		free_sprite_slots[i] = i;
 	}
 
-	if ((spr_fd = open(SPRITESHEET_PATH, O_RDONLY)) == -1) {
-		perror("open");
+	if ((spr_ops = SDL_RWFromFile(SPRITESHEET_PATH, "rb")) == NULL) {
+		perror("SDL_RWFromFile");
 		return -1;
 	}
-	fstat(spr_fd, &spr_stat);
-	if (!(spritesheet = malloc(spr_stat.st_size))) {
+	if ((spritesheet = malloc((size_t)spr_ops->size)) == NULL) {
 		perror("malloc");
 		return -1;
 	}
 
-	lseek(spr_fd, 0, SEEK_SET);
-	read(spr_fd, spritesheet, spr_stat.st_size);
-	close(spr_fd);
+	SDL_RWseek(spr_ops, 0, RW_SEEK_SET);
+	SDL_RWread(spr_ops, spritesheet, (size_t)spr_ops->size, 1);
+	SDL_RWclose(spr_ops);
 
 	return 0;
 }
