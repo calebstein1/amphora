@@ -32,8 +32,14 @@ struct color_t {
 	Uint8 b;
 };
 
+struct camera_t {
+	int x;
+	int y;
+};
+
 int init_render(void); /* Run once to load spritesheet and palette data */
 void cleanup_render(void); /* Free allocated memory for spritesheet, palettes, and colors */
+void set_camera(int x, int y); /* Set the location of the camera's top left point */
 void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
 void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */

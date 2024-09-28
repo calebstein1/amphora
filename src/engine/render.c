@@ -20,6 +20,7 @@ static int *next_free_sprite_slot = free_sprite_slots;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
+static struct camera_t camera = { 0, 0 };
 
 int
 init_render(void) {
@@ -51,6 +52,12 @@ init_render(void) {
 void
 cleanup_render(void) {
 	free(spritesheet);
+}
+
+void
+set_camera(int x, int y) {
+	camera.x = x;
+	camera.y = y;
 }
 
 void
@@ -195,8 +202,8 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 			last_zone = zone;
 		}
 
-		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) / SUBPIXEL_STEPS);
-		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) / SUBPIXEL_STEPS);
+		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) / SUBPIXEL_STEPS) - camera.x;
+		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) / SUBPIXEL_STEPS) - camera.y;
 
 		SDL_RenderFillRect(renderer, &pxl);
 	}
