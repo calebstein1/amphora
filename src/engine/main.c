@@ -13,7 +13,6 @@ int
 main(void) {
 	Uint64 frame_start, frame_end, frame_time, frame_count = 0;
 	int win_size_x, win_size_y;
-	unsigned short int pixel_size;
 
 	SDL_Window *win;
 	SDL_Renderer *renderer;
@@ -28,10 +27,9 @@ main(void) {
 
 	win_size_x = WINDOW_X;
 	win_size_y = WINDOW_Y;
-	pixel_size = RESOLUTION_MODE ?
+	set_pixel_size(RESOLUTION_MODE ?
 		MAX_OF(win_size_x, win_size_y) / RESOLUTION :
-		MIN_OF(win_size_x, win_size_y) / RESOLUTION;
-	if (!pixel_size) pixel_size = 1;
+		MIN_OF(win_size_x, win_size_y) / RESOLUTION);
 	win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			       win_size_x, win_size_y, WINDOW_MODE);
 	if (!win) {
@@ -57,10 +55,10 @@ main(void) {
 		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		if (event_loop(&e, &pixel_size, &key_actions, &win_size_x, &win_size_y, win) == SDL_QUIT) break;
+		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, win) == SDL_QUIT) break;
 		clear_bg(renderer);
 		game_loop(frame_count, &key_actions.state, &save_data);
-		draw_all_sprites(renderer, pixel_size);
+		draw_all_sprites(renderer);
 
 		SDL_RenderPresent(renderer);
 

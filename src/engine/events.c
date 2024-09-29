@@ -4,10 +4,11 @@
 
 #include "engine/events.h"
 #include "engine/input.h"
+#include "engine/render.h"
 #include "engine/util.h"
 
 Uint32
-event_loop(SDL_Event *e, unsigned short *pixel_size, union input_state_u *key_actions,
+event_loop(SDL_Event *e, union input_state_u *key_actions,
 	   int *win_size_x, int *win_size_y, SDL_Window *win) {
 	while (SDL_PollEvent(e)) {
 		switch (e->type) {
@@ -23,10 +24,9 @@ event_loop(SDL_Event *e, unsigned short *pixel_size, union input_state_u *key_ac
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 
 				SDL_GetWindowSize(win, win_size_x, win_size_y);
-				*pixel_size = RESOLUTION_MODE ?
+				set_pixel_size(RESOLUTION_MODE ?
 					     MAX_OF(*win_size_x, *win_size_y) / RESOLUTION :
-					     MIN_OF(*win_size_x, *win_size_y) / RESOLUTION;
-				if (!*pixel_size) *pixel_size = 1;
+					     MIN_OF(*win_size_x, *win_size_y) / RESOLUTION);
 				break;
 		}
 	}

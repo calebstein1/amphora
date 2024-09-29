@@ -7,7 +7,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size);
+void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer);
 
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
@@ -17,6 +17,7 @@ static int *next_free_sprite_slot = free_sprite_slots;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
+static unsigned short int pixel_size = 1;
 static struct camera_t camera = { 0, 0 };
 
 int
@@ -49,6 +50,16 @@ cleanup_render(void) {
 	free(spritesheet);
 }
 
+unsigned short int
+get_pixel_size(void) {
+	return pixel_size;
+}
+
+void
+set_pixel_size(unsigned short int size) {
+	pixel_size = size > 0 ? size : 1;
+}
+
 void
 set_camera(int x, int y) {
 	camera.x = x;
@@ -72,7 +83,7 @@ clear_bg(SDL_Renderer *renderer) {
 }
 
 void
-draw_all_sprites(SDL_Renderer *renderer, int p_size) {
+draw_all_sprites(SDL_Renderer *renderer) {
 	int i;
 	struct sprite_slot_t *cur_spr;
 
@@ -80,7 +91,7 @@ draw_all_sprites(SDL_Renderer *renderer, int p_size) {
 		cur_spr = &sprite_slots[i];
 		if (!cur_spr->reserved || !cur_spr->display) continue;
 
-		draw_sprite(cur_spr, renderer, p_size);
+		draw_sprite(cur_spr, renderer);
 	}
 }
 
@@ -141,27 +152,27 @@ release_sprite_slot(struct sprite_slot_t **spr) {
  */
 
 void
-draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size) {
+draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 	int i;
 	Uint8 *s_addr = spritesheet + (spr->num * 0x20);
 	Uint8 p_0, p_1, p_2, p_3;
 	Uint8 zone, last_zone = 0, cur_pxl;
 	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
-	int spr_x = spr->x * p_size;
-	int spr_y = spr->y * p_size;
+	int spr_x = spr->x * pixel_size;
+	int spr_y = spr->y * pixel_size;
 	Uint8 x_off = 0, y_off = 0xff;
 	SDL_Rect pxl;
 
-	pxl.h = p_size;
-	pxl.w = p_size;
+	pxl.h = pixel_size;
+	pxl.w = pixel_size;
 
 	for (i = 0; i < num_pixels; i++) {
 		if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
 			s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
-			spr_x -= ((spr->x_size - 1) * (p_size * SPR_SIDE));
+			spr_x -= ((spr->x_size - 1) * (pixel_size * SPR_SIDE));
 		} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
 			s_addr += SPR_NUM_BYTES;
-			spr_x += (p_size * SPR_SIDE);
+			spr_x += (pixel_size * SPR_SIDE);
 			y_off -= SPR_SIDE;
 		}
 
@@ -197,8 +208,8 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer, int p_size)
 			last_zone = zone;
 		}
 
-		pxl.x = spr_x + (x_off * p_size) + ((spr->x_subp * p_size) / SUBPIXEL_STEPS) - camera.x;
-		pxl.y = spr_y + (y_off * p_size) + ((spr->y_subp * p_size) / SUBPIXEL_STEPS) - camera.y;
+		pxl.x = spr_x + (x_off * pixel_size) + ((spr->x_subp * pixel_size) / SUBPIXEL_STEPS) - camera.x;
+		pxl.y = spr_y + (y_off * pixel_size) + ((spr->y_subp * pixel_size) / SUBPIXEL_STEPS) - camera.y;
 
 		SDL_RenderFillRect(renderer, &pxl);
 	}
