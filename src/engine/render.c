@@ -27,7 +27,7 @@ static Vector2 render_dimensions = { 0, 0 };
 int
 init_render(void) {
 	spritesheet = (Uint8 *)SDL_LoadFile(SPRITESHEET_PATH, &spritesheet_size);
-	if ((sprite_slot = calloc(1, sizeof(struct sprite_slot_t))) == NULL) {
+	if ((sprite_slot = malloc(sizeof(struct sprite_slot_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
 
 		return -1;
@@ -35,6 +35,7 @@ init_render(void) {
 	sprite_slot->order = INT_MIN;
 	sprite_slot->display = false;
 	sprite_slot->garbage = false;
+	sprite_slot->next = NULL;
 	sprite_slots_head = sprite_slot;
 
 	return spritesheet ? 0 : -1;
@@ -142,14 +143,15 @@ reserve_sprite_slot(struct sprite_slot_t **spr, int order) {
 
 	if (*spr) return *spr;
 
-	if ((sprite_slot_temp = calloc(1, sizeof(struct sprite_slot_t))) == NULL) {
+	if ((sprite_slot_temp = malloc(sizeof(struct sprite_slot_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
 		*spr = NULL;
 
 		return NULL;
 	}
-	while (sprite_slot) {
+	while (1) {
 		if (sprite_slot->next == NULL) {
+			sprite_slot_temp->next = NULL;
 			sprite_slot->next = sprite_slot_temp;
 			break;
 		} else if (sprite_slot->next->order >= order) {
