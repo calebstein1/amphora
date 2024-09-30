@@ -12,6 +12,7 @@ void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer);
 /* File-scoped variables */
 static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
 static Uint8 *spritesheet;
+static size_t spritesheet_size;
 static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
 static int *next_free_sprite_slot = free_sprite_slots;
 static struct color_t black = BLACK;
@@ -23,32 +24,18 @@ static Vector2 render_dimensions = { 0, 0 };
 
 int
 init_render(void) {
-	SDL_RWops *spr_ops;
 	int i;
-
 	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
 		free_sprite_slots[i] = i;
 	}
+	spritesheet = (Uint8 *)SDL_LoadFile(SPRITESHEET_PATH, &spritesheet_size);
 
-	if ((spr_ops = SDL_RWFromFile(SPRITESHEET_PATH, "rb")) == NULL) {
-		perror("SDL_RWFromFile");
-		return -1;
-	}
-	if ((spritesheet = malloc((size_t)spr_ops->size)) == NULL) {
-		perror("malloc");
-		return -1;
-	}
-
-	SDL_RWseek(spr_ops, 0, RW_SEEK_SET);
-	SDL_RWread(spr_ops, spritesheet, (size_t)spr_ops->size, 1);
-	SDL_RWclose(spr_ops);
-
-	return 0;
+	return spritesheet ? 0 : -1;
 }
 
 void
 cleanup_render(void) {
-	free(spritesheet);
+	SDL_free(spritesheet);
 }
 
 unsigned short int
