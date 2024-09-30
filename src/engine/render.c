@@ -163,7 +163,7 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 	int i;
 	Uint8 *s_addr = spritesheet + (spr->num * 0x20);
 	Uint8 p_0, p_1, p_2, p_3;
-	Uint8 zone, last_zone = 0, cur_pxl;
+	Uint8 zone, cur_pxl;
 	int num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
 	int spr_x = spr->x * pixel_size;
 	int spr_y = spr->y * pixel_size;
@@ -218,15 +218,14 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 		}
 		if (!cur_pxl) continue;
 
-		zone = zones[cur_pxl];
-		if (zone != last_zone) {
-			SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, zone);
-			last_zone = zone;
-		}
-
 		pxl.x = spr_x + (x_off * pixel_size) + ((spr->x_subp * pixel_size) / SUBPIXEL_STEPS) - camera.x;
 		pxl.y = spr_y + (y_off * pixel_size) + ((spr->y_subp * pixel_size) / SUBPIXEL_STEPS) - camera.y;
 
+		SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, 0xff);
+		SDL_RenderFillRect(renderer, &pxl);
+
+		zone = zones[cur_pxl];
+		SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, zone);
 		SDL_RenderFillRect(renderer, &pxl);
 	}
 }
