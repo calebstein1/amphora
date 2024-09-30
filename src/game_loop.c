@@ -21,6 +21,7 @@ game_init(void) {
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data) {
 	static Uint64 walk_timer = 0;
+	static Vector2 camera_location;
 
 	(void)save_data;
 
@@ -50,4 +51,9 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 		}
 		walk_timer = frame;
 	}
+
+	camera_location = get_sprite_center(p_char2);
+	camera_location.x -= get_window_size().x / 2;
+	camera_location.y = 0;
+	set_camera(camera_location);
 }

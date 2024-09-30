@@ -32,19 +32,22 @@ struct color_t {
 	Uint8 b;
 };
 
-struct camera_t {
+typedef struct vector2_t {
 	int x;
 	int y;
-};
+} Vector2;
 
 int init_render(void); /* Run once to load spritesheet and palette data */
 void cleanup_render(void); /* Free allocated memory for spritesheet, palettes, and colors */
 unsigned short int get_pixel_size(void); /* Get the current pixel size */
 void set_pixel_size(unsigned short int size); /* Set the current pixel size */
-void set_camera(int x, int y); /* Set the location of the camera's top left point */
+Vector2 get_window_size(void); /* Get the current window dimensions */
+void set_window_size(Vector2 window_size); /* Set the current window dimensions */
+void set_camera(Vector2 cam_vec); /* Set the location of the camera's top left point */
 void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
 void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
+Vector2 get_sprite_center(const struct sprite_slot_t *spr);
 void draw_all_sprites(SDL_Renderer *renderer); /* Draw all active sprite slots */
 /* Reserve a sprite slot and get a pointer to it */
 struct sprite_slot_t *reserve_sprite_slot(struct sprite_slot_t **spr);

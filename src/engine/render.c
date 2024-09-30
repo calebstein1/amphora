@@ -18,7 +18,8 @@ static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
 static unsigned short int pixel_size = 1;
-static struct camera_t camera = { 0, 0 };
+static Vector2 camera = { 0, 0 };
+static Vector2 render_dimensions = { 0, 0 };
 
 int
 init_render(void) {
@@ -60,10 +61,19 @@ set_pixel_size(unsigned short int size) {
 	pixel_size = size > 0 ? size : 1;
 }
 
+Vector2
+get_window_size(void) {
+	return render_dimensions;
+}
+
 void
-set_camera(int x, int y) {
-	camera.x = x;
-	camera.y = y;
+set_window_size(Vector2 window_size) {
+	render_dimensions = window_size;
+}
+
+void
+set_camera(Vector2 cam_vec) {
+	camera = cam_vec;
 }
 
 void
@@ -80,6 +90,16 @@ void
 clear_bg(SDL_Renderer *renderer) {
 	SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, 0xff);
 	SDL_RenderClear(renderer);
+}
+
+Vector2
+get_sprite_center(const struct sprite_slot_t *spr) {
+	Vector2 center;
+
+	center.x = (spr->x * pixel_size) + (spr->x_subp * pixel_size / SUBPIXEL_STEPS) + (4 * spr->x_size);
+	center.y = (spr->y * pixel_size) + (spr->y_subp * pixel_size / SUBPIXEL_STEPS) + (4 * spr->y_size);
+
+	return center;
 }
 
 void

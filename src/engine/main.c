@@ -19,6 +19,7 @@ main(void) {
 	SDL_Event e;
 	union input_state_u key_actions;
 	struct save_data_t save_data;
+	Vector2 init_window_size;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Failed to init SDL: %s\n", SDL_GetError());
@@ -42,6 +43,9 @@ main(void) {
 		return -1;
 	}
 
+	SDL_GetRendererOutputSize(renderer, &init_window_size.x, &init_window_size.y);
+	set_window_size(init_window_size);
+
 	if (init_render() == -1) {
 		fputs("Failed to init render data\n", stderr);
 		return -1;
@@ -55,7 +59,7 @@ main(void) {
 		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, win) == SDL_QUIT) break;
+		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, renderer) == SDL_QUIT) break;
 		clear_bg(renderer);
 		game_loop(frame_count, &key_actions.state, &save_data);
 		draw_all_sprites(renderer);

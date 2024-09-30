@@ -9,7 +9,7 @@
 
 Uint32
 event_loop(SDL_Event *e, union input_state_u *key_actions,
-	   int *win_size_x, int *win_size_y, SDL_Window *win) {
+	   int *win_size_x, int *win_size_y, SDL_Renderer *renderer) {
 	while (SDL_PollEvent(e)) {
 		switch (e->type) {
 			case SDL_QUIT:
@@ -23,10 +23,11 @@ event_loop(SDL_Event *e, union input_state_u *key_actions,
 			case SDL_WINDOWEVENT:
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 
-				SDL_GetWindowSize(win, win_size_x, win_size_y);
+				SDL_GetRendererOutputSize(renderer, win_size_x, win_size_y);
 				set_pixel_size(RESOLUTION_MODE ?
 					     MAX_OF(*win_size_x, *win_size_y) / RESOLUTION :
 					     MIN_OF(*win_size_x, *win_size_y) / RESOLUTION);
+				set_window_size((Vector2){ *win_size_x, *win_size_y });
 				break;
 		}
 	}
