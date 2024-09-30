@@ -62,7 +62,7 @@ main(void) {
 		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, renderer) == SDL_QUIT) break;
 		clear_bg(renderer);
 		game_loop(frame_count, &key_actions.state, &save_data);
-		draw_all_sprites(renderer);
+		draw_all_sprites_and_gc(renderer);
 
 		SDL_RenderPresent(renderer);
 

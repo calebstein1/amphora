@@ -19,8 +19,8 @@ bool walking = false;
 
 void
 game_init(void) {
-	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false);
-	init_sprite_slot(&building, 12, 4, 8, 96, 148, false);
+	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false, 10);
+	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
 }
 
 void

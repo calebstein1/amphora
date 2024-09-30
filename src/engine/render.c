@@ -1,3 +1,5 @@
+#include <limits.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include <SDL2/SDL.h>
@@ -10,11 +12,11 @@
 void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer);
 
 /* File-scoped variables */
-static struct sprite_slot_t sprite_slots[MAX_SPRITES_ON_SCREEN];
+static struct sprite_slot_t *sprite_slot;
+static struct sprite_slot_t *sprite_slots_head;
+int sprite_slots_count = 1;
 static Uint8 *spritesheet;
 static size_t spritesheet_size;
-static int free_sprite_slots[MAX_SPRITES_ON_SCREEN];
-static int *next_free_sprite_slot = free_sprite_slots;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
@@ -24,17 +26,33 @@ static Vector2 render_dimensions = { 0, 0 };
 
 int
 init_render(void) {
-	int i;
-	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
-		free_sprite_slots[i] = i;
-	}
 	spritesheet = (Uint8 *)SDL_LoadFile(SPRITESHEET_PATH, &spritesheet_size);
+	if ((sprite_slot = calloc(1, sizeof(struct sprite_slot_t))) == NULL) {
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
+
+		return -1;
+	}
+	sprite_slot->order = INT_MIN;
+	sprite_slot->display = false;
+	sprite_slot->garbage = false;
+	sprite_slots_head = sprite_slot;
 
 	return spritesheet ? 0 : -1;
 }
 
 void
 cleanup_render(void) {
+	struct sprite_slot_t **allocated_addrs = malloc(sprite_slots_count * sizeof(struct sprite_slot_t *));
+	int i = 0;
+
+	while (sprite_slot) {
+		allocated_addrs[i++] = sprite_slot;
+		sprite_slot = sprite_slot->next;
+	}
+	for (i = 0; i < sprite_slots_count; i++) {
+		free(allocated_addrs[i]);
+	}
+	free(allocated_addrs);
 	SDL_free(spritesheet);
 }
 
@@ -90,34 +108,66 @@ get_sprite_center(const struct sprite_slot_t *spr) {
 }
 
 void
-draw_all_sprites(SDL_Renderer *renderer) {
-	int i;
-	struct sprite_slot_t *cur_spr;
+draw_all_sprites_and_gc(SDL_Renderer *renderer) {
+	struct sprite_slot_t *garbage;
 
-	for (i = 0; i < MAX_SPRITES_ON_SCREEN; i++) {
-		cur_spr = &sprite_slots[i];
-		if (!cur_spr->reserved || !cur_spr->display) continue;
+	if (!sprite_slot->next) return;
 
-		draw_sprite(cur_spr, renderer);
+	while(1) {
+		if (!sprite_slot) break;
+
+		if (sprite_slot->next && sprite_slot->next->garbage) {
+			garbage = sprite_slot->next;
+			sprite_slot->next = sprite_slot->next->next;
+			free(garbage);
+			garbage = NULL;
+			sprite_slots_count--;
+		}
+		if (!sprite_slot->display) {
+			sprite_slot = sprite_slot->next;
+			continue;
+		}
+
+		draw_sprite(sprite_slot, renderer);
+
+		sprite_slot = sprite_slot->next;
 	}
+
+	sprite_slot = sprite_slots_head;
 }
 
 struct sprite_slot_t *
-reserve_sprite_slot(struct sprite_slot_t **spr) {
-	if (*spr) return *spr;
-	if (next_free_sprite_slot == free_sprite_slots + (MAX_SPRITES_ON_SCREEN - 1)) return NULL;
+reserve_sprite_slot(struct sprite_slot_t **spr, int order) {
+	struct sprite_slot_t *sprite_slot_temp = NULL;
 
-	sprite_slots[*next_free_sprite_slot].reserved = true;
-	sprite_slots[*next_free_sprite_slot].display = false;
-	*spr = &sprite_slots[*next_free_sprite_slot];
-	next_free_sprite_slot++;
+	if (*spr) return *spr;
+
+	if ((sprite_slot_temp = calloc(1, sizeof(struct sprite_slot_t))) == NULL) {
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
+		*spr = NULL;
+
+		return NULL;
+	}
+	while (sprite_slot) {
+		if (sprite_slot->next == NULL) {
+			sprite_slot->next = sprite_slot_temp;
+			break;
+		} else if (sprite_slot->next->order >= order) {
+			sprite_slot_temp->next = sprite_slot->next;
+			sprite_slot->next = sprite_slot_temp;
+			break;
+		}
+		sprite_slot = sprite_slot->next;
+	}
+	*spr = sprite_slot_temp;
+	sprite_slots_count++;
 
 	return *spr;
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip) {
-	if (!reserve_sprite_slot(spr)) return NULL;
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
+	if (!reserve_sprite_slot(spr, order)) return NULL;
 
 	(*spr)->num = num;
 	(*spr)->x_size = x_size;
@@ -126,6 +176,8 @@ init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size,
 	(*spr)->y = y;
 	(*spr)->flip = flip;
 	(*spr)->display = true;
+	(*spr)->garbage = false;
+	(*spr)->order = order;
 
 	return *spr;
 }
@@ -142,13 +194,7 @@ hide_sprite(struct sprite_slot_t *spr) {
 
 void *
 release_sprite_slot(struct sprite_slot_t **spr) {
-	if (next_free_sprite_slot == free_sprite_slots) return *spr;
-	if (!(*spr)->reserved) return *spr;
-
-	next_free_sprite_slot--;
-	*next_free_sprite_slot = (int)(*spr - sprite_slots);
-	(*spr)->display = false;
-	(*spr)->reserved = false;
+	(*spr)->garbage = true;
 	*spr = NULL;
 
 	return NULL;
