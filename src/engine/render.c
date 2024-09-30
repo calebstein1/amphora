@@ -174,13 +174,25 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 	pxl.w = pixel_size;
 
 	for (i = 0; i < num_pixels; i++) {
-		if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
-			s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
-			spr_x -= ((spr->x_size - 1) * (pixel_size * SPR_SIDE));
-		} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
-			s_addr += SPR_NUM_BYTES;
-			spr_x += (pixel_size * SPR_SIDE);
-			y_off -= SPR_SIDE;
+		if (spr->flip) {
+			if (i == 0) spr_x += ((spr->x_size - 1) * (pixel_size * SPR_SIDE));
+			if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
+				s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
+				spr_x += ((spr->x_size - 1) * (pixel_size * SPR_SIDE));
+			} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
+				s_addr += SPR_NUM_BYTES;
+				spr_x -= (pixel_size * SPR_SIDE);
+				y_off -= SPR_SIDE;
+			}
+		} else {
+			if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
+				s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
+				spr_x -= ((spr->x_size - 1) * (pixel_size * SPR_SIDE));
+			} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
+				s_addr += SPR_NUM_BYTES;
+				spr_x += (pixel_size * SPR_SIDE);
+				y_off -= SPR_SIDE;
+			}
 		}
 
 		p_0 = ((*(s_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
@@ -189,9 +201,6 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 		p_3 = ((*(s_addr + 24 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
 		cur_pxl = (p_3 << 3) | (p_2 << 2) | (p_1 << 1) | p_0;
 
-		/*
-		 * TODO: Fix flip for sprites bigger than 1x1 tile
-		 */
 		if (spr->flip) {
 			if (i % SPR_SIDE == 0) {
 				x_off = 0;
