@@ -30,12 +30,13 @@
 /* Content paths */
 #define SPRITESHEET_PATH "content/img/sprites.asht"
 
-#define ACTIONS				\
-	/* KMAP(action, key1, key2) */	\
-	KMAP(left, SDLK_a, SDLK_LEFT)	\
-	KMAP(right, SDLK_d, SDLK_RIGHT)	\
-	KMAP(up, SDLK_w, SDLK_UP)	\
-	KMAP(down, SDLK_s, SDLK_DOWN)
+#define ACTIONS					\
+	/* KMAP(action, key1, key2) */		\
+	KMAP(left, SDLK_a, SDLK_LEFT)		\
+	KMAP(right, SDLK_d, SDLK_RIGHT)		\
+	KMAP(up, SDLK_w, SDLK_UP)		\
+	KMAP(down, SDLK_s, SDLK_DOWN)		\
+	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT)
 
 /* The fields to be saved to the game's save file */
 struct save_data_t {

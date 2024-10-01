@@ -27,24 +27,28 @@ void
 game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data) {
 	static Vector2 camera_location;
 	static Uint64 idle_anim = 0;
+	Uint8 p_movement_speed = 4;
 
 	(void)save_data;
 
-	walking=false;
+	walking = false;
+	if (key_actions->dash) {
+		p_movement_speed = 8;
+	}
 	if (key_actions->left) {
 		p_char->flip = true;
-		if (p_char->x_subp <= 3) {
+		if (p_char->x_subp <= p_movement_speed - 1) {
 			p_char->x--;
 		}
-		p_char->x_subp -= 4;
+		p_char->x_subp -= p_movement_speed;
 		walking = true;
 	}
 	if (key_actions->right) {
 		p_char->flip = false;
-		if(p_char->x_subp >= 12) {
+		if(p_char->x_subp >= SUBPIXEL_STEPS - p_movement_speed) {
 			p_char->x++;
 		}
-		p_char->x_subp += 4;
+		p_char->x_subp += p_movement_speed;
 		walking = true;
 	}
 
