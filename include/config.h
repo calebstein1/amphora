@@ -28,7 +28,7 @@
 #define WHITE { 0xfc, 0xd5, 0xb3 }
 
 /* Content paths */
-#define SPRITESHEET_PATH "content/img/sprites.asht"
+#define SPRITESHEET_PATH "./content/img/sprites.asht"
 
 #define ACTIONS					\
 	/* KMAP(action, key1, key2) */		\

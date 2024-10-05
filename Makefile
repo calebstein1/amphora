@@ -15,6 +15,7 @@ clean:
 $(TARGET): $(OBJ)
 	mkdir -p bin
 	$(CC) -o $@ $? $(CFLAGS) $(LDFLAGS)
+	cp -r content bin/
 
 obj/%.o: src/%.c
 	mkdir -p obj/engine
