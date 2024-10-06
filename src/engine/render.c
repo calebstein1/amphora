@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <SDL2/SDL.h>
-
 #include "engine/render.h"
 
 #include "config.h"

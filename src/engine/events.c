@@ -1,7 +1,5 @@
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
-
 #include "engine/events.h"
 #include "engine/input.h"
 #include "engine/render.h"

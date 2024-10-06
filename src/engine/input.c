@@ -1,5 +1,3 @@
-#include <SDL2/SDL.h>
-
 #include "engine/input.h"
 
 #include "config.h"

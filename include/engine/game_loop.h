@@ -1,7 +1,7 @@
 #ifndef UNTITLED_PLATFORMER_GAME_LOOP_H
 #define UNTITLED_PLATFORMER_GAME_LOOP_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "engine/input.h"
 

@@ -1,7 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
-
-#include <SDL2/SDL.h>
 
 #include "engine/game_loop.h"
 #include "engine/input.h"
