@@ -22,7 +22,7 @@ game_init(void) {
 
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data) {
-	static Vector2 camera_location;
+	static Point camera_location;
 	static Uint64 idle_anim = 0;
 	Uint8 p_movement_speed = 4;
 
@@ -34,19 +34,12 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 	}
 	if (key_actions->left) {
 		p_char->flip = true;
-		if (p_char->x_subp <= p_movement_speed - 1) {
-			p_char->x--;
-		}
-		p_char->x_subp -= p_movement_speed;
+		p_char->x -= p_movement_speed;
 		walking = true;
 	}
 	if (key_actions->right) {
 		p_char->flip = false;
-		if(p_char->x_subp >= SUBPIXEL_STEPS - p_movement_speed) {
-			p_char->x++;
-		}
-		p_char->x_subp += p_movement_speed;
-		walking = true;
+		p_char->x += p_movement_speed;
 	}
 
 	if (frame - idle_anim > 30) {
@@ -56,7 +49,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 	}
 
 	camera_location = get_sprite_center(p_char);
-	camera_location.x -= get_window_size().x / 2;
+	camera_location.x -= (get_game_window_size().x / 2);
 	camera_location.y = 0;
-	set_camera(camera_location);
+	set_camera(camera_location.x, camera_location.y);
 }

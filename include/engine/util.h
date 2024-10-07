@@ -3,6 +3,8 @@
 
 #define MAX_OF(a,b) (a > b ? a : b)
 #define MIN_OF(a,b) (a < b ? a : b)
+#define IS_ODD(a) (a & 1)
+#define IS_EVEN(a) (!IS_ODD(a))
 
 #define min false
 #define max true
