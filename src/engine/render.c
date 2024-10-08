@@ -13,9 +13,6 @@ void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer);
 static struct sprite_slot_t *sprite_slot;
 static struct sprite_slot_t *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
-extern const Uint8 spritesheet[];
-extern const Uint8 *spritesheet_end;
-extern int spritesheet_size;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
@@ -211,6 +208,10 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
+	extern const Uint8 spritesheet[];
+	extern const Uint8 *spritesheet_end;
+	extern int spritesheet_size;
+
 	const Uint8 *s_addr = spritesheet + (spr->num * 0x20);
 	Uint32 i;
 	Uint8 p_0, p_1, p_2, p_3;
