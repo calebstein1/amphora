@@ -1,13 +1,13 @@
 #include "config.h"
 
-#if defined(__linux__)
-#define SS_SYM spritesheet
-#define SS_END_SYM spritesheet_end
-#define SS_SIZE_SYM spritesheet_size
-#else
+#if defined(__APPLE__)
 #define SS_SYM _spritesheet
 #define SS_END_SYM _spritesheet_end
 #define SS_SIZE_SYM _spritesheet_size
+#else
+#define SS_SYM spritesheet
+#define SS_END_SYM spritesheet_end
+#define SS_SIZE_SYM spritesheet_size
 #endif
 
 	.section .rodata,"a"
