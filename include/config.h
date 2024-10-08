@@ -28,7 +28,7 @@
 #define WHITE { 0xfc, 0xd5, 0xb3 }
 
 /* Content paths */
-#define SPRITESHEET_PATH "./content/img/sprites.asht"
+#define SPRITESHEET_PATH "../content/img/sprites.asht"
 
 #define ACTIONS					\
 	/* KMAP(action, key1, key2) */		\
@@ -37,11 +37,5 @@
 	KMAP(up, SDLK_w, SDLK_UP)		\
 	KMAP(down, SDLK_s, SDLK_DOWN)		\
 	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT)
-
-/* The fields to be saved to the game's save file */
-struct save_data_t {
-	char player_name[256];
-	unsigned int high_score;
-};
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */

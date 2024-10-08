@@ -13,8 +13,9 @@ void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer);
 static struct sprite_slot_t *sprite_slot;
 static struct sprite_slot_t *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
-static Uint8 *spritesheet;
-static size_t spritesheet_size;
+extern const Uint8 spritesheet[];
+extern const Uint8 *spritesheet_end;
+extern int spritesheet_size;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
@@ -24,7 +25,6 @@ static Vector2 render_dimensions = { 0, 0 };
 
 int
 init_render(void) {
-	spritesheet = (Uint8 *)SDL_LoadFile(SPRITESHEET_PATH, &spritesheet_size);
 	if ((sprite_slot = malloc(sizeof(struct sprite_slot_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
 
@@ -36,7 +36,7 @@ init_render(void) {
 	sprite_slot->next = NULL;
 	sprite_slots_head = sprite_slot;
 
-	return spritesheet ? 0 : -1;
+	return 0;
 }
 
 void
@@ -52,7 +52,6 @@ cleanup_render(void) {
 		free(allocated_addrs[i]);
 	}
 	free(allocated_addrs);
-	SDL_free(spritesheet);
 }
 
 unsigned short int
@@ -212,8 +211,8 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
+	const Uint8 *s_addr = spritesheet + (spr->num * 0x20);
 	Uint32 i;
-	Uint8 *s_addr = spritesheet + (spr->num * 0x20);
 	Uint8 p_0, p_1, p_2, p_3;
 	Uint8 zone, cur_pxl;
 	Uint32 num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;

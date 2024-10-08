@@ -6,6 +6,7 @@
 #include "engine/input.h"
 
 #include "config.h"
+#include "save_data.h"
 
 void game_init(void); /* One-time init tasks */
 void game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data); /* Main gameplay loop, runs once per frame */

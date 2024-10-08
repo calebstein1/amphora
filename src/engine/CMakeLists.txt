@@ -1,1 +1,1 @@
-add_library(amphora_engine main.c render.c input.c events.c)
+add_library(amphora_engine main.c render.c input.c events.c bin_loader.s)

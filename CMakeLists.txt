@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(amphora LANGUAGES C)
+project(amphora LANGUAGES C ASM)
 
 string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
 
