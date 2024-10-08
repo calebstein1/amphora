@@ -40,6 +40,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 	if (key_actions->right) {
 		p_char->flip = false;
 		p_char->x += p_movement_speed;
+		walking = true;
 	}
 
 	if (frame - idle_anim > 30) {
