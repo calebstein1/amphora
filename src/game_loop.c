@@ -3,6 +3,7 @@
 #include "engine/game_loop.h"
 #include "engine/input.h"
 #include "engine/render.h"
+#include "engine/util.h"
 
 #define NUM_PLAYER_IDLE_FRAMES 2
 
@@ -42,6 +43,9 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 		p_char->x += p_movement_speed;
 		walking = true;
 	}
+	if (key_actions->quit) {
+		quit_game();
+	}
 
 	if (frame - idle_anim > 30) {
 		if (++player_idle_idx >= NUM_PLAYER_IDLE_FRAMES) player_idle_idx = 0;
@@ -53,4 +57,8 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 	camera_location.x -= (get_game_window_size().x / 2);
 	camera_location.y = 0;
 	set_camera(camera_location.x, camera_location.y);
+}
+
+void
+game_shutdown(void) {
 }

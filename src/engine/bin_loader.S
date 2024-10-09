@@ -1,3 +1,4 @@
+#define ASM
 #include "config.h"
 
 #if defined(__APPLE__)
@@ -21,3 +22,5 @@ SS_END_SYM:
 	.balign 4
 SS_SIZE_SYM:
 	.int SS_END_SYM - SS_SYM
+
+#undef ASM

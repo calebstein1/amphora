@@ -12,4 +12,8 @@
 #define fixed SDL_WINDOW_SHOWN
 #define resizable SDL_WINDOW_RESIZABLE
 
+#ifndef ASM
+void quit_game(void); /* Request to quit the game */
+#endif
+
 #endif /* UNTITLED_PLATFORMER_UTIL_H */

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "engine/events.h"
@@ -7,6 +8,9 @@
 #include "engine/util.h"
 
 #include "config.h"
+
+/* File-scored variables */
+static bool quit_requested = false;
 
 int
 main(void) {
@@ -54,11 +58,11 @@ main(void) {
 
 	game_init();
 
-	while (1) {
+	while (!quit_requested) {
 		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, renderer) == SDL_QUIT) break;
+		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, renderer) == SDL_QUIT) quit_requested = true;
 		clear_bg(renderer);
 		game_loop(frame_count, &key_actions.state, &save_data);
 		draw_all_sprites_and_gc(renderer);
@@ -71,6 +75,7 @@ main(void) {
 		}
 	}
 
+	game_shutdown();
 	cleanup_render();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
@@ -79,3 +84,7 @@ main(void) {
 	return 0;
 }
 
+void
+quit_game(void) {
+	quit_requested = true;
+}
