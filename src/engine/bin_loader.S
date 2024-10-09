@@ -16,7 +16,7 @@
 	.balign 4
 SS_SYM:
 	.incbin SPRITESHEET_PATH
-	SS_END_SYM:
+SS_END_SYM:
 	.global SS_SIZE_SYM
 	.balign 4
 SS_SIZE_SYM:
