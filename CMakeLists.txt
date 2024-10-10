@@ -4,10 +4,11 @@ project(amphora LANGUAGES C ASM)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
 
-find_package(SDL2 REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
 
 include_directories(include)
 include_directories(${SDL2_INCLUDE_DIRS})
