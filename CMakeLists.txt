@@ -7,7 +7,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 set(VCPKG_LIBRARY_LINKAGE static)
 
-string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
+if(NOT WIN32)
+	string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined")
+endif()
+string(APPEND CMAKE_C_FLAGS_DEBUG " -Werror=all -Werror=pedantic -Wextra")
 
 find_package(SDL2 CONFIG REQUIRED)
 
