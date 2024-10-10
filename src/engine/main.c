@@ -27,6 +27,7 @@ main(int argc, char **argv) {
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL", SDL_GetError(), 0);
 		return -1;
 	}
 
@@ -39,11 +40,13 @@ main(int argc, char **argv) {
 			       win_size_x, win_size_y, WINDOW_MODE);
 	if (!win) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
 	}
 	renderer = SDL_CreateRenderer(win, -1, 0);
 	if (!renderer) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
 	}
 
@@ -52,6 +55,7 @@ main(int argc, char **argv) {
 
 	if (init_render() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init render data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init render data", "Failed to initialize sprite slots", 0);
 		return -1;
 	}
 
