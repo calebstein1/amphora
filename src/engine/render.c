@@ -189,8 +189,10 @@ hide_sprite(struct sprite_slot_t *spr) {
 
 void *
 release_sprite_slot(struct sprite_slot_t **spr) {
-	(*spr)->garbage = true;
-	*spr = NULL;
+	if (spr) {
+		(*spr)->garbage = true;
+		*spr = NULL;
+	}
 
 	return NULL;
 }
