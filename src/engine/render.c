@@ -124,12 +124,7 @@ draw_all_sprites_and_gc(SDL_Renderer *renderer) {
 			garbage = NULL;
 			sprite_slots_count--;
 		}
-		if (!sprite_slot->display) {
-			sprite_slot = sprite_slot->next;
-			continue;
-		}
-
-		draw_sprite(sprite_slot, renderer);
+		if (sprite_slot->display) draw_sprite(sprite_slot, renderer);
 
 		sprite_slot = sprite_slot->next;
 	}
