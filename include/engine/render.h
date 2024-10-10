@@ -61,8 +61,6 @@ void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
 Point get_sprite_center(const struct sprite_slot_t *spr);
 void draw_all_sprites_and_gc(SDL_Renderer *renderer); /* Draw all active sprite slots */
-/* Reserve a sprite slot and get a pointer to it */
-struct sprite_slot_t *reserve_sprite_slot(struct sprite_slot_t **spr, int order);
 /* Reserve a sprite slot and initialize it with default values */
 struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order);
 /* Display the supplied sprite_slot */

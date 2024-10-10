@@ -138,7 +138,7 @@ draw_all_sprites_and_gc(SDL_Renderer *renderer) {
 }
 
 struct sprite_slot_t *
-reserve_sprite_slot(struct sprite_slot_t **spr, int order) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
 	struct sprite_slot_t *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
@@ -163,13 +163,6 @@ reserve_sprite_slot(struct sprite_slot_t **spr, int order) {
 	}
 	*spr = sprite_slot_temp;
 	sprite_slots_count++;
-
-	return *spr;
-}
-
-struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
-	if (!reserve_sprite_slot(spr, order)) return NULL;
 
 	(*spr)->num = num;
 	(*spr)->x_size = x_size;
