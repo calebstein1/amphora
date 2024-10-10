@@ -36,15 +36,13 @@ main(int argc, char **argv) {
 	set_pixel_size(RESOLUTION_MODE ?
 		MAX_OF(win_size_x, win_size_y) / RESOLUTION :
 		MIN_OF(win_size_x, win_size_y) / RESOLUTION);
-	win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			       win_size_x, win_size_y, WINDOW_MODE);
-	if (!win) {
+	if (!(win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+				     win_size_x, win_size_y, WINDOW_MODE))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
 	}
-	renderer = SDL_CreateRenderer(win, -1, 0);
-	if (!renderer) {
+	if (!(renderer = SDL_CreateRenderer(win, 1, 0))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
