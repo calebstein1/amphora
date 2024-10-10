@@ -1,7 +1,3 @@
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "engine/render.h"
 
 #include "config.h"
@@ -22,12 +18,12 @@ static Vector2 render_dimensions = { 0, 0 };
 
 int
 init_render(void) {
-	if ((sprite_slot = malloc(sizeof(struct sprite_slot_t))) == NULL) {
+	if ((sprite_slot = SDL_malloc(sizeof(struct sprite_slot_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
 
 		return -1;
 	}
-	sprite_slot->order = INT_MIN;
+	sprite_slot->order = SDL_MIN_SINT32;
 	sprite_slot->display = false;
 	sprite_slot->garbage = false;
 	sprite_slot->next = NULL;
@@ -38,7 +34,7 @@ init_render(void) {
 
 void
 cleanup_render(void) {
-	struct sprite_slot_t **allocated_addrs = malloc(sprite_slots_count * sizeof(struct sprite_slot_t *));
+	struct sprite_slot_t **allocated_addrs = SDL_malloc(sprite_slots_count * sizeof(struct sprite_slot_t *));
 	Uint32 i = 0;
 
 	while (sprite_slot) {
@@ -46,9 +42,9 @@ cleanup_render(void) {
 		sprite_slot = sprite_slot->next;
 	}
 	for (i = 0; i < sprite_slots_count; i++) {
-		free(allocated_addrs[i]);
+		SDL_free(allocated_addrs[i]);
 	}
-	free(allocated_addrs);
+	SDL_free(allocated_addrs);
 }
 
 unsigned short int
@@ -120,7 +116,7 @@ draw_all_sprites_and_gc(SDL_Renderer *renderer) {
 		if (sprite_slot->next && sprite_slot->next->garbage) {
 			garbage = sprite_slot->next;
 			sprite_slot->next = sprite_slot->next->next;
-			free(garbage);
+			SDL_free(garbage);
 			garbage = NULL;
 			sprite_slots_count--;
 		}
@@ -133,12 +129,12 @@ draw_all_sprites_and_gc(SDL_Renderer *renderer) {
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, SDL_bool flip, int order) {
 	struct sprite_slot_t *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
 
-	if ((sprite_slot_temp = malloc(sizeof(struct sprite_slot_t))) == NULL) {
+	if ((sprite_slot_temp = SDL_malloc(sizeof(struct sprite_slot_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
 		*spr = NULL;
 

@@ -1,5 +1,3 @@
-#include <stdbool.h>
-
 #include "engine/events.h"
 #include "engine/input.h"
 #include "engine/render.h"

@@ -1,9 +1,7 @@
 #ifndef UNTITLED_PLATFORMER_EVENTS_H
 #define UNTITLED_PLATFORMER_EVENTS_H
 
-#include <stdbool.h>
-
-#include <SDL.h>
+#include "SDL.h"
 
 #include "engine/input.h"
 

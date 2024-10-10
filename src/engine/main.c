@@ -1,6 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-
 #include "engine/events.h"
 #include "engine/game_loop.h"
 #include "engine/input.h"
@@ -10,7 +7,7 @@
 #include "config.h"
 
 /* File-scored variables */
-static bool quit_requested = false;
+static SDL_bool quit_requested = false;
 
 int
 main(int argc, char **argv) {
@@ -29,7 +26,7 @@ main(int argc, char **argv) {
 	(void)argv;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		fprintf(stderr, "Failed to init SDL: %s\n", SDL_GetError());
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL: %s\n", SDL_GetError());
 		return -1;
 	}
 
@@ -41,12 +38,12 @@ main(int argc, char **argv) {
 	win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			       win_size_x, win_size_y, WINDOW_MODE);
 	if (!win) {
-		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		return -1;
 	}
 	renderer = SDL_CreateRenderer(win, -1, 0);
 	if (!renderer) {
-		fprintf(stderr, "Failed to create renderer: %s\n", SDL_GetError());
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
 		return -1;
 	}
 
@@ -54,7 +51,7 @@ main(int argc, char **argv) {
 	set_window_size(init_window_size);
 
 	if (init_render() == -1) {
-		fputs("Failed to init render data\n", stderr);
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init render data\n");
 		return -1;
 	}
 

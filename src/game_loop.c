@@ -1,5 +1,3 @@
-#include <stdbool.h>
-
 #include "engine/game_loop.h"
 #include "engine/input.h"
 #include "engine/render.h"
@@ -13,7 +11,7 @@ struct sprite_slot_t *building = NULL;
 
 int player_idle_frames[NUM_PLAYER_IDLE_FRAMES] = { 1, 3 };
 int player_idle_idx = 0;
-bool walking = false;
+SDL_bool walking = false;
 
 void
 game_init(void) {

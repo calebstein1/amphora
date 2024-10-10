@@ -12,6 +12,9 @@
 #define fixed SDL_WINDOW_SHOWN
 #define resizable SDL_WINDOW_RESIZABLE
 
+#define true SDL_TRUE
+#define false SDL_FALSE
+
 #ifndef ASM
 void quit_game(void); /* Request to quit the game */
 #endif
