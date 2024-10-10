@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 
+set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+
 project(amphora LANGUAGES C ASM)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
-set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 set(VCPKG_LIBRARY_LINKAGE static)
 
 if(NOT WIN32)
