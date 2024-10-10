@@ -7,7 +7,7 @@
 #include "config.h"
 
 /* File-scored variables */
-static SDL_bool quit_requested = false;
+static bool quit_requested = false;
 
 int
 main(int argc, char **argv) {

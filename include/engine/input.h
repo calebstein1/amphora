@@ -6,7 +6,7 @@
 #include "config.h"
 
 struct input_state_t {
-#define KMAP(action, ...) SDL_bool action : 1;
+#define KMAP(action, ...) bool action : 1;
 	ACTIONS
 #undef KMAP
 };

@@ -22,9 +22,9 @@ struct sprite_slot_t {
 	Position32 x; /* The sprite's x position in 1/16 of a pixel */
 	Position32 y; /* The sprite's y position in 1/16 of a pixel */
 	Sint32 order; /* The draw order of sprites, higher numbers on top */
-	SDL_bool flip : 1; /* Whether or not the sprite should be flipped horizontally */
-	SDL_bool display : 1; /* Whether the sprite should be drawn or not */
-	SDL_bool garbage : 1; /* Whether the garbage collector should free the allocated memory */
+	bool flip : 1; /* Whether or not the sprite should be flipped horizontally */
+	bool display : 1; /* Whether the sprite should be drawn or not */
+	bool garbage : 1; /* Whether the garbage collector should free the allocated memory */
 	struct sprite_slot_t *next;
 };
 
@@ -60,7 +60,7 @@ void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the bac
 Point get_sprite_center(const struct sprite_slot_t *spr);
 void draw_all_sprites_and_gc(SDL_Renderer *renderer); /* Draw all active sprite slots */
 /* Reserve a sprite slot and initialize it with default values */
-struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, SDL_bool flip, int order);
+struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order);
 /* Display the supplied sprite_slot */
 void show_sprite(struct sprite_slot_t *spr);
 /* Hide a sprite slot without releasing it */

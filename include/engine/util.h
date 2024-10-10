@@ -12,6 +12,7 @@
 #define fixed SDL_WINDOW_SHOWN
 #define resizable SDL_WINDOW_RESIZABLE
 
+#define bool SDL_bool
 #define true SDL_TRUE
 #define false SDL_FALSE
 

@@ -129,7 +129,7 @@ draw_all_sprites_and_gc(SDL_Renderer *renderer) {
 }
 
 struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, SDL_bool flip, int order) {
+init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
 	struct sprite_slot_t *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
