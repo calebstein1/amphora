@@ -13,16 +13,20 @@
 static bool quit_requested = false;
 
 int
-main(void) {
+main(int argc, char **argv) {
 	Uint64 frame_start, frame_end, frame_time, frame_count = 0;
 	int win_size_x, win_size_y;
 
 	SDL_Window *win;
 	SDL_Renderer *renderer;
 	SDL_Event e;
-	union input_state_u key_actions;
-	struct save_data_t save_data;
+	static union input_state_u key_actions;
+	static struct save_data_t save_data;
 	Vector2 init_window_size;
+
+	/* SDL requires these but we're not actually using them */
+	(void)argc;
+	(void)argv;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Failed to init SDL: %s\n", SDL_GetError());

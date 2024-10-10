@@ -199,7 +199,6 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 	extern const Uint8 spritesheet[];
-	extern const Uint8 *spritesheet_end;
 	extern int spritesheet_size;
 
 	const Uint8 *s_addr = spritesheet + (spr->num * 0x20);
@@ -211,6 +210,8 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 	Position32 spr_y = spr->y;
 	Uint8 x_off = 0, y_off = 0xff;
 	SDL_Rect pxl;
+
+	(void)spritesheet_size;
 
 	pxl.h = pixel_size;
 	pxl.w = pixel_size;
