@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+file(TO_CMAKE_PATH $ENV{VCPKG_ROOT} VCPKG_ROOT)
+set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 project(amphora LANGUAGES C ASM)
 
