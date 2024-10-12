@@ -19,6 +19,5 @@ find_package(SDL2 CONFIG REQUIRED)
 
 include_directories(include)
 include_directories(${SDL2_INCLUDE_DIRS})
-include_directories(${VCToolsInstallDir})
 
 add_subdirectory(src)
