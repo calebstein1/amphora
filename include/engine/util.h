@@ -16,7 +16,7 @@
 #define true SDL_TRUE
 #define false SDL_FALSE
 
-#ifndef ASM
+#ifndef BIN_LOADER
 void quit_game(void); /* Request to quit the game */
 #endif
 

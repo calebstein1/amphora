@@ -1,4 +1,4 @@
-#define ASM
+#define BIN_LOADER
 #include "config.h"
 
 #if defined(__APPLE__)
@@ -23,4 +23,4 @@ SS_END_SYM:
 SS_SIZE_SYM:
 	.int SS_END_SYM - SS_SYM
 
-#undef ASM
+#undef BIN_LOADER

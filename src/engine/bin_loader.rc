@@ -1,1 +1,6 @@
-SpriteSheet AMPHORA_SPRITESHEET "..\content\img\sprites.asht"
+#define BIN_LOADER
+#include "config.h"
+
+SpriteSheet AMPHORA_SPRITESHEET SPRITESHEET_PATH
+
+#undef BIN_LOADER
