@@ -26,7 +26,14 @@ These stutters should not exist in the Release configuration.
 
 ## Building
 
-Amphora uses CMake to build, all you need to do is add any new files to `add_executable` in `src/CmakeLists.txt`, then run the following commands in the project root:
+Amphora uses CMake and vcpkg to build and manage dependencies.
+You'll need to ensure that vcpkg is installed somewhere on your system and that the `VCPKG_ROOT` environment variable is set properly.
+Once that's done, all you'll need to do is add any new files to `add_executable` in `src/CmakeLists.txt`, then you're ready to build your game!
+
+### *nix (MacOS, Linux)
+
+On *nix systems, you can build from the command line using the following commands.
+GCC and Clang are both supported, as are x86-64 and arm64 architectures.
 
 ```
 mkdir -p build && cd build
@@ -34,6 +41,12 @@ cmake ..
 make
 ```
 
-This will place the binary in `build/bin` and should work fine on both MacOS and Linux, x86 and arm.
-Windows build support in in development and will be coming soon.
+Any IDE with CMake support should work as well, though CLion is the only IDE that's been officially tested on MacOS and Linux.
 
+### Windows
+
+Windows builds are supported using the MSVC compiler.
+MinGW and other compilers are not supported at this time.
+
+Visual Studio (not VSCode!) works well with Amphora projects, as does CLion.
+It may be possible to configure VSCode to work with Amphora, but that's all very unsupported.
