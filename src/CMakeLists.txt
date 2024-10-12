@@ -3,7 +3,7 @@ add_subdirectory(engine)
 add_executable(amphora game_loop.c)
 
 if(WIN32)
-	target_sources(amphora PRIVATE engine/spritesheet.rc)
+	target_sources(amphora PRIVATE engine/bin_loader.rc)
 else()
 	target_sources(amphora PRIVATE engine/bin_loader.S)
 endif()
