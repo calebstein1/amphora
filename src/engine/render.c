@@ -16,7 +16,7 @@ Uint32 sprite_slots_count = 1;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
-static unsigned short int pixel_size = 1;
+static Uint16 pixel_size = 1;
 static Camera camera = { 0, 0 };
 static Vector2 render_dimensions = { 0, 0 };
 #ifdef WIN32
@@ -75,13 +75,13 @@ cleanup_render(void) {
 	SDL_free(allocated_addrs);
 }
 
-unsigned short int
+Uint16
 get_pixel_size(void) {
 	return pixel_size;
 }
 
 void
-set_pixel_size(unsigned short int size) {
+set_pixel_size(const Uint16 size) {
 	pixel_size = size > 0 ? size : 1;
 }
 

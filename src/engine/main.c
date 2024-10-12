@@ -11,7 +11,8 @@ static bool quit_requested = false;
 
 int
 main(int argc, char **argv) {
-	Uint64 frame_start, frame_end, frame_time, frame_count = 0;
+	Uint64 frame_start, frame_end, frame_count = 0;
+	Uint32 frame_time;
 	int win_size_x, win_size_y;
 
 	SDL_Window *win;
@@ -34,15 +35,15 @@ main(int argc, char **argv) {
 	win_size_x = WINDOW_X;
 	win_size_y = WINDOW_Y;
 	set_pixel_size(RESOLUTION_MODE ?
-		MAX_OF(win_size_x, win_size_y) / RESOLUTION :
-		MIN_OF(win_size_x, win_size_y) / RESOLUTION);
-	if (!(win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-				     win_size_x, win_size_y, WINDOW_MODE))) {
+		(Uint16)MAX_OF(win_size_x, win_size_y) / RESOLUTION :
+		(Uint16)MIN_OF(win_size_x, win_size_y) / RESOLUTION);
+	if (!((win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+	                              win_size_x, win_size_y, WINDOW_MODE)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
 	}
-	if (!(renderer = SDL_CreateRenderer(win, 1, 0))) {
+	if (!((renderer = SDL_CreateRenderer(win, 1, 0)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
@@ -73,7 +74,7 @@ main(int argc, char **argv) {
 		SDL_RenderPresent(renderer);
 
 		frame_end = SDL_GetTicks64();
-		if ((frame_time = frame_end - frame_start) < (1000 / FRAMERATE)) {
+		if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / FRAMERATE)) {
 			SDL_Delay((1000 / FRAMERATE) - frame_time);
 		}
 	}

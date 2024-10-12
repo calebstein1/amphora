@@ -17,10 +17,10 @@
 #define WINDOW_MODE fullscreen
 
 /*
- * min: the smaller window dimension will contain RESOLUTION pixels
- * max: the larger window dimension will contain RESOLUTION pixels
+ * shorter: the smaller window dimension will contain RESOLUTION pixels
+ * longer: the larger window dimension will contain RESOLUTION pixels
  */
-#define RESOLUTION_MODE min
+#define RESOLUTION_MODE shorter
 #define RESOLUTION 256
 
 /* Colors used for drawing in 24-bit rgb format */

@@ -21,8 +21,8 @@ event_loop(SDL_Event *e, union input_state_u *key_actions,
 
 				SDL_GetRendererOutputSize(renderer, win_size_x, win_size_y);
 				set_pixel_size(RESOLUTION_MODE ?
-					     MAX_OF(*win_size_x, *win_size_y) / RESOLUTION :
-					     MIN_OF(*win_size_x, *win_size_y) / RESOLUTION);
+					     (Uint16)MAX_OF(*win_size_x, *win_size_y) / RESOLUTION :
+					     (Uint16)MIN_OF(*win_size_x, *win_size_y) / RESOLUTION);
 				set_window_size((Vector2){ *win_size_x, *win_size_y });
 				break;
 		}
