@@ -1,3 +1,7 @@
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "engine/render.h"
 
 #include "config.h"
@@ -15,9 +19,33 @@ static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0
 static unsigned short int pixel_size = 1;
 static Camera camera = { 0, 0 };
 static Vector2 render_dimensions = { 0, 0 };
+#ifdef WIN32
+	Uint8 *spritesheet;
+	DWORD spritesheet_size;
+#else
+	extern const Uint8 spritesheet[];
+	extern int spritesheet_size;
+#endif
 
 int
 init_render(void) {
+#ifdef WIN32
+	HRSRC spritesheet_info = FindResourceA(NULL, "SpriteSheet", "AMPHORA_SPRITESHEET");
+	if (!spritesheet_info) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate spritesheet resource... Amphora will crash now\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate spritesheet resource... Amphora will crash now", 0);
+		return -1;
+	}
+	HGLOBAL spritesheet_resource = LoadResource(NULL, spritesheet_info);
+	if (!spritesheet_resource) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load spritesheet resource... Amphora will crash now\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load spritesheet resource... Amphora will crash now", 0);
+		return -1;
+	}
+	spritesheet_size = SizeofResource(NULL, spritesheet_info);
+	spritesheet = (Uint8 *)spritesheet_resource;
+#endif
+
 	if ((sprite_slot = SDL_malloc(sizeof(struct sprite_slot_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
 
@@ -194,14 +222,11 @@ release_sprite_slot(struct sprite_slot_t **spr) {
 
 void
 draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
-	extern const Uint8 spritesheet[];
-	extern int spritesheet_size;
-
-	const Uint8 *s_addr = spritesheet + (spr->num * 0x20);
-	Uint32 i;
+	Uint8 *spr_addr = spritesheet + (spr->num * 0x20);
 	Uint8 p_0, p_1, p_2, p_3;
 	Uint8 zone, cur_pxl;
 	Uint32 num_pixels = (spr->x_size * spr->y_size) * SPR_NUM_PIXELS;
+	Uint32 i;
 	Position32 spr_x = spr->x;
 	Position32 spr_y = spr->y;
 	Uint8 x_off = 0, y_off = 0xff;
@@ -216,28 +241,28 @@ draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
 		if (spr->flip) {
 			if (i == 0) spr_x += ((spr->x_size - 1) * (SPR_SIDE << SUBPIXEL_SHIFT));
 			if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
-				s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
+				spr_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
 				spr_x += ((spr->x_size - 1) * (SPR_SIDE << SUBPIXEL_SHIFT));
 			} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
-				s_addr += SPR_NUM_BYTES;
+				spr_addr += SPR_NUM_BYTES;
 				spr_x -= (SPR_SIDE << SUBPIXEL_SHIFT);
 				y_off -= SPR_SIDE;
 			}
 		} else {
 			if (i > 0 && i % (spr->x_size * SPR_NUM_PIXELS) == 0) {
-				s_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
+				spr_addr += (0x200 - ((spr->x_size - 1) * SPR_NUM_BYTES));
 				spr_x -= ((spr->x_size - 1) * (SPR_SIDE << SUBPIXEL_SHIFT));
 			} else if (i > 0 && i % SPR_NUM_PIXELS == 0) {
-				s_addr += SPR_NUM_BYTES;
+				spr_addr += SPR_NUM_BYTES;
 				spr_x += (SPR_SIDE << SUBPIXEL_SHIFT);
 				y_off -= SPR_SIDE;
 			}
 		}
 
-		p_0 = ((*(s_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		p_1 = ((*(s_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		p_2 = ((*(s_addr + 16 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
-		p_3 = ((*(s_addr + 24 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_0 = ((*(spr_addr + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_1 = ((*(spr_addr + 8 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_2 = ((*(spr_addr + 16 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
+		p_3 = ((*(spr_addr + 24 + ((i % SPR_NUM_PIXELS) >> 3)) >> (i % SPR_SIDE)) & 1);
 		cur_pxl = (p_3 << 3) | (p_2 << 2) | (p_1 << 1) | p_0;
 
 		if (spr->flip) {

@@ -10,9 +10,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(VCPKG_LIBRARY_LINKAGE static)
 
 if(NOT WIN32)
-	string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined")
+	string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
 endif()
-string(APPEND CMAKE_C_FLAGS_DEBUG " -Werror=all -Werror=pedantic -Wextra")
 
 find_package(SDL2 CONFIG REQUIRED)
 

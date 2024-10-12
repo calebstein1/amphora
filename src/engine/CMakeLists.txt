@@ -1,1 +1,5 @@
-add_library(amphora_engine main.c render.c input.c events.c bin_loader.S)
+if(WIN32)
+	add_library(amphora_engine main.c render.c input.c events.c)
+else()
+	add_library(amphora_engine main.c render.c input.c events.c bin_loader.S)
+endif()
