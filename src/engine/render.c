@@ -23,7 +23,7 @@ static Vector2 render_dimensions = { 0, 0 };
 	Uint8 *spritesheet;
 	DWORD spritesheet_size;
 #else
-	extern const Uint8 spritesheet[];
+	extern Uint8 spritesheet[];
 	extern int spritesheet_size;
 #endif
 
