@@ -20,11 +20,11 @@ static unsigned short int pixel_size = 1;
 static Camera camera = { 0, 0 };
 static Vector2 render_dimensions = { 0, 0 };
 #ifdef WIN32
-	Uint8 *spritesheet;
-	DWORD spritesheet_size;
+static Uint8 *spritesheet;
+static DWORD spritesheet_size;
 #else
-	extern Uint8 spritesheet[];
-	extern int spritesheet_size;
+extern Uint8 spritesheet[];
+extern int spritesheet_size;
 #endif
 
 int
