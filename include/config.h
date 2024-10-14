@@ -33,6 +33,7 @@
 /* Content paths */
 #define SPRITESHEET_PATH "../content/img/sprites.asht"
 
+/* Map actions to keys here following the example in the comment */
 #define ACTIONS					\
 	/* KMAP(action, key1, key2) */		\
 	KMAP(left, SDLK_a, SDLK_LEFT)		\
