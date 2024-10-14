@@ -38,6 +38,7 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
 		return -1;
 	}
+	load_fonts();
 
 	win_size_x = WINDOW_X;
 	win_size_y = WINDOW_Y;
