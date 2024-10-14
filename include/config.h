@@ -43,4 +43,10 @@
 	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT)	\
 	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE)
 
+/* Load TTF fonts */
+#define FONTS										\
+	/* LOADFONT(name, path) */							\
+	LOADFONT(Merriweather, "../content/font/Merriweather/Merriweather-Regular.ttf")	\
+	LOADFONT(Roboto, "../content/font/Roboto/Roboto-Regular.ttf")
+
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */
