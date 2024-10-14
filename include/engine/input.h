@@ -23,6 +23,8 @@ enum input_actions {
 	ACTION_COUNT
 };
 
+_Static_assert(ACTION_COUNT <= 64, "Cannot define more than 64 actions");
+
 void handle_keydown(union input_state_u *key_actions, const SDL_Event *e);
 void handle_keyup(union input_state_u *key_actions, const SDL_Event *e);
 
