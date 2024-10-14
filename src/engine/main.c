@@ -90,6 +90,7 @@ main(int argc, char **argv) {
 	cleanup_render();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
+	TTF_Quit();
 	SDL_Quit();
 
 	return 0;
