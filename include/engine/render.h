@@ -56,6 +56,8 @@ void set_window_size(Vector2 window_size); /* Set the current window dimensions 
 void set_camera(Position32 x, Position32 y); /* Set the location of the camera's top left point */
 void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
 void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
+void set_bg_black(void); /* Sets the background color to black */
+void set_bg_white(void); /* Sets the background color to white */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
 Point get_sprite_center(const struct sprite_slot_t *spr);
 void draw_all_sprites_and_gc(SDL_Renderer *renderer); /* Draw all active sprite slots */

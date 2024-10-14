@@ -15,6 +15,7 @@ static struct sprite_slot_t *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
+static struct color_t bg;
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
 static Uint16 pixel_size = 1;
 static Camera camera = { 0, 0 };
@@ -56,6 +57,8 @@ init_render(void) {
 	sprite_slot->garbage = false;
 	sprite_slot->next = NULL;
 	sprite_slots_head = sprite_slot;
+
+	bg = BG_COLOR_MODE;
 
 	return 0;
 }
@@ -117,8 +120,18 @@ set_white(Uint8 r, Uint8 g, Uint8 b) {
 }
 
 void
+set_bg_black(void) {
+	bg = black;
+}
+
+void
+set_bg_white(void) {
+	bg = white;
+}
+
+void
 clear_bg(SDL_Renderer *renderer) {
-	SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, 0xff);
+	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, 0xff);
 	SDL_RenderClear(renderer);
 }
 
