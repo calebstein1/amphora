@@ -2,6 +2,7 @@
 #include "engine/game_loop.h"
 #include "engine/input.h"
 #include "engine/render.h"
+#include "engine/ttf.h"
 #include "engine/util.h"
 
 #include "config.h"
@@ -29,6 +30,12 @@ main(int argc, char **argv) {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL", SDL_GetError(), 0);
+		return -1;
+	}
+
+	if (TTF_Init() < 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
 		return -1;
 	}
 

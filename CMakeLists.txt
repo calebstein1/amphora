@@ -16,6 +16,7 @@ else()
 endif()
 
 find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL2_ttf CONFIG REQUIRED)
 
 include_directories(include)
 include_directories(${SDL2_INCLUDE_DIRS})
