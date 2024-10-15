@@ -47,6 +47,15 @@ load_fonts(void) {
 	return 0;
 }
 
+void
+free_fonts(void) {
+	int i;
+
+	for (i = 0; i < FONTS_COUNT; i++) {
+		SDL_RWclose(fonts[i]);
+	}
+}
+
 AmphoraMessage *
 create_string(AmphoraMessage **amsg, const char *font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
 	int i;

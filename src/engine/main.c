@@ -93,6 +93,7 @@ main(int argc, char **argv) {
 
 	game_shutdown();
 	cleanup_render();
+	free_fonts();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
 	TTF_Quit();
