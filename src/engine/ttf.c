@@ -67,7 +67,7 @@ create_string(AmphoraMessage **amsg, const enum fonts_e font_name, const int pt,
 
 	if (*amsg) return *amsg;
 
-	if (!((*amsg = malloc(sizeof(struct amphora_message_t))))) {
+	if (!((*amsg = SDL_malloc(sizeof(struct amphora_message_t))))) {
 		return NULL;
 	}
 
@@ -91,7 +91,7 @@ render_string(const AmphoraMessage *msg) {
 
 void
 free_string(AmphoraMessage **amsg) {
-	free(*amsg);
+	SDL_free(*amsg);
 	*amsg = NULL;
 }
 
