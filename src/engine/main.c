@@ -20,7 +20,7 @@ main(int argc, char **argv) {
 	SDL_Window *win;
 	SDL_Event e;
 	static union input_state_u key_actions;
-	static struct save_data_t save_data;
+	static SaveData save_data;
 	Vector2 init_window_size;
 
 	/* SDL requires these but we're not actually using them */

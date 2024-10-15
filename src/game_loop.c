@@ -7,8 +7,8 @@
 #define NUM_PLAYER_IDLE_FRAMES 2
 
 /* Game globals */
-struct sprite_slot_t *p_char = NULL;
-struct sprite_slot_t *building = NULL;
+SpriteSlot *p_char = NULL;
+SpriteSlot *building = NULL;
 AmphoraMessage *my_message;
 
 int player_idle_frames[NUM_PLAYER_IDLE_FRAMES] = { 1, 3 };
@@ -23,7 +23,7 @@ game_init(void) {
 }
 
 void
-game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data) {
+game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_data) {
 	static Point camera_location;
 	static Uint64 idle_anim = 0;
 	Uint8 p_movement_speed = 4;

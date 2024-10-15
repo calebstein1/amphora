@@ -7,11 +7,11 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-void draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer);
+void draw_sprite(const SpriteSlot *spr, SDL_Renderer *renderer);
 
 /* File-scoped variables */
-static struct sprite_slot_t *sprite_slot;
-static struct sprite_slot_t *sprite_slots_head;
+static SpriteSlot *sprite_slot;
+static SpriteSlot *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
 static struct color_t black = BLACK;
 static struct color_t white = WHITE;
@@ -47,7 +47,7 @@ init_render(void) {
 	spritesheet = (Uint8 *)spritesheet_resource;
 #endif
 
-	if ((sprite_slot = SDL_malloc(sizeof(struct sprite_slot_t))) == NULL) {
+	if ((sprite_slot = SDL_malloc(sizeof(SpriteSlot))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
 
 		return -1;
@@ -65,7 +65,7 @@ init_render(void) {
 
 void
 cleanup_render(void) {
-	struct sprite_slot_t **allocated_addrs = SDL_malloc(sprite_slots_count * sizeof(struct sprite_slot_t *));
+	SpriteSlot **allocated_addrs = SDL_malloc(sprite_slots_count * sizeof(SpriteSlot *));
 	Uint32 i = 0;
 
 	while (sprite_slot) {
@@ -146,7 +146,7 @@ clear_bg(SDL_Renderer *renderer) {
 }
 
 Point
-get_sprite_center(const struct sprite_slot_t *spr) {
+get_sprite_center(const SpriteSlot *spr) {
 	Point center;
 
 	center.x = spr->x + ((spr->x_size * SUBPIXEL_STEPS) / 2);
@@ -157,7 +157,7 @@ get_sprite_center(const struct sprite_slot_t *spr) {
 
 void
 draw_all_sprites_and_gc(SDL_Renderer *renderer) {
-	struct sprite_slot_t *garbage;
+	SpriteSlot *garbage;
 
 	if (!sprite_slot->next) return;
 
@@ -179,13 +179,13 @@ draw_all_sprites_and_gc(SDL_Renderer *renderer) {
 	sprite_slot = sprite_slots_head;
 }
 
-struct sprite_slot_t *
-init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
-	struct sprite_slot_t *sprite_slot_temp = NULL;
+SpriteSlot *
+init_sprite_slot(SpriteSlot **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order) {
+	SpriteSlot *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
 
-	if ((sprite_slot_temp = SDL_malloc(sizeof(struct sprite_slot_t))) == NULL) {
+	if ((sprite_slot_temp = SDL_malloc(sizeof(SpriteSlot))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
 		*spr = NULL;
 
@@ -220,17 +220,17 @@ init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size,
 }
 
 void
-show_sprite(struct sprite_slot_t *spr) {
+show_sprite(SpriteSlot *spr) {
 	spr->display = true;
 }
 
 void
-hide_sprite(struct sprite_slot_t *spr) {
+hide_sprite(SpriteSlot *spr) {
 	spr->display = false;
 }
 
 void *
-release_sprite_slot(struct sprite_slot_t **spr) {
+release_sprite_slot(SpriteSlot **spr) {
 	if (spr) {
 		(*spr)->garbage = true;
 		*spr = NULL;
@@ -244,7 +244,7 @@ release_sprite_slot(struct sprite_slot_t **spr) {
  */
 
 void
-draw_sprite(const struct sprite_slot_t *spr, SDL_Renderer *renderer) {
+draw_sprite(const SpriteSlot *spr, SDL_Renderer *renderer) {
 	Uint8 *spr_addr = spritesheet + (spr->num * 0x20);
 	Uint8 p_0, p_1, p_2, p_3;
 	Uint8 zone, cur_pxl;
