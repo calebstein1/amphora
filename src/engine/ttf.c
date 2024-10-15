@@ -80,6 +80,7 @@ create_string(AmphoraMessage **amsg, const enum fonts_e font_name, const int pt,
 	TTF_SizeUTF8(font, text, &(*amsg)->rectangle.w, &(*amsg)->rectangle.h);
 	TTF_CloseFont(font);
 	SDL_FreeSurface(surface);
+	SDL_RWseek(fonts[font_name], 0, RW_SEEK_SET);
 
 	return *amsg;
 }
