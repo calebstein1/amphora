@@ -38,11 +38,13 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
 		return -1;
 	}
-	if (ENABLE_FONTS && load_fonts() == -1) {
+#ifdef ENABLE_FONTS
+	if (load_fonts() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
 		return -1;
 	}
+#endif
 
 	win_size_x = WINDOW_X;
 	win_size_y = WINDOW_Y;
@@ -93,7 +95,9 @@ main(int argc, char **argv) {
 
 	game_shutdown();
 	cleanup_render();
+#ifdef ENABLE_FONTS
 	free_fonts();
+#endif
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
 	TTF_Quit();

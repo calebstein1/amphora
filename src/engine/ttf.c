@@ -6,6 +6,8 @@
 
 #include "config.h"
 
+#ifdef ENABLE_FONTS
+
 struct amphora_message_t {
 	SDL_Texture *texture;
 	SDL_Rect rectangle;
@@ -42,7 +44,8 @@ load_fonts(void) {
 		fonts[i] = ttf_rw;
 	}
 #else
-#warning TTF Fonts are not yet supported on non-Windows systems
+	(void)i;
+	SDL_LogWarn(SDL_LOG_CATEGORY_SYSTEM, "TTF loading unsupported on non-Windows systems\n");
 #endif
 	return 0;
 }
@@ -91,3 +94,5 @@ free_string(AmphoraMessage **amsg) {
 	free(*amsg);
 	*amsg = NULL;
 }
+
+#endif

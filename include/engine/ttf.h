@@ -8,6 +8,8 @@
 
 #include "config.h"
 
+#ifdef ENABLE_FONTS
+
 typedef struct amphora_message_t AmphoraMessage;
 
 enum fonts_e {
@@ -23,4 +25,5 @@ AmphoraMessage *create_string(AmphoraMessage **amsg, enum fonts_e font_name, int
 void render_string(const AmphoraMessage *msg);
 void free_string(AmphoraMessage **amsg);
 
+#endif
 #endif /* AMPHORA_TTF_H */
