@@ -9,6 +9,7 @@
 
 /* File-scored variables */
 static bool quit_requested = false;
+static SDL_Renderer *renderer;
 
 int
 main(int argc, char **argv) {
@@ -17,7 +18,6 @@ main(int argc, char **argv) {
 	int win_size_x, win_size_y;
 
 	SDL_Window *win;
-	SDL_Renderer *renderer;
 	SDL_Event e;
 	static union input_state_u key_actions;
 	static struct save_data_t save_data;
@@ -38,7 +38,11 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
 		return -1;
 	}
-	load_fonts();
+	if (ENABLE_FONTS && load_fonts() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
+		return -1;
+	}
 
 	win_size_x = WINDOW_X;
 	win_size_y = WINDOW_Y;
@@ -100,4 +104,9 @@ main(int argc, char **argv) {
 void
 quit_game(void) {
 	quit_requested = true;
+}
+
+SDL_Renderer *
+get_renderer(void) {
+	return renderer;
 }

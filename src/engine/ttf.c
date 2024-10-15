@@ -6,6 +6,11 @@
 
 #include "config.h"
 
+struct amphora_message_t {
+	SDL_Texture *texture;
+	SDL_Rect rectangle;
+};
+
 /* File-scoped variables */
 static char *font_names[] = {
 #define LOADFONT(name, path) #name,
@@ -20,7 +25,6 @@ load_fonts(void) {
 #ifdef WIN32
 	HRSRC ttf_info;
 	HGLOBAL ttf_resource;
-	DWORD ttf_size;
 	SDL_RWops *ttf_rw;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
@@ -34,12 +38,53 @@ load_fonts(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
 			return -1;
 		}
-		ttf_size = SizeofResource(NULL, ttf_resource);
-		ttf_rw = SDL_RWFromConstMem(ttf_resource, ttf_size);
+		ttf_rw = SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info));
 		fonts[i] = ttf_rw;
 	}
 #else
 #warning TTF Fonts are not yet supported on non-Windows systems
 #endif
 	return 0;
+}
+
+AmphoraMessage *
+create_string(AmphoraMessage **amsg, const char *font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
+	int i;
+	TTF_Font *font;
+	const SDL_Color text_color = { .r = color.r, .g = color.g, .b = color.b, .a = 0xff};
+	SDL_Surface *surface;
+
+	if (*amsg) return *amsg;
+
+	if (!((*amsg = malloc(sizeof(struct amphora_message_t))))) {
+		return NULL;
+	}
+
+	(*amsg)->rectangle.x = x;
+	(*amsg)->rectangle.y = y;
+
+	for (i = 0; i < FONTS_COUNT; i++) {
+		if (SDL_strcmp(font_name, font_names[i]) == 0) break;
+	}
+	if (i == FONTS_COUNT) i = 0;
+
+	font = TTF_OpenFontRW(fonts[i], 0, pt);
+	surface = TTF_RenderUTF8_Blended(font, text, text_color);
+	(*amsg)->texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
+	TTF_SizeUTF8(font, text, &(*amsg)->rectangle.w, &(*amsg)->rectangle.h);
+	TTF_CloseFont(font);
+	SDL_FreeSurface(surface);
+
+	return *amsg;
+}
+
+void
+render_string(const AmphoraMessage *msg) {
+	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &msg->rectangle);
+}
+
+void
+free_string(AmphoraMessage **amsg) {
+	free(*amsg);
+	*amsg = NULL;
 }

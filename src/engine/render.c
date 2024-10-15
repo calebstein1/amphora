@@ -109,6 +109,16 @@ set_camera(Position32 x, Position32 y) {
 	camera.y = y;
 }
 
+struct color_t
+get_black(void) {
+	return black;
+}
+
+struct color_t
+get_white(void) {
+	return white;
+}
+
 void
 set_black(Uint8 r, Uint8 g, Uint8 b) {
 	black = (struct color_t){ r, g, b };

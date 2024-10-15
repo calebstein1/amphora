@@ -44,6 +44,7 @@
 	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE)
 
 /* Load TTF fonts */
+#define ENABLE_FONTS true
 #define FONTS										\
 	/* LOADFONT(name, path) */							\
 	LOADFONT(Merriweather, "../content/font/Merriweather/Merriweather-Regular.ttf")	\

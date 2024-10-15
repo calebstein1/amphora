@@ -28,11 +28,11 @@ struct sprite_slot_t {
 	struct sprite_slot_t *next;
 };
 
-struct color_t {
+typedef struct color_t {
 	Uint8 r;
 	Uint8 g;
 	Uint8 b;
-};
+} AmphoraColor;
 
 typedef struct vector2_t {
 	Sint32 x;
@@ -54,6 +54,8 @@ Point get_game_window_size(void); /* Get the current window dimensions in subpix
 Vector2 get_real_window_size(void); /* Get the current window dimensions in real pixels */
 void set_window_size(Vector2 window_size); /* Set the current window dimensions */
 void set_camera(Position32 x, Position32 y); /* Set the location of the camera's top left point */
+struct color_t get_black(void); /* Gets the current black color */
+struct color_t get_white(void); /* Gets the current white color */
 void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
 void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
 void set_bg_black(void); /* Sets the background color to black */
