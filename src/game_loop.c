@@ -19,7 +19,7 @@ void
 game_init(void) {
 	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false, 10);
 	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
-	create_string(&my_message, "Roboto", 16, 24, 24, get_black(), "Hello, world!");
+	create_string(&my_message, Roboto, 16, 24, 24, get_black(), "Hello, world!");
 }
 
 void
@@ -56,7 +56,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_dat
 
 	if (frame == 600) {
 		free_string(&my_message);
-		create_string(&my_message, "Merriweather", 24, 24, 24, get_black(), "Woah it's been 10 seconds, let's change it up");
+		create_string(&my_message, Merriweather, 24, 24, 24, get_black(), "Woah it's been 10 seconds, let's change it up");
 	}
 
 	render_string(my_message);

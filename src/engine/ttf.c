@@ -12,11 +12,6 @@ struct amphora_message_t {
 };
 
 /* File-scoped variables */
-static char *font_names[] = {
-#define LOADFONT(name, path) #name,
-	FONTS
-#undef LOADFONT
-};
 static SDL_RWops *fonts[FONTS_COUNT];
 
 int
@@ -26,6 +21,11 @@ load_fonts(void) {
 	HRSRC ttf_info;
 	HGLOBAL ttf_resource;
 	SDL_RWops *ttf_rw;
+	const char *font_names[] = {
+#define LOADFONT(name, path) #name,
+		FONTS
+#undef LOADFONT
+	};
 
 	for (i = 0; i < FONTS_COUNT; i++) {
 		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
@@ -57,8 +57,7 @@ free_fonts(void) {
 }
 
 AmphoraMessage *
-create_string(AmphoraMessage **amsg, const char *font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
-	int i;
+create_string(AmphoraMessage **amsg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
 	TTF_Font *font;
 	const SDL_Color text_color = { .r = color.r, .g = color.g, .b = color.b, .a = 0xff};
 	SDL_Surface *surface;
@@ -72,12 +71,7 @@ create_string(AmphoraMessage **amsg, const char *font_name, const int pt, const 
 	(*amsg)->rectangle.x = x;
 	(*amsg)->rectangle.y = y;
 
-	for (i = 0; i < FONTS_COUNT; i++) {
-		if (SDL_strcmp(font_name, font_names[i]) == 0) break;
-	}
-	if (i == FONTS_COUNT) i = 0;
-
-	font = TTF_OpenFontRW(fonts[i], 0, pt);
+	font = TTF_OpenFontRW(fonts[font_name], 0, pt);
 	surface = TTF_RenderUTF8_Blended(font, text, text_color);
 	(*amsg)->texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
 	TTF_SizeUTF8(font, text, &(*amsg)->rectangle.w, &(*amsg)->rectangle.h);
