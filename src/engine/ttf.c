@@ -78,7 +78,7 @@ free_fonts(void) {
 }
 
 AmphoraMessage *
-create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text, const int n) {
+create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
 	if (*msg) return *msg;
 
 	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
@@ -88,7 +88,7 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 	(*msg)->font = font_name;
 	(*msg)->pt = pt;
 	(*msg)->len = strlen(text);
-	(*msg)->n = n;
+	(*msg)->n = 0;
 	(*msg)->color = color;
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;

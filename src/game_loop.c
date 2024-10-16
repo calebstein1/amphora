@@ -22,8 +22,8 @@ game_init(void) {
 
 	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false, 10);
 	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
-	create_string(&hello, Roboto, 16, 24, 24, get_black(), welcome_message, 0);
-	create_string(&timer, Merriweather, 32, get_real_window_size().x - 64, 24, get_black(), "0", 0);
+	create_string(&hello, Roboto, 16, 24, 24, get_black(), welcome_message);
+	create_string(&timer, Merriweather, 32, get_real_window_size().x - 64, 24, get_black(), "0");
 }
 
 void
