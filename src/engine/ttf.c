@@ -87,7 +87,7 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 
 	(*msg)->font = font_name;
 	(*msg)->pt = pt;
-	(*msg)->len = strlen(text);
+	(*msg)->len = SDL_strlen(text);
 	(*msg)->n = 0;
 	(*msg)->color = color;
 	(*msg)->rectangle.x = x;
@@ -106,6 +106,7 @@ get_string_length(const AmphoraMessage *msg) {
 
 AmphoraMessage *
 update_string_text(AmphoraMessage **msg, const char *text) {
+	(*msg)->len = SDL_strlen(text);
 	SDL_strlcpy((*msg)->text, text, MAX_STRING_LENGTH);
 	SDL_DestroyTexture((*msg)->texture);
 	(*msg)->texture = render_string_to_texture(*msg);
