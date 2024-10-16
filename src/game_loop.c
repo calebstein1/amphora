@@ -9,7 +9,8 @@
 /* Game globals */
 SpriteSlot *p_char = NULL;
 SpriteSlot *building = NULL;
-AmphoraMessage *my_message;
+AmphoraMessage *hello;
+AmphoraMessage *timer;
 
 int player_idle_frames[NUM_PLAYER_IDLE_FRAMES] = { 1, 3 };
 int player_idle_idx = 0;
@@ -17,9 +18,12 @@ bool walking = false;
 
 void
 game_init(void) {
+	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
+
 	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false, 10);
 	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
-	create_string(&my_message, Roboto, 16, 24, 24, get_black(), "Hello, world!");
+	create_string(&hello, Roboto, 16, 24, 24, get_black(), welcome_message, 0);
+	create_string(&timer, Merriweather, 32, get_real_window_size().x - 64, 24, get_black(), "0", 0);
 }
 
 void
@@ -27,6 +31,8 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static Point camera_location;
 	static Uint64 idle_anim = 0;
 	Uint8 p_movement_speed = 4;
+	static char timer_string[128] = "0";
+	static int hello_ticker = 0;
 
 	(void)save_data;
 
@@ -54,12 +60,17 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 		idle_anim = frame;
 	}
 
-	if (frame == 600) {
-		free_string(&my_message);
-		create_string(&my_message, Merriweather, 24, 24, 24, get_black(), "Woah it's been 10 seconds, let's change it up");
+	if (frame % 60 == 0) {
+		snprintf(timer_string, 128, "%d", SDL_atoi(timer_string) + 1);
+		update_string_text(&timer, timer_string);
 	}
 
-	render_string(my_message);
+	if (IS_EVEN(frame) && hello_ticker < get_string_length(hello)) {
+		update_string_n(&hello, ++hello_ticker);
+	}
+
+	render_string(hello);
+	render_string(timer);
 
 	camera_location = get_sprite_center(p_char);
 	camera_location.x -= (get_game_window_size().x / 2);
@@ -69,5 +80,5 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 
 void
 game_shutdown(void) {
-	free_string(&my_message);
+	free_string(&hello);
 }
