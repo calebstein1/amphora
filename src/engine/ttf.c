@@ -68,14 +68,14 @@ free_fonts(void) {
 }
 
 AmphoraMessage *
-create_string(AmphoraMessage **amsg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
+create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
 	TTF_Font *font;
 	const SDL_Color text_color = { .r = color.r, .g = color.g, .b = color.b, .a = 0xff};
 	SDL_Surface *surface;
 
-	if (*amsg) return *amsg;
+	if (*msg) return *msg;
 
-	if (!((*amsg = SDL_malloc(sizeof(struct amphora_message_t))))) {
+	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
 		return NULL;
 	}
 
@@ -85,16 +85,16 @@ create_string(AmphoraMessage **amsg, const enum fonts_e font_name, const int pt,
 		open_fonts[font_name] = (struct open_font_t){ .font = TTF_OpenFontRW(fonts[font_name], 0, pt), .pt = pt };
 	}
 
-	(*amsg)->rectangle.x = x;
-	(*amsg)->rectangle.y = y;
+	(*msg)->rectangle.x = x;
+	(*msg)->rectangle.y = y;
 
 	font = open_fonts[font_name].font;
 	surface = TTF_RenderUTF8_Blended(font, text, text_color);
-	(*amsg)->texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
-	TTF_SizeUTF8(font, text, &(*amsg)->rectangle.w, &(*amsg)->rectangle.h);
+	(*msg)->texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
+	TTF_SizeUTF8(font, text, &(*msg)->rectangle.w, &(*msg)->rectangle.h);
 	SDL_FreeSurface(surface);
 
-	return *amsg;
+	return *msg;
 }
 
 void
@@ -103,11 +103,12 @@ render_string(const AmphoraMessage *msg) {
 }
 
 void
-free_string(AmphoraMessage **amsg) {
-	if (!*amsg) return;
+free_string(AmphoraMessage **msg) {
+	if (!*msg) return;
 
-	SDL_free(*amsg);
-	*amsg = NULL;
+	SDL_DestroyTexture((*msg)->texture);
+	SDL_free(*msg);
+	*msg = NULL;
 }
 
 #endif

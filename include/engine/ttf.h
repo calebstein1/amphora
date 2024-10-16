@@ -21,9 +21,9 @@ enum fonts_e {
 
 int load_fonts(void);
 void free_fonts(void);
-AmphoraMessage *create_string(AmphoraMessage **amsg, enum fonts_e font_name, int pt, int x, int y, AmphoraColor color, const char *text);
+AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, AmphoraColor color, const char *text);
 void render_string(const AmphoraMessage *msg);
-void free_string(AmphoraMessage **amsg);
+void free_string(AmphoraMessage **msg);
 
 #endif
 #endif /* AMPHORA_TTF_H */
