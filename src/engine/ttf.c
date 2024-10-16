@@ -8,13 +8,20 @@
 
 #ifdef ENABLE_FONTS
 
+/* Private structs */
 struct amphora_message_t {
 	SDL_Texture *texture;
 	SDL_Rect rectangle;
 };
 
+struct open_font_t {
+	TTF_Font *font;
+	int pt;
+};
+
 /* File-scoped variables */
 static SDL_RWops *fonts[FONTS_COUNT];
+static struct open_font_t open_fonts[FONTS_COUNT];
 
 int
 load_fonts(void) {
@@ -56,6 +63,7 @@ free_fonts(void) {
 
 	for (i = 0; i < FONTS_COUNT; i++) {
 		SDL_RWclose(fonts[i]);
+		TTF_CloseFont(open_fonts[i].font);
 	}
 }
 
@@ -71,16 +79,20 @@ create_string(AmphoraMessage **amsg, const enum fonts_e font_name, const int pt,
 		return NULL;
 	}
 
+	if (open_fonts[font_name].pt != pt) {
+		TTF_CloseFont(open_fonts[font_name].font);
+		SDL_RWseek(fonts[font_name], 0, RW_SEEK_SET);
+		open_fonts[font_name] = (struct open_font_t){ .font = TTF_OpenFontRW(fonts[font_name], 0, pt), .pt = pt };
+	}
+
 	(*amsg)->rectangle.x = x;
 	(*amsg)->rectangle.y = y;
 
-	font = TTF_OpenFontRW(fonts[font_name], 0, pt);
+	font = open_fonts[font_name].font;
 	surface = TTF_RenderUTF8_Blended(font, text, text_color);
 	(*amsg)->texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
 	TTF_SizeUTF8(font, text, &(*amsg)->rectangle.w, &(*amsg)->rectangle.h);
-	TTF_CloseFont(font);
 	SDL_FreeSurface(surface);
-	SDL_RWseek(fonts[font_name], 0, RW_SEEK_SET);
 
 	return *amsg;
 }
@@ -92,6 +104,8 @@ render_string(const AmphoraMessage *msg) {
 
 void
 free_string(AmphoraMessage **amsg) {
+	if (!*amsg) return;
+
 	SDL_free(*amsg);
 	*amsg = NULL;
 }
