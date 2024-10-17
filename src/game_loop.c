@@ -32,7 +32,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static Uint64 idle_anim = 0;
 	Uint8 p_movement_speed = 4;
 	static char timer_string[128] = "0";
-	static int hello_ticker = 0;
+	static Uint8 hello_ticker = 0;
 
 	(void)save_data;
 

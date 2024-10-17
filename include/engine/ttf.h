@@ -24,7 +24,7 @@ void free_fonts(void);
 AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, AmphoraColor color, const char *text);
 size_t get_string_length(const AmphoraMessage *msg);
 AmphoraMessage *update_string_text(AmphoraMessage **msg, const char *text);
-AmphoraMessage *update_string_n(AmphoraMessage **msg, int n);
+AmphoraMessage *update_string_n(AmphoraMessage **msg, size_t n);
 void render_string(const AmphoraMessage *msg);
 void free_string(AmphoraMessage **msg);
 

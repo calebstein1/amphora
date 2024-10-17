@@ -16,7 +16,7 @@ struct amphora_message_t {
 	enum fonts_e font;
 	int pt;
 	size_t len;
-	int n;
+	size_t n;
 	AmphoraColor color;
 	char text[MAX_STRING_LENGTH];
 };
@@ -115,7 +115,7 @@ update_string_text(AmphoraMessage **msg, const char *text) {
 }
 
 AmphoraMessage *
-update_string_n(AmphoraMessage **msg, int n) {
+update_string_n(AmphoraMessage **msg, size_t n) {
 	if (n >= (*msg)->len) n = 0;
 	(*msg)->n = n;
 	SDL_DestroyTexture((*msg)->texture);
@@ -146,7 +146,7 @@ SDL_Texture *
 render_string_to_texture(AmphoraMessage *msg) {
 	enum fonts_e font_name = msg->font;
 	int pt = msg->pt;
-	int n = msg->n;
+	size_t n = msg->n;
 	const char *text = msg->text;
 	const SDL_Color text_color = { .r = msg->color.r, .g = msg->color.g, .b = msg->color.b, .a = 0xff };
 	TTF_Font *font = NULL;
