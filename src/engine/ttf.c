@@ -7,7 +7,7 @@
 #include "config.h"
 
 #ifdef ENABLE_FONTS
-#define MAX_STRING_LENGTH 1024
+#define OPEN_MESSAGES_BATCH_COUNT 8
 
 /* Private structs */
 struct amphora_message_t {
@@ -18,7 +18,8 @@ struct amphora_message_t {
 	size_t len;
 	size_t n;
 	AmphoraColor color;
-	char text[MAX_STRING_LENGTH];
+	char *text;
+	Uint32 idx;
 };
 
 struct open_font_t {
@@ -28,13 +29,17 @@ struct open_font_t {
 
 /* Prototypes for private functions */
 SDL_Texture *render_string_to_texture(AmphoraMessage *msg);
+void free_string(AmphoraMessage *msg);
 
 /* File-scoped variables */
 static SDL_RWops *fonts[FONTS_COUNT];
 static struct open_font_t open_fonts[FONTS_COUNT];
+static struct amphora_message_t **open_messages;
+static Uint32 open_message_count;
+static bool allow_leaks = false;
 
 int
-load_fonts(void) {
+init_fonts(void) {
 	int i;
 #ifdef WIN32
 	HRSRC ttf_info;
@@ -64,6 +69,13 @@ load_fonts(void) {
 	(void)i;
 	SDL_LogWarn(SDL_LOG_CATEGORY_SYSTEM, "TTF loading unsupported on non-Windows systems\n");
 #endif
+	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
+		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
+	} else {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize open messages tracker\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Memory allocation error", "Failed to initialize message tracker... Amphora will attempt to continue with memory leaks, but a crash is likely incoming ¯\\_(ツ)_/¯", 0);
+		allow_leaks = true;
+	}
 	return 0;
 }
 
@@ -79,9 +91,14 @@ free_fonts(void) {
 
 AmphoraMessage *
 create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
+	Uint32 i = 0;
+
 	if (*msg) return *msg;
 
 	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
+		return NULL;
+	}
+	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
 		return NULL;
 	}
 
@@ -92,9 +109,22 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 	(*msg)->color = color;
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
-	SDL_strlcpy((*msg)->text, text, MAX_STRING_LENGTH);
+	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
 
 	(*msg)->texture = render_string_to_texture(*msg);
+
+	if (allow_leaks) return *msg;
+
+	while (open_messages[i]) {
+		if (++i == open_message_count) {
+			open_message_count += OPEN_MESSAGES_BATCH_COUNT;
+			open_messages = SDL_realloc(open_messages, open_message_count * sizeof(struct amphora_message_t *));
+			SDL_memset(&open_messages[open_message_count - OPEN_MESSAGES_BATCH_COUNT], 0, OPEN_MESSAGES_BATCH_COUNT * sizeof(struct amphora_message_t *));
+			break;
+		}
+	}
+	open_messages[i] = *msg;
+	(*msg)->idx = i;
 
 	return *msg;
 }
@@ -107,7 +137,11 @@ get_string_length(const AmphoraMessage *msg) {
 AmphoraMessage *
 update_string_text(AmphoraMessage **msg, const char *text) {
 	(*msg)->len = SDL_strlen(text);
-	SDL_strlcpy((*msg)->text, text, MAX_STRING_LENGTH);
+	SDL_free((*msg)->text);
+	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
+		return NULL;
+	}
+	SDL_strlcpy((*msg)->text, text, (*msg)->len + 1);
 	SDL_DestroyTexture((*msg)->texture);
 	(*msg)->texture = render_string_to_texture(*msg);
 
@@ -130,12 +164,14 @@ render_string(const AmphoraMessage *msg) {
 }
 
 void
-free_string(AmphoraMessage **msg) {
-	if (!*msg) return;
+free_all_strings(void) {
+	Uint32 i;
 
-	SDL_DestroyTexture((*msg)->texture);
-	SDL_free(*msg);
-	*msg = NULL;
+	for (i = 0; i < open_message_count; i++) {
+		if (!open_messages[i]) continue;
+
+		free_string(open_messages[i]);
+	}
 }
 
 /*
@@ -155,7 +191,7 @@ render_string_to_texture(AmphoraMessage *msg) {
 	char *n_buff = NULL;
 
 	if (n) {
-		if ((n_buff = SDL_malloc(n))) {
+		if ((n_buff = SDL_malloc(n + 1))) {
 			SDL_strlcpy(n_buff, text, n);
 		} else {
 			SDL_LogWarn(SDL_LOG_CATEGORY_ERROR, "Failed to allocate buffer for partial string\n");
@@ -177,6 +213,16 @@ render_string_to_texture(AmphoraMessage *msg) {
 	if (n_buff) SDL_free(n_buff);
 
 	return texture;
+}
+
+void
+free_string(AmphoraMessage *msg) {
+	if (!msg) return;
+
+	open_messages[msg->idx] = NULL;
+	SDL_DestroyTexture(msg->texture);
+	SDL_free(msg->text);
+	SDL_free(msg);
 }
 
 #endif

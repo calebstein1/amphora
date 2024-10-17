@@ -39,7 +39,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 #ifdef ENABLE_FONTS
-	if (load_fonts() == -1) {
+	if (init_fonts() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
 		return -1;
@@ -97,6 +97,7 @@ main(int argc, char **argv) {
 	cleanup_render();
 #ifdef ENABLE_FONTS
 	free_fonts();
+	free_all_strings();
 #endif
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);

@@ -80,5 +80,4 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 
 void
 game_shutdown(void) {
-	free_string(&hello);
 }

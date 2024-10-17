@@ -19,14 +19,14 @@ enum fonts_e {
 	FONTS_COUNT
 };
 
-int load_fonts(void);
+int init_fonts(void);
 void free_fonts(void);
 AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, AmphoraColor color, const char *text);
 size_t get_string_length(const AmphoraMessage *msg);
 AmphoraMessage *update_string_text(AmphoraMessage **msg, const char *text);
 AmphoraMessage *update_string_n(AmphoraMessage **msg, size_t n);
 void render_string(const AmphoraMessage *msg);
-void free_string(AmphoraMessage **msg);
+void free_all_strings(void);
 
 #endif
 #endif /* AMPHORA_TTF_H */
