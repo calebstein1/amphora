@@ -50,7 +50,8 @@ int init_render(void); /* Run once to load spritesheet and palette data */
 void cleanup_render(void); /* Free allocated memory for spritesheet, palettes, and colors */
 Uint16 get_pixel_size(void); /* Get the current pixel size */
 void set_pixel_size(Uint16 size); /* Set the current pixel size */
-Point get_game_window_size(void); /* Get the current window dimensions in subpixel steps */
+Point get_game_window_size(void); /* Get the current window dimensions in scaled pixels */
+Point get_game_subpixel_window_size(void); /* Get the current window dimensions in subpixel steps */
 Vector2 get_real_window_size(void); /* Get the current window dimensions in real pixels */
 void set_window_size(Vector2 window_size); /* Set the current window dimensions */
 void set_camera(Position32 x, Position32 y); /* Set the location of the camera's top left point */

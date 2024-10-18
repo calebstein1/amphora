@@ -166,7 +166,14 @@ update_string_n(AmphoraMessage **msg, size_t n) {
 
 void
 render_string(const AmphoraMessage *msg) {
-	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &msg->rectangle);
+	const SDL_Rect pos_adj = {
+		.x = msg->rectangle.x > 0 ? msg->rectangle.x * get_pixel_size() : get_real_window_size().x - (msg->rectangle.x * -1 * get_pixel_size()),
+		.y = msg->rectangle.y > 0 ? msg->rectangle.y * get_pixel_size() : get_real_window_size().y - (msg->rectangle.y * -1 * get_pixel_size()),
+		.w = msg->rectangle.w,
+		.h = msg->rectangle.h
+	};
+
+	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &pos_adj);
 }
 
 void

@@ -90,6 +90,11 @@ set_pixel_size(const Uint16 size) {
 
 Point
 get_game_window_size(void) {
+	return (Point){ (render_dimensions.x / pixel_size), (render_dimensions.y / pixel_size) };
+}
+
+Point
+get_game_subpixel_window_size(void) {
 	return (Point){ (render_dimensions.x / pixel_size) << SUBPIXEL_SHIFT, (render_dimensions.y / pixel_size) << SUBPIXEL_SHIFT };
 }
 
