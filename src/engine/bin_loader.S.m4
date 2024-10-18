@@ -18,14 +18,18 @@ $1_size:
 
 #if defined(__APPLE__)
 _incbin(_spritesheet, SPRITESHEET_PATH)
+#ifdef ENABLE_FONTS
 #define LOADFONT(name, path) _incbin(_##name, path)
 	FONTS
 #undef LOADFONT
+#endif
 #else
 _incbin(spritesheet, SPRITESHEET_PATH)
+#ifdef ENABLE_FONTS
 #define LOADFONT(name, path) _incbin(name, path)
 	FONTS
 #undef LOADFONT
+#endif
 #endif
 
 #undef BIN_LOADER
