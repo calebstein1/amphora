@@ -2,12 +2,14 @@
 #include "engine/game_loop.h"
 #include "engine/input.h"
 #include "engine/render.h"
+#include "engine/ttf.h"
 #include "engine/util.h"
 
 #include "config.h"
 
 /* File-scored variables */
 static bool quit_requested = false;
+static SDL_Renderer *renderer;
 
 int
 main(int argc, char **argv) {
@@ -16,10 +18,9 @@ main(int argc, char **argv) {
 	int win_size_x, win_size_y;
 
 	SDL_Window *win;
-	SDL_Renderer *renderer;
 	SDL_Event e;
 	static union input_state_u key_actions;
-	static struct save_data_t save_data;
+	static SaveData save_data;
 	Vector2 init_window_size;
 
 	/* SDL requires these but we're not actually using them */
@@ -31,6 +32,19 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL", SDL_GetError(), 0);
 		return -1;
 	}
+
+	if (TTF_Init() < 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
+		return -1;
+	}
+#ifdef ENABLE_FONTS
+	if (init_fonts() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
+		return -1;
+	}
+#endif
 
 	win_size_x = WINDOW_X;
 	win_size_y = WINDOW_Y;
@@ -81,8 +95,13 @@ main(int argc, char **argv) {
 
 	game_shutdown();
 	cleanup_render();
+#ifdef ENABLE_FONTS
+	free_fonts();
+	free_all_strings();
+#endif
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(win);
+	TTF_Quit();
 	SDL_Quit();
 
 	return 0;
@@ -91,4 +110,9 @@ main(int argc, char **argv) {
 void
 quit_game(void) {
 	quit_requested = true;
+}
+
+SDL_Renderer *
+get_renderer(void) {
+	return renderer;
 }

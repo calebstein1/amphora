@@ -15,7 +15,7 @@
 
 typedef Sint32 Position32; /* A position in the game, each unit is equal to 1/16 of a pixel */
 
-struct sprite_slot_t {
+typedef struct sprite_slot_t {
 	Uint32 num; /* The sprite to draw from the spritesheet */
 	Sint16 x_size; /* The number of horizontal tiles in the sprite */
 	Sint16 y_size; /* The number of vertical tiles in the sprite */
@@ -26,13 +26,13 @@ struct sprite_slot_t {
 	bool display : 1; /* Whether the sprite should be drawn or not */
 	bool garbage : 1; /* Whether the garbage collector should free the allocated memory */
 	struct sprite_slot_t *next;
-};
+} SpriteSlot;
 
-struct color_t {
+typedef struct color_t {
 	Uint8 r;
 	Uint8 g;
 	Uint8 b;
-};
+} AmphoraColor;
 
 typedef struct vector2_t {
 	Sint32 x;
@@ -54,20 +54,22 @@ Point get_game_window_size(void); /* Get the current window dimensions in subpix
 Vector2 get_real_window_size(void); /* Get the current window dimensions in real pixels */
 void set_window_size(Vector2 window_size); /* Set the current window dimensions */
 void set_camera(Position32 x, Position32 y); /* Set the location of the camera's top left point */
+struct color_t get_black(void); /* Gets the current black color */
+struct color_t get_white(void); /* Gets the current white color */
 void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
 void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
 void set_bg_black(void); /* Sets the background color to black */
 void set_bg_white(void); /* Sets the background color to white */
 void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
-Point get_sprite_center(const struct sprite_slot_t *spr);
+Point get_sprite_center(const SpriteSlot *spr);
 void draw_all_sprites_and_gc(SDL_Renderer *renderer); /* Draw all active sprite slots */
 /* Reserve a sprite slot and initialize it with default values */
-struct sprite_slot_t *init_sprite_slot(struct sprite_slot_t **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order);
+SpriteSlot *init_sprite_slot(SpriteSlot **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order);
 /* Display the supplied sprite_slot */
-void show_sprite(struct sprite_slot_t *spr);
+void show_sprite(SpriteSlot *spr);
 /* Hide a sprite slot without releasing it */
-void hide_sprite(struct sprite_slot_t *spr);
+void hide_sprite(SpriteSlot *spr);
 /* Release a sprite slot for reuse */
-void *release_sprite_slot(struct sprite_slot_t **spr);
+void *release_sprite_slot(SpriteSlot **spr);
 
 #endif /* UNTITLED_PLATFORMER_RENDER_H */

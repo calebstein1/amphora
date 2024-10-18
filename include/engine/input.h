@@ -18,7 +18,7 @@ union input_state_u {
 
 enum input_actions {
 #define KMAP(action, ...) action,
-    	ACTIONS
+	ACTIONS
 #undef KMAP
 	ACTION_COUNT
 };
