@@ -192,8 +192,8 @@ render_string(const AmphoraMessage *msg) {
 		};
 	} else {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x * pixel_size : get_real_window_size().x - (msg->rectangle.x * -1 * pixel_size),
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y * pixel_size : get_real_window_size().y - (msg->rectangle.y * -1 * pixel_size),
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x * pixel_size : get_real_window_size().x - (msg->rectangle.x * -1 * pixel_size) - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y * pixel_size : get_real_window_size().y - (msg->rectangle.y * -1 * pixel_size) - msg->rectangle.h,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
