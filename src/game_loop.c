@@ -11,6 +11,7 @@ SpriteSlot *p_char = NULL;
 SpriteSlot *building = NULL;
 AmphoraMessage *hello;
 AmphoraMessage *timer;
+AmphoraMessage *stationary;
 
 int player_idle_frames[NUM_PLAYER_IDLE_FRAMES] = { 1, 3 };
 int player_idle_idx = 0;
@@ -19,11 +20,13 @@ bool walking = false;
 void
 game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
+	const char *stationary_message = "I'm going to be fixed right here above the tower!";
 
 	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false, 10);
 	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
 	create_string(&hello, Roboto, 16, 4, 4, welcome_message);
 	create_string(&timer, Merriweather, 32, -16, 4, "0");
+	create_stationary_string(&stationary, Merriweather, 12, 76, 132, stationary_message);
 }
 
 void
@@ -71,6 +74,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 
 	render_string(hello);
 	render_string(timer);
+	render_string(stationary);
 
 	camera_location = get_sprite_center(p_char);
 	camera_location.x -= (get_game_subpixel_window_size().x / 2);

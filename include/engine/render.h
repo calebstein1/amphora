@@ -54,6 +54,7 @@ Point get_game_window_size(void); /* Get the current window dimensions in scaled
 Point get_game_subpixel_window_size(void); /* Get the current window dimensions in subpixel steps */
 Vector2 get_real_window_size(void); /* Get the current window dimensions in real pixels */
 void set_window_size(Vector2 window_size); /* Set the current window dimensions */
+Point get_camera(void); /* Get the current upper-left point of the camera */
 void set_camera(Position32 x, Position32 y); /* Set the location of the camera's top left point */
 struct color_t get_black(void); /* Gets the current black color */
 struct color_t get_white(void); /* Gets the current white color */

@@ -108,6 +108,11 @@ set_window_size(Vector2 window_size) {
 	render_dimensions = window_size;
 }
 
+Point
+get_camera(void) {
+	return camera;
+}
+
 void
 set_camera(Position32 x, Position32 y) {
 	camera.x = x;

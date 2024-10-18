@@ -20,6 +20,7 @@ struct amphora_message_t {
 	AmphoraColor color;
 	char *text;
 	Uint32 idx;
+	bool stationary : 1;
 };
 
 struct open_font_t {
@@ -113,6 +114,7 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 	(*msg)->color = BG_COLOR_MODE ? get_white() : get_black();
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
+	(*msg)->stationary = false;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
 #undef black
 #undef white
@@ -131,6 +133,14 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 	}
 	open_messages[i] = *msg;
 	(*msg)->idx = i;
+
+	return *msg;
+}
+
+AmphoraMessage *
+create_stationary_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const char *text) {
+	*msg = create_string(msg, font_name, pt, x, y, text);
+	(*msg)->stationary = true;
 
 	return *msg;
 }
@@ -166,12 +176,25 @@ update_string_n(AmphoraMessage **msg, size_t n) {
 
 void
 render_string(const AmphoraMessage *msg) {
-	const SDL_Rect pos_adj = {
-		.x = msg->rectangle.x > 0 ? msg->rectangle.x * get_pixel_size() : get_real_window_size().x - (msg->rectangle.x * -1 * get_pixel_size()),
-		.y = msg->rectangle.y > 0 ? msg->rectangle.y * get_pixel_size() : get_real_window_size().y - (msg->rectangle.y * -1 * get_pixel_size()),
-		.w = msg->rectangle.w,
-		.h = msg->rectangle.h
-	};
+	SDL_Rect pos_adj;
+	const Point camera = get_camera();
+	const Uint16 pixel_size = get_pixel_size();
+
+	if (msg->stationary) {
+		pos_adj = (SDL_Rect){
+			.x = msg->rectangle.x * pixel_size - DECODE_POSITION32(camera.x),
+			.y = msg->rectangle.y * pixel_size - DECODE_POSITION32(camera.y),
+			.w = msg->rectangle.w,
+			.h = msg->rectangle.h
+		};
+	} else {
+		pos_adj = (SDL_Rect){
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x * pixel_size : get_real_window_size().x - (msg->rectangle.x * -1 * pixel_size),
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y * pixel_size : get_real_window_size().y - (msg->rectangle.y * -1 * pixel_size),
+			.w = msg->rectangle.w,
+			.h = msg->rectangle.h
+		};
+	}
 
 	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &pos_adj);
 }
