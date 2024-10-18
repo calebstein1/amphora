@@ -67,8 +67,11 @@ init_fonts(void) {
 		fonts[i] = ttf_rw;
 	}
 #else
+#define LOADFONT(name, path) extern char name[]; extern int name##_size;
+	FONTS
+#undef LOADFONT
 	SDL_RWops **fonts_ptr = fonts;
-#define LOADFONT(name, path) extern char name[]; extern int name##_size; *fonts_ptr = SDL_RWFromConstMem(name, name##_size); fonts_ptr++;
+#define LOADFONT(name, path) *fonts_ptr = SDL_RWFromConstMem(name, name##_size); fonts_ptr++;
 	FONTS
 #undef LOADFONT
 #endif
