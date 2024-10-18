@@ -46,32 +46,51 @@ typedef struct point_t {
 
 typedef Point Camera;
 
-int init_render(void); /* Run once to load spritesheet and palette data */
-void cleanup_render(void); /* Free allocated memory for spritesheet, palettes, and colors */
-Uint16 get_pixel_size(void); /* Get the current pixel size */
-void set_pixel_size(Uint16 size); /* Set the current pixel size */
-Point get_game_window_size(void); /* Get the current window dimensions in scaled pixels */
-Point get_game_subpixel_window_size(void); /* Get the current window dimensions in subpixel steps */
-Vector2 get_real_window_size(void); /* Get the current window dimensions in real pixels */
-void set_window_size(Vector2 window_size); /* Set the current window dimensions */
-Point get_camera(void); /* Get the current upper-left point of the camera */
-void set_camera(Position32 x, Position32 y); /* Set the location of the camera's top left point */
-struct color_t get_black(void); /* Gets the current black color */
-struct color_t get_white(void); /* Gets the current white color */
-void set_black(Uint8 r, Uint8 g, Uint8 b); /* Sets the black color */
-void set_white(Uint8 r, Uint8 g, Uint8 b); /* Sets the white color */
-void set_bg_black(void); /* Sets the background color to black */
-void set_bg_white(void); /* Sets the background color to white */
-void clear_bg(SDL_Renderer *renderer); /* Clear the screen and fill with the background color */
+/* One-time tasks to initialize the renderer */
+int init_render(void);
+/* Frees resources allocated for the renderer in anticipation of exit */
+void cleanup_render(void);
+/* Get the current pixel size */
+Uint16 get_pixel_size(void);
+/* Set the current pixel size */
+void set_pixel_size(Uint16 size);
+/* Get the current window dimensions in scaled pixels */
+Point get_game_window_size(void);
+/* Get the current window dimensions in subpixel steps */
+Point get_game_subpixel_window_size(void);
+/* Get the current window dimensions in real pixels */
+Vector2 get_real_window_size(void);
+/* Set the current window dimensions */
+void set_window_size(Vector2 window_size);
+/* Get the current upper-left point of the camera */
+Point get_camera(void);
+/* Set the location of the camera's top left point */
+void set_camera(Position32 x, Position32 y);
+/* Gets the current black color */
+struct color_t get_black(void);
+/* Gets the current white color */
+struct color_t get_white(void);
+/* Sets the black color */
+void set_black(Uint8 r, Uint8 g, Uint8 b);
+/* Sets the white color */
+void set_white(Uint8 r, Uint8 g, Uint8 b);
+/* Sets the background color to black */
+void set_bg_black(void);
+/* Sets the background color to white */
+void set_bg_white(void);
+/* Clear the screen and fill with the background color */
+void clear_bg(SDL_Renderer *renderer);
+/* Gets the scaled pixel position of the center of a sprite */
 Point get_sprite_center(const SpriteSlot *spr);
-void draw_all_sprites_and_gc(SDL_Renderer *renderer); /* Draw all active sprite slots */
-/* Reserve a sprite slot and initialize it with default values */
+/* Draw all active sprite slots and clean up freed sprites, called once per frame automatically */
+void draw_all_sprites_and_gc(SDL_Renderer *renderer);
+/* Allocate a sprite slot and initialize it with the supplied values */
 SpriteSlot *init_sprite_slot(SpriteSlot **spr, unsigned int num, short int x_size, short int y_size, int x, int y, bool flip, int order);
-/* Display the supplied sprite_slot */
+/* Show the supplied sprite_slot if hidden */
 void show_sprite(SpriteSlot *spr);
-/* Hide a sprite slot without releasing it */
+/* Hide a sprite without free it */
 void hide_sprite(SpriteSlot *spr);
-/* Release a sprite slot for reuse */
+/* Free a sprite slot */
 void *release_sprite_slot(SpriteSlot **spr);
 
 #endif /* UNTITLED_PLATFORMER_RENDER_H */
