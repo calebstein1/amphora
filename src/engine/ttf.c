@@ -92,7 +92,7 @@ free_fonts(void) {
 }
 
 AmphoraMessage *
-create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const AmphoraColor color, const char *text) {
+create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const char *text) {
 	Uint32 i = 0;
 
 	if (*msg) return *msg;
@@ -104,14 +104,18 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 		return NULL;
 	}
 
+#define black true
+#define white false
 	(*msg)->font = font_name;
 	(*msg)->pt = pt;
 	(*msg)->len = SDL_strlen(text);
 	(*msg)->n = 0;
-	(*msg)->color = color;
+	(*msg)->color = BG_COLOR_MODE ? get_white() : get_black();
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
+#undef black
+#undef white
 
 	(*msg)->texture = render_string_to_texture(*msg);
 
