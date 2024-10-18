@@ -180,20 +180,19 @@ update_string_n(AmphoraMessage **msg, size_t n) {
 void
 render_string(const AmphoraMessage *msg) {
 	SDL_Rect pos_adj;
-	const Point camera = get_camera();
-	const Uint16 pixel_size = get_pixel_size();
+	const Vector2 camera = get_camera();
 
 	if (msg->stationary) {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x * pixel_size - DECODE_POSITION32(camera.x),
-			.y = msg->rectangle.y * pixel_size - DECODE_POSITION32(camera.y),
+			.x = msg->rectangle.x  - camera.x,
+			.y = msg->rectangle.y  - camera.y,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
 	} else {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x * pixel_size : get_real_window_size().x - (msg->rectangle.x * -1 * pixel_size) - msg->rectangle.w,
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y * pixel_size : get_real_window_size().y - (msg->rectangle.y * -1 * pixel_size) - msg->rectangle.h,
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};

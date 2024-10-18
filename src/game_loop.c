@@ -22,18 +22,18 @@ game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *stationary_message = "I'm going to be fixed right here above the tower!";
 
-	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 24, 196, false, 10);
+	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 12, 120, false, 10);
 	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
-	create_string(&hello, Roboto, 16, 4, 4, welcome_message);
-	create_string(&timer, Merriweather, 32, -4, 4, "0");
-	create_stationary_string(&stationary, Merriweather, 12, 76, 132, stationary_message);
+	create_string(&hello, Roboto, 32, 16, 16, welcome_message);
+	create_string(&timer, Merriweather, 32, -16, 16, "0");
+	create_stationary_string(&stationary, Merriweather, 16, 76, 132, stationary_message);
 }
 
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_data) {
-	static Point camera_location;
+	static Vector2 camera_location;
 	static Uint64 idle_anim = 0;
-	Uint8 p_movement_speed = 4;
+	Sint32 p_movement_speed = 1;
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
 
@@ -41,7 +41,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 
 	walking = false;
 	if (key_actions->dash) {
-		p_movement_speed = 8;
+		p_movement_speed = 2;
 	}
 	if (key_actions->left) {
 		p_char->flip = true;
@@ -77,7 +77,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	render_string(stationary);
 
 	camera_location = get_sprite_center(p_char);
-	camera_location.x -= (get_game_subpixel_window_size().x / 2);
+	camera_location.x -= (get_resolution().x / 2);
 	camera_location.y = 0;
 	set_camera(camera_location.x, camera_location.y);
 }

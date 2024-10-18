@@ -15,13 +15,11 @@ int
 main(int argc, char **argv) {
 	Uint64 frame_start, frame_end, frame_count = 0;
 	Uint32 frame_time;
-	int win_size_x, win_size_y;
 
 	SDL_Window *win;
 	SDL_Event e;
 	static union input_state_u key_actions;
 	static SaveData save_data;
-	Vector2 init_window_size;
 
 	/* SDL requires these but we're not actually using them */
 	(void)argc;
@@ -46,13 +44,8 @@ main(int argc, char **argv) {
 	}
 #endif
 
-	win_size_x = WINDOW_X;
-	win_size_y = WINDOW_Y;
-	set_pixel_size(RESOLUTION_MODE ?
-		(Uint16)MAX_OF(win_size_x, win_size_y) / RESOLUTION :
-		(Uint16)MIN_OF(win_size_x, win_size_y) / RESOLUTION);
 	if (!((win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-	                              win_size_x, win_size_y, WINDOW_MODE)))) {
+	                              WINDOW_X, WINDOW_Y, WINDOW_MODE)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
@@ -62,9 +55,7 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
 	}
-
-	SDL_GetRendererOutputSize(renderer, &init_window_size.x, &init_window_size.y);
-	set_window_size(init_window_size);
+	set_resolution(0);
 
 	if (init_render() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init render data\n");
@@ -80,7 +71,7 @@ main(int argc, char **argv) {
 		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		if (event_loop(&e, &key_actions, &win_size_x, &win_size_y, renderer) == SDL_QUIT) quit_requested = true;
+		if (event_loop(&e, &key_actions) == SDL_QUIT) quit_requested = true;
 		clear_bg(renderer);
 		game_loop(frame_count, &key_actions.state, &save_data);
 		draw_all_sprites_and_gc(renderer);

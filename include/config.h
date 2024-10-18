@@ -16,12 +16,9 @@
  */
 #define WINDOW_MODE fullscreen
 
-/*
- * shorter: the smaller window dimension will contain RESOLUTION pixels
- * longer: the larger window dimension will contain RESOLUTION pixels
- */
-#define RESOLUTION_MODE shorter
-#define RESOLUTION 256
+#define SUPPORTED_RESOLUTIONS		\
+	RES(1280, 720)			\
+	RES(1920, 1080)
 
 /* Colors used for drawing in 24-bit rgb format */
 #define BLACK { 0x1c, 0x0f, 0x00 }
