@@ -5,12 +5,12 @@ add_executable(amphora game_loop.c)
 if(WIN32)
 	target_sources(amphora PRIVATE engine/bin_loader.rc)
 else()
-	set(BIN_LOADER_SRC ${CMAKE_SOURCE_DIR}/src/engine/bin_loader.S)
-	set(BIN_LOADER_INTER ${CMAKE_BINARY_DIR}/src/engine/bin_loader_pre.S.m4)
-	set(BIN_LOADER_FINAL ${CMAKE_BINARY_DIR}/src/engine/bin_loader_final.S)
+	set(BIN_LOADER_SRC ${CMAKE_SOURCE_DIR}/src/engine/bin_loader.S.m4)
+	set(BIN_LOADER_INTER ${CMAKE_BINARY_DIR}/src/engine/bin_loader.prepro.S.m4)
+	set(BIN_LOADER_FINAL ${CMAKE_BINARY_DIR}/src/engine/bin_loader.S)
 	add_custom_command(
 		OUTPUT ${BIN_LOADER_INTER}
-		COMMAND ${CMAKE_C_COMPILER} -I${CMAKE_SOURCE_DIR}/include -E ${BIN_LOADER_SRC} -o ${BIN_LOADER_INTER}
+		COMMAND ${CMAKE_C_COMPILER} -xc -Wno-invalid-pp-token -I${CMAKE_SOURCE_DIR}/include -E ${BIN_LOADER_SRC} -o ${BIN_LOADER_INTER}
 		DEPENDS ${BIN_LOADER_SRC}
 	)
 	add_custom_command(
