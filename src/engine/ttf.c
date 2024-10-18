@@ -40,11 +40,11 @@ static bool allow_leaks = false;
 
 int
 init_fonts(void) {
-	int i;
 #ifdef WIN32
 	HRSRC ttf_info;
 	HGLOBAL ttf_resource;
 	SDL_RWops *ttf_rw;
+	int i;
 	const char *font_names[] = {
 #define LOADFONT(name, path) #name,
 		FONTS
@@ -66,8 +66,10 @@ init_fonts(void) {
 		fonts[i] = ttf_rw;
 	}
 #else
-	(void)i;
-	SDL_LogWarn(SDL_LOG_CATEGORY_SYSTEM, "TTF loading unsupported on non-Windows systems\n");
+	SDL_RWops **fonts_ptr = fonts;
+#define LOADFONT(name, path) extern char name[]; extern int name##_size; *fonts_ptr = SDL_RWFromConstMem(name, name##_size); fonts_ptr++;
+	FONTS
+#undef LOADFONT
 #endif
 	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
 		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
