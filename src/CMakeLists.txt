@@ -10,7 +10,7 @@ else()
 	set(BIN_LOADER_FINAL ${CMAKE_BINARY_DIR}/src/engine/bin_loader.S)
 	add_custom_command(
 		OUTPUT ${BIN_LOADER_INTER}
-		COMMAND ${CMAKE_C_COMPILER} -xc -Wno-invalid-pp-token -I${CMAKE_SOURCE_DIR}/include -E ${BIN_LOADER_SRC} -o ${BIN_LOADER_INTER}
+		COMMAND ${CMAKE_C_COMPILER} -xc -I${CMAKE_SOURCE_DIR}/include -E ${BIN_LOADER_SRC} -o ${BIN_LOADER_INTER}
 		DEPENDS ${BIN_LOADER_SRC}
 	)
 	add_custom_command(
