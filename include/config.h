@@ -16,17 +16,6 @@
  */
 #define WINDOW_MODE fullscreen
 
-#define SUPPORTED_RESOLUTIONS		\
-	RES(1280, 720)			\
-	RES(1920, 1080)
-
-/* Colors used for drawing in 24-bit rgb format */
-#define BLACK { 0x1c, 0x0f, 0x00 }
-#define WHITE { 0xfc, 0xd5, 0xb3 }
-
-/* Set whether the background color should be black or white */
-#define BG_COLOR_MODE white
-
 /* Content paths */
 #define SPRITESHEET_PATH "../content/img/sprites.asht"
 

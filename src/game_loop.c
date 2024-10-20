@@ -21,12 +21,13 @@ void
 game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *stationary_message = "I'm going to be fixed right here above the tower!";
+	SDL_Color font_color = { 0, 0, 0, 0xff };
 
 	init_sprite_slot(&p_char, player_idle_frames[player_idle_idx], 2, 4, 12, 120, false, 10);
 	init_sprite_slot(&building, 12, 4, 8, 96, 148, false, -1);
-	create_string(&hello, Roboto, 32, 16, 16, welcome_message);
-	create_string(&timer, Merriweather, 32, -16, 16, "0");
-	create_stationary_string(&stationary, Merriweather, 16, 76, 132, stationary_message);
+	create_string(&hello, Roboto, 32, 16, 16, font_color, welcome_message);
+	create_string(&timer, Merriweather, 32, -16, 16, font_color, "0");
+	create_stationary_string(&stationary, Merriweather, 16, 76, 132, font_color, stationary_message);
 }
 
 void

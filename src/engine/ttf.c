@@ -17,7 +17,7 @@ struct amphora_message_t {
 	int pt;
 	size_t len;
 	size_t n;
-	AmphoraColor color;
+	SDL_Color color;
 	char *text;
 	Uint32 idx;
 	bool stationary : 1;
@@ -96,7 +96,7 @@ free_fonts(void) {
 }
 
 AmphoraMessage *
-create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const char *text) {
+create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
 	Uint32 i = 0;
 
 	if (*msg) return *msg;
@@ -108,19 +108,15 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 		return NULL;
 	}
 
-#define black true
-#define white false
 	(*msg)->font = font_name;
 	(*msg)->pt = pt;
 	(*msg)->len = SDL_strlen(text);
 	(*msg)->n = 0;
-	(*msg)->color = BG_COLOR_MODE ? get_white() : get_black();
+	(*msg)->color = color;
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
 	(*msg)->stationary = false;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
-#undef black
-#undef white
 
 	(*msg)->texture = render_string_to_texture(*msg);
 
@@ -141,8 +137,8 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 }
 
 AmphoraMessage *
-create_stationary_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const char *text) {
-	*msg = create_string(msg, font_name, pt, x, y, text);
+create_stationary_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
+	*msg = create_string(msg, font_name, pt, x, y, color, text);
 	(*msg)->stationary = true;
 
 	return *msg;
@@ -222,7 +218,7 @@ render_string_to_texture(AmphoraMessage *msg) {
 	int pt = msg->pt;
 	size_t n = msg->n;
 	const char *text = msg->text;
-	const SDL_Color text_color = { .r = msg->color.r, .g = msg->color.g, .b = msg->color.b, .a = 0xff };
+	const SDL_Color text_color = msg->color;
 	TTF_Font *font = NULL;
 	SDL_Surface *surface = NULL;
 	SDL_Texture *texture = NULL;

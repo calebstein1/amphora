@@ -24,9 +24,9 @@ int init_fonts(void);
 /* Close all fonts in preperation for exit */
 void free_fonts(void);
 /* Create a string that will move with the camera, negative x and y values start from the right and bottom edges of the screen */
-AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, const char *text);
+AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, SDL_Color color, const char *text);
 /* Create a string that is fixed to an absolute coordinate */
-AmphoraMessage *create_stationary_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, const char *text);
+AmphoraMessage *create_stationary_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, SDL_Color color, const char *text);
 /* Get the number of characters in a message */
 size_t get_string_length(const AmphoraMessage *msg);
 /* Update the text in a string */

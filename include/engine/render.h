@@ -22,12 +22,6 @@ typedef struct sprite_slot_t {
 	struct sprite_slot_t *next;
 } SpriteSlot;
 
-typedef struct color_t {
-	Uint8 r;
-	Uint8 g;
-	Uint8 b;
-} AmphoraColor;
-
 typedef struct vector2_t {
     Sint32 x;
     Sint32 y;
@@ -42,23 +36,15 @@ void cleanup_render(void);
 /* Get the resolution */
 Vector2 get_resolution(void);
 /* Set the resolution */
-void set_resolution(Uint32 res);
+void set_resolution(Sint32 mode);
 /* Get the current upper-left point of the camera */
 Vector2 get_camera(void);
 /* Set the location of the camera's top left point */
 void set_camera(Sint32 x, Sint32 y);
-/* Gets the current black color */
-struct color_t get_black(void);
-/* Gets the current white color */
-struct color_t get_white(void);
-/* Sets the black color */
-void set_black(Uint8 r, Uint8 g, Uint8 b);
-/* Sets the white color */
-void set_white(Uint8 r, Uint8 g, Uint8 b);
-/* Sets the background color to black */
-void set_bg_black(void);
-/* Sets the background color to white */
-void set_bg_white(void);
+/* Gets the current background color */
+SDL_Color get_bg(void);
+/* Sets the background color */
+void set_bg(SDL_Color color);
 /* Clear the screen and fill with the background color */
 void clear_bg(SDL_Renderer *renderer);
 /* Gets the pixel position of the center of a sprite */

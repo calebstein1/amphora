@@ -18,6 +18,7 @@
 
 #ifndef BIN_LOADER
 void quit_game(void); /* Request to quit the game */
+SDL_Window *get_window(void); /* Return the window */
 SDL_Renderer *get_renderer(void); /* Return the render context */
 #endif
 

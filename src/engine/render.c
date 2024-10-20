@@ -13,18 +13,14 @@ void draw_sprite(const SpriteSlot *spr, SDL_Renderer *renderer);
 static SpriteSlot *sprite_slot;
 static SpriteSlot *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
-static struct color_t black = BLACK;
-static struct color_t white = WHITE;
-static struct color_t bg;
+static SDL_Color black = { 0, 0, 0, 255 };
+static SDL_Color white = { 255, 255, 255, 255 };
+static SDL_Color bg = { 255, 255, 255, 255 };
 static Uint8 zones[] = { 0xff, 0xf0, 0xd9, 0xbd, 0xa1, 0x7f, 0x61, 0x43, 0x29, 0x11, 0x00 };
 static Uint16 pixel_size = 1;
 static Camera camera = { 0, 0 };
-static Vector2 resolution = {0, 0 };
-static Vector2 resolutions[] = {
-#define RES(x, y) { x, y },
-	SUPPORTED_RESOLUTIONS
-#undef RES
-};
+static SDL_DisplayMode *display_modes = NULL;
+static Sint32 display_index, num_display_modes;
 #ifdef WIN32
 static Uint8 *spritesheet;
 static DWORD spritesheet_size;
@@ -35,6 +31,7 @@ extern int spritesheet_size;
 
 int
 init_render(void) {
+	Sint32 i;
 #ifdef WIN32
 	HRSRC spritesheet_info = FindResourceA(NULL, "SpriteSheet", "AMPHORA_SPRITESHEET");
 	if (!spritesheet_info) {
@@ -51,9 +48,18 @@ init_render(void) {
 	spritesheet_size = SizeofResource(NULL, spritesheet_info);
 	spritesheet = (Uint8 *)spritesheet_resource;
 #endif
+	display_index = SDL_GetWindowDisplayIndex(get_window());
+	num_display_modes = SDL_GetNumDisplayModes(0);
+	if (((display_modes = SDL_malloc(num_display_modes * sizeof(SDL_DisplayMode))))) {
+		for (i = 0; i < num_display_modes; i++) {
+			SDL_GetDisplayMode(display_index, i, &display_modes[i]);
+		}
+	} else {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to allocate space for display modes\n");
+	}
 
 	if ((sprite_slot = SDL_malloc(sizeof(SpriteSlot))) == NULL) {
-		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite slots\n");
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize sprite slots\n");
 
 		return -1;
 	}
@@ -62,8 +68,6 @@ init_render(void) {
 	sprite_slot->garbage = false;
 	sprite_slot->next = NULL;
 	sprite_slots_head = sprite_slot;
-
-	bg = BG_COLOR_MODE;
 
 	return 0;
 }
@@ -81,17 +85,30 @@ cleanup_render(void) {
 		SDL_free(allocated_addrs[i]);
 	}
 	SDL_free(allocated_addrs);
+	if (display_modes) SDL_free(display_modes);
 }
 
 Vector2
 get_resolution(void) {
-	return resolution;
+	Sint32 rx, ry;
+	SDL_GL_GetDrawableSize(get_window(), &rx, &ry);
+	return (Vector2){ rx, ry };
 }
 
 void
-set_resolution(Uint32 res) {
-	resolution = resolutions[res];
-	SDL_RenderSetLogicalSize(get_renderer(), resolution.x, resolution.y);
+set_resolution(Sint32 mode) {
+#if WINDOW_MODE != fullscreen
+	return;
+#endif
+	int wx, wy;
+
+#ifndef DISABLE_UNDOCUMENTED_WARNING
+	SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "set_resolution is an experimental, undocumented, and unsuported function");
+#endif
+
+	SDL_GL_GetDrawableSize(get_window(), &wx, &wy);
+	SDL_SetWindowDisplayMode(get_window(), &display_modes[mode]);
+	SDL_RenderSetLogicalSize(get_renderer(), wx, wy);
 }
 
 Vector2
@@ -105,39 +122,19 @@ set_camera(Sint32 x, Sint32 y) {
 	camera.y = y;
 }
 
-struct color_t
-get_black(void) {
-	return black;
-}
-
-struct color_t
-get_white(void) {
-	return white;
+SDL_Color
+get_bg (void) {
+	return bg;
 }
 
 void
-set_black(Uint8 r, Uint8 g, Uint8 b) {
-	black = (struct color_t){ r, g, b };
-}
-
-void
-set_white(Uint8 r, Uint8 g, Uint8 b) {
-	white = (struct color_t){ r, g, b };
-}
-
-void
-set_bg_black(void) {
-	bg = black;
-}
-
-void
-set_bg_white(void) {
-	bg = white;
+set_bg(SDL_Color color) {
+	bg = color;
 }
 
 void
 clear_bg(SDL_Renderer *renderer) {
-	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, 0xff);
+	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, bg.a);
 	SDL_RenderClear(renderer);
 }
 

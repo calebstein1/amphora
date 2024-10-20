@@ -10,13 +10,13 @@
 /* File-scored variables */
 static bool quit_requested = false;
 static SDL_Renderer *renderer;
+static SDL_Window *window;
 
 int
 main(int argc, char **argv) {
 	Uint64 frame_start, frame_end, frame_count = 0;
 	Uint32 frame_time;
 
-	SDL_Window *win;
 	SDL_Event e;
 	static union input_state_u key_actions;
 	static SaveData save_data;
@@ -31,12 +31,12 @@ main(int argc, char **argv) {
 		return -1;
 	}
 
+#ifdef ENABLE_FONTS
 	if (TTF_Init() < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
 		return -1;
 	}
-#ifdef ENABLE_FONTS
 	if (init_fonts() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
@@ -44,22 +44,20 @@ main(int argc, char **argv) {
 	}
 #endif
 
-	if (!((win = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-	                              WINDOW_X, WINDOW_Y, WINDOW_MODE)))) {
+	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+					 WINDOW_X, WINDOW_Y, WINDOW_MODE | SDL_WINDOW_ALLOW_HIGHDPI)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
 	}
-	if (!((renderer = SDL_CreateRenderer(win, 1, 0)))) {
+	if (!((renderer = SDL_CreateRenderer(window, -1, 0)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
 	}
-	set_resolution(0);
-
 	if (init_render() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init render data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init render data", "Failed to initialize sprite slots", 0);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init render data", "Failed to initialize render data", 0);
 		return -1;
 	}
 
@@ -91,7 +89,7 @@ main(int argc, char **argv) {
 	free_all_strings();
 #endif
 	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(win);
+	SDL_DestroyWindow(window);
 	TTF_Quit();
 	SDL_Quit();
 
@@ -101,6 +99,11 @@ main(int argc, char **argv) {
 void
 quit_game(void) {
 	quit_requested = true;
+}
+
+SDL_Window *
+get_window(void) {
+	return window;
 }
 
 SDL_Renderer *
