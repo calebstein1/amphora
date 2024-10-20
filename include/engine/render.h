@@ -6,6 +6,7 @@
 #define SPR_SIDE 8
 
 #include "SDL.h"
+#include "SDL_image.h"
 
 #include "engine/util.h"
 

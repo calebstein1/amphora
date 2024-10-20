@@ -29,6 +29,13 @@
 	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT)	\
 	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE)
 
+/* Load image resources */
+#define IMAGES\
+	/* LOADIMG(name, path) */				\
+	LOADIMG(Character, "../content/img/character.png")	\
+	LOADIMG(Objects, "../content/img/objects.png")		\
+	LOADIMG(Overworld, "../content/img/overworld.png")
+
 /* Load TTF fonts */
 #define ENABLE_FONTS
 #define FONTS										\

@@ -2,6 +2,9 @@
 #include "config.h"
 
 SpriteSheet AMPHORA_SPRITESHEET SPRITESHEET_PATH
+#define LOADIMG(name, path) name PNG_IMG path
+IMAGES
+#undef LOADIMG
 #ifdef ENABLE_FONTS
 #define LOADFONT(name, path) name TTF_FONT path
 FONTS
