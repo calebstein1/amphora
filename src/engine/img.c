@@ -25,7 +25,7 @@ get_sprite_center(const AmphoraImage *spr) {
 }
 
 AmphoraImage *
-init_sprite_slot(AmphoraImage **spr, const ImageName name, Sint32 x, Sint32 y, bool flip, Sint32 order) {
+init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const Sint32 y, const bool flip, const Sint32 order) {
 	AmphoraImage *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
@@ -68,7 +68,7 @@ init_sprite_slot(AmphoraImage **spr, const ImageName name, Sint32 x, Sint32 y, b
 }
 
 void
-add_frameset(AmphoraImage *spr, const char *name, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint16 num_frames, Uint16 delay) {
+add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const Uint16 num_frames, const Uint16 delay) {
 	/* TODO: Cascade error cases and free */
 	if (spr->framesets) {
 		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
@@ -90,8 +90,8 @@ add_frameset(AmphoraImage *spr, const char *name, Sint32 x, Sint32 y, Sint32 w, 
 		}
 	}
 	spr->framesets[spr->num_framesets] = (struct frameset_t){
-		.sx = x,
-		.sy = y,
+		.sx = sx,
+		.sy = sy,
 		.w = w,
 		.h = h,
 		.num_frames = num_frames,
