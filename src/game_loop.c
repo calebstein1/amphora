@@ -10,12 +10,15 @@ AmphoraImage *player;
 AmphoraMessage *hello;
 AmphoraMessage *timer;
 AmphoraMessage *stationary;
+Vector2 screen_size;
 
 void
 game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *stationary_message = "I'm going to be fixed right here in place!";
 	SDL_Color font_color = { 0xff, 0xff, 0xff, 0xff };
+
+	screen_size = get_resolution();
 
 	init_sprite_slot(&player, Character, 96, 148, false, 10);
 	add_frameset(player, "WalkDown", 0, 5, 16, 24, 4, 30);
@@ -33,22 +36,30 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static Vector2 camera_location = { 0, 0 };
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
+	Uint8 player_speed = 1;
 
 	(void)save_data;
 
 	camera_location = get_camera();
 
+	if (key_actions->dash) {
+		player_speed = 2;
+	}
 	if (key_actions->left) {
 		set_frameset(player, "WalkLeft");
+		move_sprite(player, -player_speed, 0);
 	}
 	if (key_actions->right) {
 		set_frameset(player, "WalkRight");
+		move_sprite(player, player_speed, 0);
 	}
 	if (key_actions->up) {
 		set_frameset(player, "WalkUp");
+		move_sprite(player, 0, -player_speed);
 	}
 	if (key_actions->down) {
 		set_frameset(player, "WalkDown");
+		move_sprite(player, 0, player_speed);
 	}
 	if (key_actions->quit) {
 		quit_game();
@@ -67,6 +78,9 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	render_string(timer);
 	render_string(stationary);
 
+	camera_location = get_sprite_center(player);
+	camera_location.x -= (screen_size.x / 2);
+	camera_location.y -= (screen_size.y / 2);
 	set_camera(camera_location.x, camera_location.y);
 }
 

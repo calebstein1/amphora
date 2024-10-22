@@ -20,8 +20,10 @@ Uint32 sprite_slots_count = 1;
 
 Vector2
 get_sprite_center(const AmphoraImage *spr) {
-	(void)spr;
-	return (Vector2){ 0, 0 };
+	return (Vector2){
+		.x = spr->dx + (spr->framesets[spr->current_frameset].w / 2),
+		.y = spr->dy + (spr->framesets[spr->current_frameset].h / 2)
+	};
 }
 
 AmphoraImage *
@@ -117,6 +119,12 @@ set_frameset(AmphoraImage *spr, const char *name) {
 		return;
 	}
 	spr->current_frameset = i;
+}
+
+void
+move_sprite(AmphoraImage *spr, const Sint32 delta_x, const Sint32 delta_y) {
+	spr->dx += delta_x;
+	spr->dy += delta_y;
 }
 
 void
@@ -254,6 +262,7 @@ void
 update_draw_sprite(const AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
 	SDL_Rect src, dst;
+	const Vector2 camera = get_camera();
 
 	if (frame_count - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) frameset->current_frame = 0;
@@ -266,8 +275,8 @@ update_draw_sprite(const AmphoraImage *spr) {
 		.h = frameset->h
 	};
 	dst = (SDL_Rect){
-		.x = spr->dx,
-		.y = spr->dy,
+		.x = spr->dx - camera.x,
+		.y = spr->dy - camera.y,
 		.w = frameset->w,
 		.h = frameset->h
 	};
