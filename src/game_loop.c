@@ -6,6 +6,7 @@
 #include "engine/util.h"
 
 /* Game globals */
+AmphoraImage *player;
 AmphoraMessage *hello;
 AmphoraMessage *timer;
 AmphoraMessage *stationary;
@@ -15,6 +16,12 @@ game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *stationary_message = "I'm going to be fixed right here in place!";
 	SDL_Color font_color = { 0xff, 0xff, 0xff, 0xff };
+
+	init_sprite_slot(&player, Character, 96, 148, false, 10);
+	add_frameset(player, "WalkDown", 0, 5, 16, 24, 4, 30);
+	add_frameset(player, "WalkRight", 0, 37, 16, 24, 4, 30);
+	add_frameset(player, "WalkUp", 0, 69, 16, 24, 4, 30);
+	add_frameset(player, "WalkLeft", 0, 101, 16, 24, 4, 30);
 
 	create_string(&hello, Roboto, 32, 16, 16, font_color, welcome_message);
 	create_string(&timer, Merriweather, 32, -16, 16, font_color, "0");
@@ -32,16 +39,16 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	camera_location = get_camera();
 
 	if (key_actions->left) {
-		camera_location.x--;
+		set_frameset(player, "WalkLeft");
 	}
 	if (key_actions->right) {
-		camera_location.x++;
+		set_frameset(player, "WalkRight");
 	}
 	if (key_actions->up) {
-		camera_location.y--;
+		set_frameset(player, "WalkUp");
 	}
 	if (key_actions->down) {
-		camera_location.y++;
+		set_frameset(player, "WalkDown");
 	}
 	if (key_actions->quit) {
 		quit_game();

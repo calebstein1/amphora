@@ -4,27 +4,37 @@
 
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
+#include "engine/internal/timer.h"
 
 #include "config.h"
 
+/* Prototypes for private functions */
+void update_draw_sprite(const AmphoraImage *spr);
+
 /* File-scoped variables */
 static SDL_RWops *images[IMAGES_COUNT];
-static SpriteSlot *sprite_slot;
-static SpriteSlot *sprite_slots_head;
+static SDL_Texture *open_images[IMAGES_COUNT];
+static AmphoraImage *sprite_slot;
+static AmphoraImage *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
 
 Vector2
-get_sprite_center(const SpriteSlot *spr) {
-	return (Vector2){ spr->x + (spr->x_size * 4), spr->y + (spr->y_size * 4) };
+get_sprite_center(const AmphoraImage *spr) {
+	(void)spr;
+	return (Vector2){ 0, 0 };
 }
 
-SpriteSlot *
-init_sprite_slot(SpriteSlot **spr, Uint32 num, Uint16 x_size, Uint16 y_size, Sint32 x, Sint32 y, bool flip, Sint32 order) {
-	SpriteSlot *sprite_slot_temp = NULL;
+AmphoraImage *
+init_sprite_slot(AmphoraImage **spr, const ImageName name, Sint32 x, Sint32 y, bool flip, Sint32 order) {
+	AmphoraImage *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
 
-	if ((sprite_slot_temp = SDL_malloc(sizeof(SpriteSlot))) == NULL) {
+	if (!open_images[name]) {
+		open_images[name] = IMG_LoadTexture_RW(get_renderer(), images[name], 0);
+	}
+
+	if ((sprite_slot_temp = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
 		*spr = NULL;
 
@@ -46,11 +56,9 @@ init_sprite_slot(SpriteSlot **spr, Uint32 num, Uint16 x_size, Uint16 y_size, Sin
 	*spr = sprite_slot_temp;
 	sprite_slots_count++;
 
-	(*spr)->num = num;
-	(*spr)->x_size = x_size;
-	(*spr)->y_size = y_size;
-	(*spr)->x = x;
-	(*spr)->y = y;
+	(*spr)->image = name;
+	(*spr)->dx = x;
+	(*spr)->dy = y;
 	(*spr)->flip = flip;
 	(*spr)->display = true;
 	(*spr)->garbage = false;
@@ -60,18 +68,77 @@ init_sprite_slot(SpriteSlot **spr, Uint32 num, Uint16 x_size, Uint16 y_size, Sin
 }
 
 void
-show_sprite(SpriteSlot *spr) {
+add_frameset(AmphoraImage *spr, const char *name, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint16 num_frames, Uint16 delay) {
+	/* TODO: Cascade error cases and free */
+	if (spr->framesets) {
+		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
+			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to reallocate framesets\n");
+			return;
+		}
+		if (!((spr->frameset_labels = SDL_realloc(spr->frameset_labels, (spr->num_framesets + 1) * sizeof(char *))))) {
+			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to reallocate frameset labels\n");
+			return;
+		}
+	} else {
+		if (!((spr->framesets = SDL_malloc(sizeof(struct frameset_t))))) {
+			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate framesets\n");
+			return;
+		}
+		if (!((spr->frameset_labels = SDL_malloc(sizeof(char *))))) {
+			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate frameset labels\n");
+			return;
+		}
+	}
+	spr->framesets[spr->num_framesets] = (struct frameset_t){
+		.sx = x,
+		.sy = y,
+		.w = w,
+		.h = h,
+		.num_frames = num_frames,
+		.delay = delay
+	};
+	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate frameset label\n");
+		return;
+	}
+	SDL_strlcpy(spr->frameset_labels[spr->num_framesets], name, strlen(name) + 1);
+	spr->num_framesets++;
+}
+
+void
+set_frameset(AmphoraImage *spr, const char *name) {
+	Uint16 i;
+
+	for (i = 0; i < spr->num_framesets; i++) {
+		if (SDL_strcmp(spr->frameset_labels[i], name) == 0) break;
+	}
+	if (i == spr->num_framesets) {
+		SDL_LogWarn(SDL_LOG_PRIORITY_WARN, "Failed to update frameset\n");
+		return;
+	}
+	spr->current_frameset = i;
+}
+
+void
+show_sprite(AmphoraImage *spr) {
 	spr->display = true;
 }
 
 void
-hide_sprite(SpriteSlot *spr) {
+hide_sprite(AmphoraImage *spr) {
 	spr->display = false;
 }
 
 void *
-release_sprite_slot(SpriteSlot **spr) {
+release_sprite_slot(AmphoraImage **spr) {
+	int i;
+
 	if (spr) {
+		for (i = 0; i < (*spr)->num_framesets; i++) {
+			SDL_free((*spr)->frameset_labels[i]);
+		}
+		if ((*spr)->frameset_labels) SDL_free((*spr)->frameset_labels);
+		if ((*spr)->framesets) SDL_free((*spr)->framesets);
 		(*spr)->garbage = true;
 		*spr = NULL;
 	}
@@ -119,7 +186,7 @@ init_img(void) {
 	IMAGES
 #undef LOADIMG
 #endif
-	if ((sprite_slot = SDL_malloc(sizeof(SpriteSlot))) == NULL) {
+	if ((sprite_slot = SDL_malloc(sizeof(AmphoraImage))) == NULL) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize sprite slots\n");
 
 		return -1;
@@ -135,7 +202,8 @@ init_img(void) {
 
 void
 cleanup_sprites(void) {
-	SpriteSlot **allocated_addrs = SDL_malloc(sprite_slots_count * sizeof(SpriteSlot *));
+	AmphoraImage **allocated_addrs = SDL_malloc(sprite_slots_count * sizeof(AmphoraImage *));
+	AmphoraImage *garbage;
 	Uint32 i = 0;
 
 	while (sprite_slot) {
@@ -143,14 +211,20 @@ cleanup_sprites(void) {
 		sprite_slot = sprite_slot->next;
 	}
 	for (i = 0; i < sprite_slots_count; i++) {
-		SDL_free(allocated_addrs[i]);
+		garbage = allocated_addrs[i];
+		if (i > 0) release_sprite_slot(&allocated_addrs[i]);
+		SDL_free(garbage);
+	}
+	for (i = 0; i < IMAGES_COUNT; i++) {
+		SDL_RWclose(images[i]);
+		if (open_images[i]) SDL_DestroyTexture(open_images[i]);
 	}
 	SDL_free(allocated_addrs);
 }
 
 void
 draw_all_sprites_and_gc(void) {
-	SpriteSlot *garbage;
+	AmphoraImage *garbage;
 
 	if (!sprite_slot->next) return;
 
@@ -164,10 +238,39 @@ draw_all_sprites_and_gc(void) {
 			garbage = NULL;
 			sprite_slots_count--;
 		}
-		//if (sprite_slot->display) draw_sprite(sprite_slot);
+		if (sprite_slot->display && sprite_slot->num_framesets > 0) update_draw_sprite(sprite_slot);
 
 		sprite_slot = sprite_slot->next;
 	}
 
 	sprite_slot = sprite_slots_head;
+}
+
+/*
+ * Private functions
+ */
+
+void
+update_draw_sprite(const AmphoraImage *spr) {
+	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
+	SDL_Rect src, dst;
+
+	if (frame_count - frameset->last_change > frameset->delay) {
+		if (++frameset->current_frame == frameset->num_frames) frameset->current_frame = 0;
+		frameset->last_change = frame_count;
+	}
+	src = (SDL_Rect){
+		.x = frameset->sx + (frameset->w * frameset->current_frame),
+		.y = frameset->sy,
+		.w = frameset->w,
+		.h = frameset->h
+	};
+	dst = (SDL_Rect){
+		.x = spr->dx,
+		.y = spr->dy,
+		.w = frameset->w,
+		.h = frameset->h
+	};
+
+	render_texture(open_images[spr->image], &src, &dst);
 }

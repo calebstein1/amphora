@@ -9,35 +9,28 @@
 
 #include "config.h"
 
-enum images_e {
+typedef enum images_e {
 #define LOADIMG(name, path) name,
 	IMAGES
 #undef LOADIMG
 	IMAGES_COUNT
-};
+} ImageName;
 
-typedef struct sprite_slot_t {
-	Uint32 num; /* The sprite to draw from the spritesheet */
-	Uint16 x_size; /* The number of horizontal tiles in the sprite */
-	Uint16 y_size; /* The number of vertical tiles in the sprite */
-	Sint32 x; /* The sprite's x position in 1/16 of a pixel */
-	Sint32 y; /* The sprite's y position in 1/16 of a pixel */
-	Sint32 order; /* The draw order of sprites, higher numbers on top */
-	bool flip : 1; /* Whether or not the sprite should be flipped horizontally */
-	bool display : 1; /* Whether the sprite should be drawn or not */
-	bool garbage : 1; /* Whether the garbage collector should free the allocated memory */
-	struct sprite_slot_t *next;
-} SpriteSlot;
+typedef struct sprite_slot_t AmphoraImage;
 
 /* Gets the pixel position of the center of a sprite */
-Vector2 get_sprite_center(const SpriteSlot *spr);
+Vector2 get_sprite_center(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
-SpriteSlot *init_sprite_slot(SpriteSlot **spr, Uint32 num, Uint16 x_size, Uint16 y_size, Sint32 x, Sint32 y, bool flip, Sint32 order);
+AmphoraImage *init_sprite_slot(AmphoraImage **spr, ImageName name, Sint32 x, Sint32 y, bool flip, Sint32 order);
+/* Add a frameset to a sprite */
+void add_frameset(AmphoraImage *spr, const char *name, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint16 num_frames, Uint16 delay);
+/* Set a sprite slot's frameset */
+void set_frameset(AmphoraImage *spr, const char *name);
 /* Show the supplied sprite_slot if hidden */
-void show_sprite(SpriteSlot *spr);
+void show_sprite(AmphoraImage *spr);
 /* Hide a sprite without free it */
-void hide_sprite(SpriteSlot *spr);
+void hide_sprite(AmphoraImage *spr);
 /* Free a sprite slot */
-void *release_sprite_slot(SpriteSlot **spr);
+void *release_sprite_slot(AmphoraImage **spr);
 
 #endif /* UNTITLED_PLATFORMER_IMG_H */

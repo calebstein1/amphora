@@ -4,16 +4,20 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
 
 #include "config.h"
+
+/* Globals */
+Uint64 frame_count = 0;
 
 /* File-scored variables */
 static bool quit_requested = false;
 
 int
 main(int argc, char **argv) {
-	Uint64 frame_start, frame_end, frame_count = 0;
+	Uint64 frame_start, frame_end;
 	Uint32 frame_time;
 
 	SDL_Event e;
