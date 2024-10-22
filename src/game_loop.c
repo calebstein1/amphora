@@ -7,6 +7,8 @@
 
 /* Game globals */
 AmphoraImage *player;
+AmphoraImage *heart;
+AmphoraImage *rotating_heart;
 AmphoraMessage *hello;
 AmphoraMessage *timer;
 AmphoraMessage *stationary;
@@ -15,20 +17,25 @@ Vector2 screen_size;
 void
 game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
-	const char *stationary_message = "I'm going to be fixed right here in place!";
-	SDL_Color font_color = { 0xff, 0xff, 0xff, 0xff };
+	const char *message = "I'm going to be fixed right here in place!";
+	const SDL_Color font_color = { 0xff, 0xff, 0xff, 0xff };
 
 	screen_size = get_resolution();
 
-	init_sprite_slot(&player, Character, 96, 148, false, 10);
+	init_sprite_slot(&player, Character, 96, 148, false, false, 10);
+	init_sprite_slot(&heart, Objects, -96, 32, false, true, 11);
+	init_sprite_slot(&rotating_heart, Objects, 128, 72, false, false, -1);
+
 	add_frameset(player, "WalkDown", 0, 5, 16, 24, 4, 30);
 	add_frameset(player, "WalkRight", 0, 37, 16, 24, 4, 30);
 	add_frameset(player, "WalkUp", 0, 69, 16, 24, 4, 30);
 	add_frameset(player, "WalkLeft", 0, 101, 16, 24, 4, 30);
+	add_frameset(heart, "Default", 63, 0, 16, 16, 1, 0);
+	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 4, 15);
 
-	create_string(&hello, Roboto, 32, 16, 16, font_color, welcome_message);
-	create_string(&timer, Merriweather, 32, -16, 16, font_color, "0");
-	create_stationary_string(&stationary, Merriweather, 16, 76, 132, font_color, stationary_message);
+	create_string(&hello, Roboto, 32, 16, 16, font_color, welcome_message, true);
+	create_string(&timer, Merriweather, 32, -16, 16, font_color, "0", true);
+	create_string(&stationary, Merriweather, 16, 76, 132, font_color, message, false);
 }
 
 void
