@@ -60,9 +60,9 @@ init_render(void) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
 	}
-	if (init_sprites() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init sprite slots\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init sprite slots", "Failed to initialize sprite slots", 0);
+	if (init_img() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init image system\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init image system", "Failed to initialize image system", 0);
 		return -1;
 	}
 

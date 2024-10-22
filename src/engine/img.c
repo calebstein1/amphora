@@ -8,7 +8,7 @@
 #include "config.h"
 
 /* File-scoped variables */
-static SDL_RWops *images;
+static SDL_RWops *images[IMAGES_COUNT];
 static SpriteSlot *sprite_slot;
 static SpriteSlot *sprite_slots_head;
 Uint32 sprite_slots_count = 1;
@@ -85,6 +85,40 @@ release_sprite_slot(SpriteSlot **spr) {
 
 int
 init_img(void) {
+#ifdef WIN32
+	HRSRC img_info;
+	HGLOBAL img_resource;
+	SDL_RWops *img_rw;
+	int i;
+	const char *img_names[] = {
+#define LOADIMG(name, path) #name,
+		IMAGES
+#undef LOADIMG
+	};
+
+	for (i = 0; i < IMAGES_COUNT; i++) {
+		if (!((img_info = FindResourceA(NULL, img_names[i], "PNG_IMG")))) {
+			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate image resource... Amphora will crash now\n");
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate image resource... Amphora will crash now", 0);
+			return -1;
+		}
+		if (!((img_resource = LoadResource(NULL, img_info)))) {
+			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load image resource... Amphora will crash now\n");
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load image resource... Amphora will crash now", 0);
+			return -1;
+		}
+		img_rw = SDL_RWFromConstMem(img_resource, SizeofResource(NULL, img_info));
+		images[i] = img_rw;
+	}
+#else
+#define LOADIMG(name, path) extern char name[]; extern int name##_size;
+	IMAGES
+#undef LOADIMG
+	SDL_RWops **img_ptr = images;
+#define LOADIMG(name, path) *img_ptr = SDL_RWFromConstMem(name, name##_size); img_ptr++;
+	IMAGES
+#undef LOADIMG
+#endif
 	if ((sprite_slot = SDL_malloc(sizeof(SpriteSlot))) == NULL) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize sprite slots\n");
 

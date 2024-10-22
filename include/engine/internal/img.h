@@ -4,7 +4,7 @@
 #include "engine/img.h"
 #include "engine/internal/render.h"
 
-int init_sprites(void);
+int init_img(void);
 void cleanup_sprites(void);
 void draw_all_sprites_and_gc(void);
 

@@ -7,6 +7,15 @@
 #include "engine/util.h"
 #include "engine/render.h"
 
+#include "config.h"
+
+enum images_e {
+#define LOADIMG(name, path) name,
+	IMAGES
+#undef LOADIMG
+	IMAGES_COUNT
+};
+
 typedef struct sprite_slot_t {
 	Uint32 num; /* The sprite to draw from the spritesheet */
 	Uint16 x_size; /* The number of horizontal tiles in the sprite */
