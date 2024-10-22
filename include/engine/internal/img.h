@@ -22,6 +22,7 @@ struct sprite_slot_t {
 	struct frameset_t *framesets;
 	bool flip : 1;
 	bool display : 1;
+	bool stationary : 1;
 	bool garbage : 1;
 	struct sprite_slot_t *next;
 };

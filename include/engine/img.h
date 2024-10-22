@@ -21,7 +21,7 @@ typedef struct sprite_slot_t AmphoraImage;
 /* Gets the pixel position of the center of a sprite */
 Vector2 get_sprite_center(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
-AmphoraImage *init_sprite_slot(AmphoraImage **spr, ImageName name, Sint32 x, Sint32 y, bool flip, Sint32 order);
+AmphoraImage *init_sprite_slot(AmphoraImage **spr, ImageName name, Sint32 x, Sint32 y, bool flip, bool stationary, Sint32 order);
 /* Add a frameset to a sprite */
 void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
