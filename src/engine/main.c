@@ -1,16 +1,15 @@
-#include "engine/events.h"
 #include "engine/game_loop.h"
-#include "engine/input.h"
-#include "engine/render.h"
-#include "engine/ttf.h"
 #include "engine/util.h"
+#include "engine/internal/events.h"
+#include "engine/internal/img.h"
+#include "engine/internal/input.h"
+#include "engine/internal/render.h"
+#include "engine/internal/ttf.h"
 
 #include "config.h"
 
 /* File-scored variables */
 static bool quit_requested = false;
-static SDL_Renderer *renderer;
-static SDL_Window *window;
 
 int
 main(int argc, char **argv) {
@@ -50,24 +49,10 @@ main(int argc, char **argv) {
 	}
 #endif
 
-	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-					 WINDOW_X, WINDOW_Y, WINDOW_MODE | SDL_WINDOW_ALLOW_HIGHDPI)))) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
-		return -1;
-	}
-	if (!((renderer = SDL_CreateRenderer(window, -1, 0)))) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
-		return -1;
-	}
 	if (init_render() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init render data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init render data", "Failed to initialize render data", 0);
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init renderer\n");
 		return -1;
 	}
-
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 	game_init();
 
@@ -76,11 +61,11 @@ main(int argc, char **argv) {
 		frame_count++;
 
 		if (event_loop(&e, &key_actions) == SDL_QUIT) quit_requested = true;
-		clear_bg(renderer);
+		clear_bg();
 		game_loop(frame_count, &key_actions.state, &save_data);
-		draw_all_sprites_and_gc(renderer);
+		draw_all_sprites_and_gc();
 
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(get_renderer());
 
 		frame_end = SDL_GetTicks64();
 		if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / FRAMERATE)) {
@@ -89,13 +74,12 @@ main(int argc, char **argv) {
 	}
 
 	game_shutdown();
-	cleanup_render();
+	cleanup_sprites();
 #ifdef ENABLE_FONTS
-	free_fonts();
 	free_all_strings();
+	free_fonts();
 #endif
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
+	cleanup_render();
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
@@ -106,14 +90,4 @@ main(int argc, char **argv) {
 void
 quit_game(void) {
 	quit_requested = true;
-}
-
-SDL_Window *
-get_window(void) {
-	return window;
-}
-
-SDL_Renderer *
-get_renderer(void) {
-	return renderer;
 }

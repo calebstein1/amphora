@@ -16,9 +16,6 @@
  */
 #define WINDOW_MODE fullscreen
 
-/* Content paths */
-#define SPRITESHEET_PATH "../content/img/sprites.asht"
-
 /* Map actions to keys here following the example in the comment */
 #define ACTIONS					\
 	/* KMAP(action, key1, key2) */		\
@@ -30,7 +27,7 @@
 	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE)
 
 /* Load image resources */
-#define IMAGES\
+#define IMAGES							\
 	/* LOADIMG(name, path) */				\
 	LOADIMG(Character, "../content/img/character.png")	\
 	LOADIMG(Objects, "../content/img/objects.png")		\

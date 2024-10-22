@@ -1,7 +1,6 @@
 #define BIN_LOADER
 #include "config.h"
 
-SpriteSheet AMPHORA_SPRITESHEET SPRITESHEET_PATH
 #define LOADIMG(name, path) name PNG_IMG path
 IMAGES
 #undef LOADIMG

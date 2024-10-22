@@ -17,7 +17,6 @@ $1_size:
 	.section .rodata,"a"
 
 #if defined(__APPLE__)
-_incbin(_spritesheet, SPRITESHEET_PATH)
 #define LOADIMG(name, path) _incbin(_##name, path)
 	IMAGES
 #undef LOADIMG
@@ -27,7 +26,6 @@ _incbin(_spritesheet, SPRITESHEET_PATH)
 #undef LOADFONT
 #endif
 #else
-_incbin(spritesheet, SPRITESHEET_PATH)
 #define LOADIMG(name, path) _incbin(name, path)
 	IMAGES
 #undef LOADIMG

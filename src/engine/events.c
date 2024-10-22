@@ -1,7 +1,9 @@
-#include "engine/events.h"
-#include "engine/input.h"
-#include "engine/render.h"
-#include "engine/util.h"
+#include "engine/internal/events.h"
+#include "engine/internal/input.h"
+
+/*
+ * Internal functions
+ */
 
 Uint32
 event_loop(SDL_Event *e, union input_state_u *key_actions) {

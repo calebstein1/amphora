@@ -5,7 +5,6 @@
 
 #include "engine/input.h"
 
-#include "config.h"
 #include "save_data.h"
 
 void game_init(void); /* One-time init tasks */

@@ -19,10 +19,6 @@ enum fonts_e {
 	FONTS_COUNT
 };
 
-/* One-time tasks to load fonts and initialize the font system */
-int init_fonts(void);
-/* Close all fonts in preperation for exit */
-void free_fonts(void);
 /* Create a string that will move with the camera, negative x and y values start from the right and bottom edges of the screen */
 AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, SDL_Color color, const char *text);
 /* Create a string that is fixed to an absolute coordinate */
@@ -35,8 +31,6 @@ AmphoraMessage *update_string_text(AmphoraMessage **msg, const char *text);
 AmphoraMessage *update_string_n(AmphoraMessage **msg, size_t n);
 /* Display an AmphoraMessage on the screen */
 void render_string(const AmphoraMessage *msg);
-/* Free all created AmphoraMessage instances, this is called automatically at exit */
-void free_all_strings(void);
 
 #endif
 #endif /* AMPHORA_TTF_H */

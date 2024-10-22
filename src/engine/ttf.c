@@ -2,31 +2,13 @@
 #include <windows.h>
 #endif
 
-#include "engine/ttf.h"
+#include <engine/internal/render.h>
+#include "engine/internal/ttf.h"
 
 #include "config.h"
 
 #ifdef ENABLE_FONTS
 #define OPEN_MESSAGES_BATCH_COUNT 8
-
-/* Private structs */
-struct amphora_message_t {
-	SDL_Texture *texture;
-	SDL_Rect rectangle;
-	enum fonts_e font;
-	int pt;
-	size_t len;
-	size_t n;
-	SDL_Color color;
-	char *text;
-	Uint32 idx;
-	bool stationary : 1;
-};
-
-struct open_font_t {
-	TTF_Font *font;
-	int pt;
-};
 
 /* Prototypes for private functions */
 SDL_Texture *render_string_to_texture(AmphoraMessage *msg);
@@ -38,62 +20,6 @@ static struct open_font_t open_fonts[FONTS_COUNT];
 static struct amphora_message_t **open_messages;
 static Uint32 open_message_count;
 static bool allow_leaks = false;
-
-int
-init_fonts(void) {
-#ifdef WIN32
-	HRSRC ttf_info;
-	HGLOBAL ttf_resource;
-	SDL_RWops *ttf_rw;
-	int i;
-	const char *font_names[] = {
-#define LOADFONT(name, path) #name,
-		FONTS
-#undef LOADFONT
-	};
-
-	for (i = 0; i < FONTS_COUNT; i++) {
-		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate font resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate font resource... Amphora will crash now", 0);
-			return -1;
-		}
-		if (!((ttf_resource = LoadResource(NULL, ttf_info)))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load font resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
-			return -1;
-		}
-		ttf_rw = SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info));
-		fonts[i] = ttf_rw;
-	}
-#else
-#define LOADFONT(name, path) extern char name[]; extern int name##_size;
-	FONTS
-#undef LOADFONT
-	SDL_RWops **fonts_ptr = fonts;
-#define LOADFONT(name, path) *fonts_ptr = SDL_RWFromConstMem(name, name##_size); fonts_ptr++;
-	FONTS
-#undef LOADFONT
-#endif
-	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
-		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
-	} else {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize open messages tracker\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Memory allocation error", "Failed to initialize message tracker... Amphora will attempt to continue with memory leaks, but a crash is likely incoming ¯\\_(ツ)_/¯", 0);
-		allow_leaks = true;
-	}
-	return 0;
-}
-
-void
-free_fonts(void) {
-	int i;
-
-	for (i = 0; i < FONTS_COUNT; i++) {
-		SDL_RWclose(fonts[i]);
-		TTF_CloseFont(open_fonts[i].font);
-	}
-}
 
 AmphoraMessage *
 create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
@@ -197,6 +123,66 @@ render_string(const AmphoraMessage *msg) {
 	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &pos_adj);
 }
 
+/*
+ * Internal functions
+ */
+
+int
+init_fonts(void) {
+#ifdef WIN32
+	HRSRC ttf_info;
+	HGLOBAL ttf_resource;
+	SDL_RWops *ttf_rw;
+	int i;
+	const char *font_names[] = {
+#define LOADFONT(name, path) #name,
+		FONTS
+#undef LOADFONT
+	};
+
+	for (i = 0; i < FONTS_COUNT; i++) {
+		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
+			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate font resource... Amphora will crash now\n");
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate font resource... Amphora will crash now", 0);
+			return -1;
+		}
+		if (!((ttf_resource = LoadResource(NULL, ttf_info)))) {
+			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load font resource... Amphora will crash now\n");
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
+			return -1;
+		}
+		ttf_rw = SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info));
+		fonts[i] = ttf_rw;
+	}
+#else
+#define LOADFONT(name, path) extern char name[]; extern int name##_size;
+	FONTS
+#undef LOADFONT
+	SDL_RWops **fonts_ptr = fonts;
+#define LOADFONT(name, path) *fonts_ptr = SDL_RWFromConstMem(name, name##_size); fonts_ptr++;
+	FONTS
+#undef LOADFONT
+#endif
+	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
+		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
+	} else {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize open messages tracker\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Memory allocation error", "Failed to initialize message tracker... Amphora will attempt to continue with memory leaks, but a crash is likely incoming ¯\\_(ツ)_/¯", 0);
+		allow_leaks = true;
+	}
+	return 0;
+}
+
+void
+free_fonts(void) {
+	int i;
+
+	for (i = 0; i < FONTS_COUNT; i++) {
+		SDL_RWclose(fonts[i]);
+		TTF_CloseFont(open_fonts[i].font);
+	}
+}
+
 void
 free_all_strings(void) {
 	Uint32 i;
@@ -258,5 +244,4 @@ free_string(AmphoraMessage *msg) {
 	SDL_free(msg->text);
 	SDL_free(msg);
 }
-
 #endif
