@@ -1,10 +1,6 @@
 #ifndef UNTITLED_PLATFORMER_RENDER_H
 #define UNTITLED_PLATFORMER_RENDER_H
 
-#define SPR_NUM_PIXELS 64
-#define SPR_NUM_BYTES 32
-#define SPR_SIDE 8
-
 #include "SDL.h"
 
 typedef struct vector2_t {
