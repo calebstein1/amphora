@@ -84,3 +84,9 @@ SDL_Renderer *
 get_renderer(void) {
 	return renderer;
 }
+
+void
+render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect) {
+
+	SDL_RenderCopy(renderer, texture, srcrect, dstrect);
+}

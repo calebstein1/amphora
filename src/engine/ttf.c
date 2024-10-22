@@ -106,8 +106,8 @@ render_string(const AmphoraMessage *msg) {
 
 	if (msg->stationary) {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x  - camera.x,
-			.y = msg->rectangle.y  - camera.y,
+			.x = msg->rectangle.x - camera.x,
+			.y = msg->rectangle.y - camera.y,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
@@ -120,7 +120,7 @@ render_string(const AmphoraMessage *msg) {
 		};
 	}
 
-	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &pos_adj);
+	render_texture(msg->texture, NULL, &pos_adj);
 }
 
 /*
