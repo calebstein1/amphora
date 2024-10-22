@@ -57,6 +57,7 @@ init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const
 	}
 	*spr = sprite_slot_temp;
 	sprite_slots_count++;
+	sprite_slot = sprite_slots_head;
 
 	(*spr)->image = name;
 	(*spr)->dx = x;
