@@ -187,6 +187,7 @@ void
 free_all_strings(void) {
 	Uint32 i;
 
+	if (allow_leaks) return;
 	for (i = 0; i < open_message_count; i++) {
 		if (!open_messages[i]) continue;
 
