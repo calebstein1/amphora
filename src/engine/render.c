@@ -37,12 +37,6 @@ set_bg(SDL_Color color) {
 	bg = color;
 }
 
-void
-clear_bg() {
-	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, bg.a);
-	SDL_RenderClear(renderer);
-}
-
 /*
  * Internal functions
  */
@@ -73,6 +67,12 @@ void
 cleanup_render(void) {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+}
+
+void
+clear_bg(void) {
+	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, bg.a);
+	SDL_RenderClear(renderer);
 }
 
 SDL_Window *

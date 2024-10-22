@@ -24,7 +24,5 @@ void set_camera(Sint32 x, Sint32 y);
 SDL_Color get_bg(void);
 /* Sets the background color */
 void set_bg(SDL_Color color);
-/* Clear the screen and fill with the background color */
-void clear_bg();
 
 #endif /* UNTITLED_PLATFORMER_RENDER_H */
