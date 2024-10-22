@@ -22,7 +22,7 @@ static Uint32 open_message_count;
 static bool allow_leaks = false;
 
 AmphoraMessage *
-create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
+create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text, const bool stationary) {
 	Uint32 i = 0;
 
 	if (*msg) return *msg;
@@ -41,7 +41,7 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 	(*msg)->color = color;
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
-	(*msg)->stationary = false;
+	(*msg)->stationary = stationary;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
 
 	(*msg)->texture = render_string_to_texture(*msg);
@@ -58,14 +58,6 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 	}
 	open_messages[i] = *msg;
 	(*msg)->idx = i;
-
-	return *msg;
-}
-
-AmphoraMessage *
-create_stationary_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
-	*msg = create_string(msg, font_name, pt, x, y, color, text);
-	(*msg)->stationary = true;
 
 	return *msg;
 }
