@@ -27,7 +27,7 @@ get_sprite_center(const AmphoraImage *spr) {
 }
 
 AmphoraImage *
-init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const Sint32 y, const bool flip, const bool stationary, const Sint32 order) {
+init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *sprite_slot_temp = NULL;
 
 	if (*spr) return *spr;
@@ -62,6 +62,7 @@ init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const
 	(*spr)->image = name;
 	(*spr)->dx = x;
 	(*spr)->dy = y;
+	(*spr)->scale = scale;
 	(*spr)->flip = flip;
 	(*spr)->stationary = stationary;
 	(*spr)->display = true;
@@ -280,15 +281,15 @@ update_draw_sprite(const AmphoraImage *spr) {
 		dst = (SDL_Rect){
 			.x = spr->dx > 0 ? spr->dx : get_resolution().x + spr->dx - frameset->w,
 			.y = spr->dy > 0 ? spr->dy : get_resolution().y + spr->dy - frameset->h,
-			.w = frameset->w,
-			.h = frameset->h
+			.w = frameset->w * spr->scale,
+			.h = frameset->h * spr->scale
 		};
 	} else {
 		dst = (SDL_Rect){
 			.x = spr->dx - camera.x,
 			.y = spr->dy - camera.y,
-			.w = frameset->w,
-			.h = frameset->h
+			.w = frameset->w * spr->scale,
+			.h = frameset->h * spr->scale
 		};
 	}
 

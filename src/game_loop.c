@@ -22,9 +22,9 @@ game_init(void) {
 
 	screen_size = get_resolution();
 
-	init_sprite_slot(&player, Character, 96, 148, false, false, 10);
-	init_sprite_slot(&heart, Objects, -96, 32, false, true, 11);
-	init_sprite_slot(&rotating_heart, Objects, 128, 72, false, false, -1);
+	init_sprite_slot(&player, Character, 96, 148, 2, false, false, 10);
+	init_sprite_slot(&heart, Objects, -96, 32, 2, false, true, 11);
+	init_sprite_slot(&rotating_heart, Objects, 128, 72, 3, false, false, -1);
 
 	add_frameset(player, "WalkDown", 0, 5, 16, 24, 4, 30);
 	add_frameset(player, "WalkRight", 0, 37, 16, 24, 4, 30);

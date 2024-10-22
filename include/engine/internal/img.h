@@ -16,6 +16,7 @@ struct sprite_slot_t {
 	ImageName image;
 	Sint32 dx, dy;
 	Sint32 order;
+	Uint8 scale;
 	Uint16 current_frameset;
 	Uint16 num_framesets;
 	char **frameset_labels;
