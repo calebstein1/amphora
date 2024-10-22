@@ -16,23 +16,6 @@
  */
 #define WINDOW_MODE fullscreen
 
-/*
- * shorter: the smaller window dimension will contain RESOLUTION pixels
- * longer: the larger window dimension will contain RESOLUTION pixels
- */
-#define RESOLUTION_MODE shorter
-#define RESOLUTION 256
-
-/* Colors used for drawing in 24-bit rgb format */
-#define BLACK { 0x1c, 0x0f, 0x00 }
-#define WHITE { 0xfc, 0xd5, 0xb3 }
-
-/* Set whether the background color should be black or white */
-#define BG_COLOR_MODE white
-
-/* Content paths */
-#define SPRITESHEET_PATH "../content/img/sprites.asht"
-
 /* Map actions to keys here following the example in the comment */
 #define ACTIONS					\
 	/* KMAP(action, key1, key2) */		\
@@ -42,6 +25,13 @@
 	KMAP(down, SDLK_s, SDLK_DOWN)		\
 	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT)	\
 	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE)
+
+/* Load image resources */
+#define IMAGES							\
+	/* LOADIMG(name, path) */				\
+	LOADIMG(Character, "../content/img/character.png")	\
+	LOADIMG(Objects, "../content/img/objects.png")		\
+	LOADIMG(Overworld, "../content/img/overworld.png")
 
 /* Load TTF fonts */
 #define ENABLE_FONTS

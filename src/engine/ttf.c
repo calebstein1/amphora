@@ -2,31 +2,13 @@
 #include <windows.h>
 #endif
 
-#include "engine/ttf.h"
+#include <engine/internal/render.h>
+#include "engine/internal/ttf.h"
 
 #include "config.h"
 
 #ifdef ENABLE_FONTS
 #define OPEN_MESSAGES_BATCH_COUNT 8
-
-/* Private structs */
-struct amphora_message_t {
-	SDL_Texture *texture;
-	SDL_Rect rectangle;
-	enum fonts_e font;
-	int pt;
-	size_t len;
-	size_t n;
-	AmphoraColor color;
-	char *text;
-	Uint32 idx;
-	bool stationary : 1;
-};
-
-struct open_font_t {
-	TTF_Font *font;
-	int pt;
-};
 
 /* Prototypes for private functions */
 SDL_Texture *render_string_to_texture(AmphoraMessage *msg);
@@ -38,6 +20,112 @@ static struct open_font_t open_fonts[FONTS_COUNT];
 static struct amphora_message_t **open_messages;
 static Uint32 open_message_count;
 static bool allow_leaks = false;
+
+AmphoraMessage *
+create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
+	Uint32 i = 0;
+
+	if (*msg) return *msg;
+
+	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
+		return NULL;
+	}
+	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
+		return NULL;
+	}
+
+	(*msg)->font = font_name;
+	(*msg)->pt = pt;
+	(*msg)->len = SDL_strlen(text);
+	(*msg)->n = 0;
+	(*msg)->color = color;
+	(*msg)->rectangle.x = x;
+	(*msg)->rectangle.y = y;
+	(*msg)->stationary = false;
+	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
+
+	(*msg)->texture = render_string_to_texture(*msg);
+
+	if (allow_leaks) return *msg;
+
+	while (open_messages[i]) {
+		if (++i == open_message_count) {
+			open_message_count += OPEN_MESSAGES_BATCH_COUNT;
+			open_messages = SDL_realloc(open_messages, open_message_count * sizeof(struct amphora_message_t *));
+			SDL_memset(&open_messages[open_message_count - OPEN_MESSAGES_BATCH_COUNT], 0, OPEN_MESSAGES_BATCH_COUNT * sizeof(struct amphora_message_t *));
+			break;
+		}
+	}
+	open_messages[i] = *msg;
+	(*msg)->idx = i;
+
+	return *msg;
+}
+
+AmphoraMessage *
+create_stationary_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text) {
+	*msg = create_string(msg, font_name, pt, x, y, color, text);
+	(*msg)->stationary = true;
+
+	return *msg;
+}
+
+size_t
+get_string_length(const AmphoraMessage *msg) {
+	return msg->len;
+}
+
+AmphoraMessage *
+update_string_text(AmphoraMessage **msg, const char *text) {
+	(*msg)->len = SDL_strlen(text);
+	SDL_free((*msg)->text);
+	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
+		return NULL;
+	}
+	SDL_strlcpy((*msg)->text, text, (*msg)->len + 1);
+	SDL_DestroyTexture((*msg)->texture);
+	(*msg)->texture = render_string_to_texture(*msg);
+
+	return *msg;
+}
+
+AmphoraMessage *
+update_string_n(AmphoraMessage **msg, size_t n) {
+	if (n >= (*msg)->len) n = 0;
+	(*msg)->n = n;
+	SDL_DestroyTexture((*msg)->texture);
+	(*msg)->texture = render_string_to_texture(*msg);
+
+	return *msg;
+}
+
+void
+render_string(const AmphoraMessage *msg) {
+	SDL_Rect pos_adj;
+	const Vector2 camera = get_camera();
+
+	if (msg->stationary) {
+		pos_adj = (SDL_Rect){
+			.x = msg->rectangle.x - camera.x,
+			.y = msg->rectangle.y - camera.y,
+			.w = msg->rectangle.w,
+			.h = msg->rectangle.h
+		};
+	} else {
+		pos_adj = (SDL_Rect){
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
+			.w = msg->rectangle.w,
+			.h = msg->rectangle.h
+		};
+	}
+
+	render_texture(msg->texture, NULL, &pos_adj);
+}
+
+/*
+ * Internal functions
+ */
 
 int
 init_fonts(void) {
@@ -95,117 +183,11 @@ free_fonts(void) {
 	}
 }
 
-AmphoraMessage *
-create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const char *text) {
-	Uint32 i = 0;
-
-	if (*msg) return *msg;
-
-	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
-		return NULL;
-	}
-	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
-		return NULL;
-	}
-
-#define black true
-#define white false
-	(*msg)->font = font_name;
-	(*msg)->pt = pt;
-	(*msg)->len = SDL_strlen(text);
-	(*msg)->n = 0;
-	(*msg)->color = BG_COLOR_MODE ? get_white() : get_black();
-	(*msg)->rectangle.x = x;
-	(*msg)->rectangle.y = y;
-	(*msg)->stationary = false;
-	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
-#undef black
-#undef white
-
-	(*msg)->texture = render_string_to_texture(*msg);
-
-	if (allow_leaks) return *msg;
-
-	while (open_messages[i]) {
-		if (++i == open_message_count) {
-			open_message_count += OPEN_MESSAGES_BATCH_COUNT;
-			open_messages = SDL_realloc(open_messages, open_message_count * sizeof(struct amphora_message_t *));
-			SDL_memset(&open_messages[open_message_count - OPEN_MESSAGES_BATCH_COUNT], 0, OPEN_MESSAGES_BATCH_COUNT * sizeof(struct amphora_message_t *));
-			break;
-		}
-	}
-	open_messages[i] = *msg;
-	(*msg)->idx = i;
-
-	return *msg;
-}
-
-AmphoraMessage *
-create_stationary_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const char *text) {
-	*msg = create_string(msg, font_name, pt, x, y, text);
-	(*msg)->stationary = true;
-
-	return *msg;
-}
-
-size_t
-get_string_length(const AmphoraMessage *msg) {
-	return msg->len;
-}
-
-AmphoraMessage *
-update_string_text(AmphoraMessage **msg, const char *text) {
-	(*msg)->len = SDL_strlen(text);
-	SDL_free((*msg)->text);
-	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
-		return NULL;
-	}
-	SDL_strlcpy((*msg)->text, text, (*msg)->len + 1);
-	SDL_DestroyTexture((*msg)->texture);
-	(*msg)->texture = render_string_to_texture(*msg);
-
-	return *msg;
-}
-
-AmphoraMessage *
-update_string_n(AmphoraMessage **msg, size_t n) {
-	if (n >= (*msg)->len) n = 0;
-	(*msg)->n = n;
-	SDL_DestroyTexture((*msg)->texture);
-	(*msg)->texture = render_string_to_texture(*msg);
-
-	return *msg;
-}
-
-void
-render_string(const AmphoraMessage *msg) {
-	SDL_Rect pos_adj;
-	const Point camera = get_camera();
-	const Uint16 pixel_size = get_pixel_size();
-
-	if (msg->stationary) {
-		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x * pixel_size - DECODE_POSITION32(camera.x),
-			.y = msg->rectangle.y * pixel_size - DECODE_POSITION32(camera.y),
-			.w = msg->rectangle.w,
-			.h = msg->rectangle.h
-		};
-	} else {
-		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x * pixel_size : get_real_window_size().x - (msg->rectangle.x * -1 * pixel_size) - msg->rectangle.w,
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y * pixel_size : get_real_window_size().y - (msg->rectangle.y * -1 * pixel_size) - msg->rectangle.h,
-			.w = msg->rectangle.w,
-			.h = msg->rectangle.h
-		};
-	}
-
-	SDL_RenderCopy(get_renderer(), msg->texture, NULL, &pos_adj);
-}
-
 void
 free_all_strings(void) {
 	Uint32 i;
 
+	if (allow_leaks) return;
 	for (i = 0; i < open_message_count; i++) {
 		if (!open_messages[i]) continue;
 
@@ -223,7 +205,7 @@ render_string_to_texture(AmphoraMessage *msg) {
 	int pt = msg->pt;
 	size_t n = msg->n;
 	const char *text = msg->text;
-	const SDL_Color text_color = { .r = msg->color.r, .g = msg->color.g, .b = msg->color.b, .a = 0xff };
+	const SDL_Color text_color = msg->color;
 	TTF_Font *font = NULL;
 	SDL_Surface *surface = NULL;
 	SDL_Texture *texture = NULL;
@@ -263,5 +245,4 @@ free_string(AmphoraMessage *msg) {
 	SDL_free(msg->text);
 	SDL_free(msg);
 }
-
 #endif

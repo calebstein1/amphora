@@ -1,4 +1,4 @@
-#include "engine/input.h"
+#include "engine/internal/input.h"
 
 #include "config.h"
 
@@ -17,6 +17,10 @@ static SDL_Keycode key2[] = {
 	ACTIONS
 #undef KMAP
 };
+
+/*
+ * Internal functions
+ */
 
 void
 handle_keydown(union input_state_u *key_actions, const SDL_Event *e) {
