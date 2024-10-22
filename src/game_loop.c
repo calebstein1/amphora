@@ -12,15 +12,12 @@ AmphoraImage *rotating_heart;
 AmphoraMessage *hello;
 AmphoraMessage *timer;
 AmphoraMessage *stationary;
-Vector2 screen_size;
 
 void
 game_init(void) {
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *message = "I'm going to be fixed right here in place!";
 	const SDL_Color font_color = { 0xff, 0xff, 0xff, 0xff };
-
-	screen_size = get_resolution();
 
 	init_sprite_slot(&player, Character, 96, 148, 2, false, false, 10);
 	init_sprite_slot(&heart, Objects, -96, 32, 2, false, true, 11);
@@ -44,6 +41,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
 	Uint8 player_speed = 1;
+	Vector2 screen_size = get_resolution();
 
 	(void)save_data;
 

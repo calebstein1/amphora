@@ -12,7 +12,7 @@ static SDL_Color bg = { 0, 0, 0, 0xff };
 Vector2
 get_resolution(void) {
 	Sint32 rx, ry;
-	SDL_GL_GetDrawableSize(window, &rx, &ry);
+	SDL_GetWindowSize(window, &rx, &ry);
 	return (Vector2){ rx, ry };
 }
 
@@ -43,6 +43,8 @@ set_bg(SDL_Color color) {
 
 int
 init_render(void) {
+	Vector2 window_size;
+
 	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 					 WINDOW_X, WINDOW_Y, WINDOW_MODE | SDL_WINDOW_ALLOW_HIGHDPI)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
@@ -59,6 +61,8 @@ init_render(void) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init image system", "Failed to initialize image system", 0);
 		return -1;
 	}
+	window_size = get_resolution();
+	SDL_RenderSetLogicalSize(renderer, window_size.x, window_size.y);
 
 	return 0;
 }
