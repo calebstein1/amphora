@@ -106,15 +106,15 @@ render_string(const AmphoraMessage *msg) {
 
 	if (msg->stationary) {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x - camera.x,
-			.y = msg->rectangle.y - camera.y,
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
 	} else {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
+			.x = msg->rectangle.x - camera.x,
+			.y = msg->rectangle.y - camera.y,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
