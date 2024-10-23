@@ -76,37 +76,42 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static Vector2 camera_location = { 0, 0 };
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
-	Uint8 player_speed = 1;
+	Uint8 player_speed;
 	Vector2 screen_size = get_resolution();
 
 	(void)save_data;
 
 	camera_location = get_camera();
 
-	if (key_actions->dash) {
-		player_speed = 2;
-	}
 	if (key_actions->left && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkLeft");
+		player_speed = key_actions->dash ? 2 : 1;
+		set_frameset_delay(player, "WalkLeft", key_actions->dash ? 15 : 30);
 		move_sprite(player, -player_speed, 0);
 		p_facing = w;
 	}
 	if (key_actions->right && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkRight");
+		player_speed = key_actions->dash ? 2 : 1;
+		set_frameset_delay(player, "WalkRight", key_actions->dash ? 15 : 30);
 		move_sprite(player, player_speed, 0);
 		p_facing = e;
 	}
 	if (key_actions->up && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkUp");
+		player_speed = key_actions->dash ? 2 : 1;
+		set_frameset_delay(player, "WalkUp", key_actions->dash ? 15 : 30);
 		move_sprite(player, 0, -player_speed);
 		p_facing = n;
 	}
 	if (key_actions->down && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkDown");
+		player_speed = key_actions->dash ? 2 : 1;
+		set_frameset_delay(player, "WalkDown", key_actions->dash ? 15 : 30);
 		move_sprite(player, 0, player_speed);
 		p_facing = s;
 	}

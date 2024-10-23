@@ -28,6 +28,8 @@ void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sin
 void set_frameset(AmphoraImage *spr, const char *name);
 /* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
 void play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
+/* Set the delay between frames of a frameset animation */
+void set_frameset_delay(AmphoraImage *spr, const char *name, Uint16 delay);
 /* Move a sprite by the supplied delta values */
 void move_sprite(AmphoraImage *spr, Sint32 delta_x, Sint32 delta_y);
 /* Show the supplied sprite_slot if hidden */
