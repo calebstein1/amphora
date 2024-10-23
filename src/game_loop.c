@@ -86,31 +86,31 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	if (key_actions->dash) {
 		player_speed = 2;
 	}
-	if (key_actions->left) {
+	if (key_actions->left && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkLeft");
 		move_sprite(player, -player_speed, 0);
 		p_facing = w;
 	}
-	if (key_actions->right) {
+	if (key_actions->right && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkRight");
 		move_sprite(player, player_speed, 0);
 		p_facing = e;
 	}
-	if (key_actions->up) {
+	if (key_actions->up && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkUp");
 		move_sprite(player, 0, -player_speed);
 		p_facing = n;
 	}
-	if (key_actions->down) {
+	if (key_actions->down && p_state != atk) {
 		p_state = walk;
 		set_frameset(player, "WalkDown");
 		move_sprite(player, 0, player_speed);
 		p_facing = s;
 	}
-	if (key_actions->attack) {
+	if (key_actions->attack && p_state != atk) {
 		p_state = atk;
 		switch(p_facing) {
 			case n:
