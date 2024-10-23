@@ -1,13 +1,5 @@
 #include "engine/amphora.h"
 
-/* Game globals */
-AmphoraImage *player;
-AmphoraImage *heart;
-AmphoraImage *rotating_heart;
-AmphoraMessage *hello;
-AmphoraMessage *timer;
-AmphoraMessage *stationary;
-
 enum player_state_e {
 	idle,
 	walk,
@@ -17,6 +9,35 @@ enum player_state_e {
 enum player_facing_e {
 	n, s, e, w
 };
+
+/* Game globals */
+AmphoraImage *player;
+AmphoraImage *heart;
+AmphoraImage *rotating_heart;
+AmphoraMessage *hello;
+AmphoraMessage *timer;
+AmphoraMessage *stationary;
+enum player_state_e p_state = idle;
+enum player_facing_e p_facing = s;
+
+void
+end_player_attack(void) {
+	p_state = idle;
+	switch (p_facing) {
+		case n:
+			set_frameset(player, "IdleUp");
+			break;
+		case s:
+			set_frameset(player, "IdleDown");
+			break;
+		case e:
+			set_frameset(player, "IdleRight");
+			break;
+		case w:
+			set_frameset(player, "IdleLeft");
+			break;
+	}
+}
 
 void
 game_init(void) {
@@ -37,6 +58,10 @@ game_init(void) {
 	add_frameset(player, "WalkUp", 0, 69, 16, 24, 4, 30);
 	add_frameset(player, "IdleLeft", 0, 101, 16, 24, 1, 0);
 	add_frameset(player, "WalkLeft", 0, 101, 16, 24, 4, 30);
+	add_frameset(player, "AttackDown", 0, 132, 32, 24, 4, 5);
+	add_frameset(player, "AttackUp", 0, 164, 32, 24, 4, 5);
+	add_frameset(player, "AttackRight", 0, 196, 32, 24, 4, 5);
+	add_frameset(player, "AttackLeft", 0, 228, 32, 24, 4, 5);
 
 	add_frameset(heart, "Default", 63, 0, 16, 16, 1, 0);
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 4, 15);
@@ -53,8 +78,6 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static Uint8 hello_ticker = 0;
 	Uint8 player_speed = 1;
 	Vector2 screen_size = get_resolution();
-	static enum player_state_e p_state = idle;
-	static enum player_facing_e p_facing = s;
 
 	(void)save_data;
 
@@ -87,7 +110,24 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 		move_sprite(player, 0, player_speed);
 		p_facing = s;
 	}
-	if (!key_actions->left && !key_actions->right && !key_actions->up && !key_actions->down) {
+	if (key_actions->attack) {
+		p_state = atk;
+		switch(p_facing) {
+			case n:
+				play_oneshot(player, "AttackUp", end_player_attack);
+				break;
+			case s:
+				play_oneshot(player, "AttackDown", end_player_attack);
+				break;
+			case e:
+				play_oneshot(player, "AttackRight", end_player_attack);
+				break;
+			case w:
+				play_oneshot(player, "AttackLeft", end_player_attack);
+				break;
+		}
+	}
+	if (!key_actions->left && !key_actions->right && !key_actions->up && !key_actions->down && p_state == walk) {
 		p_state = idle;
 		switch (p_facing) {
 			case n:

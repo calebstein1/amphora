@@ -9,7 +9,8 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-void update_draw_sprite(const AmphoraImage *spr);
+int find_frameset(const AmphoraImage *spr, const char *name);
+void update_and_draw_sprite(const AmphoraImage *spr);
 
 /* File-scoped variables */
 static SDL_RWops *images[IMAGES_COUNT];
@@ -65,9 +66,11 @@ init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const
 	(*spr)->scale = scale;
 	(*spr)->flip = flip;
 	(*spr)->stationary = stationary;
+	(*spr)->playing_oneshot = false;
 	(*spr)->display = true;
 	(*spr)->garbage = false;
 	(*spr)->order = order;
+	(*spr)->callback = NULL;
 
 	return *spr;
 }
@@ -112,16 +115,28 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 
 void
 set_frameset(AmphoraImage *spr, const char *name) {
-	Uint16 i;
+	int frameset;
 
-	for (i = 0; i < spr->num_framesets; i++) {
-		if (SDL_strcmp(spr->frameset_labels[i], name) == 0) break;
-	}
-	if (i == spr->num_framesets) {
+	spr->playing_oneshot = false;
+	if ((frameset = find_frameset(spr, name)) == -1) {
 		SDL_LogWarn(SDL_LOG_PRIORITY_WARN, "Failed to update frameset\n");
 		return;
 	}
-	spr->current_frameset = i;
+	spr->current_frameset = frameset;
+}
+
+void
+play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
+	int frameset;
+
+	spr->playing_oneshot = true;
+	if ((frameset = find_frameset(spr, name)) == -1) {
+		SDL_LogWarn(SDL_LOG_PRIORITY_WARN, "Failed to update frameset\n");
+		return;
+	}
+	spr->current_frameset = frameset;
+	spr->framesets[frameset].current_frame = 0;
+	spr->callback = callback;
 }
 
 void
@@ -249,7 +264,7 @@ draw_all_sprites_and_gc(void) {
 			garbage = NULL;
 			sprite_slots_count--;
 		}
-		if (sprite_slot->display && sprite_slot->num_framesets > 0) update_draw_sprite(sprite_slot);
+		if (sprite_slot->display && sprite_slot->num_framesets > 0) update_and_draw_sprite(sprite_slot);
 
 		sprite_slot = sprite_slot->next;
 	}
@@ -261,14 +276,35 @@ draw_all_sprites_and_gc(void) {
  * Private functions
  */
 
+int
+find_frameset(const AmphoraImage *spr, const char *name) {
+	int i;
+
+	for (i = 0; i < spr->num_framesets; i++) {
+		if (SDL_strcmp(spr->frameset_labels[i], name) == 0) break;
+	}
+	if (i == spr->num_framesets) {
+		return -1;
+	}
+
+	return i;
+}
+
 void
-update_draw_sprite(const AmphoraImage *spr) {
+update_and_draw_sprite(const AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
 	SDL_Rect src, dst;
 	const Vector2 camera = get_camera();
 
 	if (frame_count - frameset->last_change > frameset->delay) {
-		if (++frameset->current_frame == frameset->num_frames) frameset->current_frame = 0;
+		if (++frameset->current_frame == frameset->num_frames) {
+			if (spr->playing_oneshot) {
+				frameset->current_frame--;
+				if (spr->callback) spr->callback();
+			} else {
+				frameset->current_frame = 0;
+			}
+		}
 		frameset->last_change = frame_count;
 	}
 	src = (SDL_Rect){

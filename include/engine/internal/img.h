@@ -17,14 +17,16 @@ struct sprite_slot_t {
 	Sint32 dx, dy;
 	Sint32 order;
 	Uint8 scale;
-	Uint16 current_frameset;
-	Uint16 num_framesets;
+	Sint32 current_frameset;
+	Sint32 num_framesets;
 	char **frameset_labels;
 	struct frameset_t *framesets;
 	bool flip : 1;
 	bool display : 1;
 	bool stationary : 1;
+	bool playing_oneshot : 1;
 	bool garbage : 1;
+	void (*callback)(void);
 	struct sprite_slot_t *next;
 };
 

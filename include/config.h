@@ -24,6 +24,7 @@
 	KMAP(up, SDLK_w, SDLK_UP)		\
 	KMAP(down, SDLK_s, SDLK_DOWN)		\
 	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT)	\
+	KMAP(attack, SDLK_SPACE, SDLK_SPACE)	\
 	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE)
 
 /* Load image resources */
