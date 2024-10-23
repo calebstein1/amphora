@@ -50,21 +50,21 @@ game_init(void) {
 	init_sprite_slot(&heart, Objects, -96, 32, 2, false, true, 11);
 	init_sprite_slot(&rotating_heart, Objects, 128, 72, 3, false, false, -1);
 
-	add_frameset(player, "IdleDown", 0, 5, 16, 24, 1, 0);
-	add_frameset(player, "WalkDown", 0, 5, 16, 24, 4, 30);
-	add_frameset(player, "IdleRight", 0, 37, 16, 24, 1, 0);
-	add_frameset(player, "WalkRight", 0, 37, 16, 24, 4, 30);
-	add_frameset(player, "IdleUp", 0, 69, 16, 24, 1, 0);
-	add_frameset(player, "WalkUp", 0, 69, 16, 24, 4, 30);
-	add_frameset(player, "IdleLeft", 0, 101, 16, 24, 1, 0);
-	add_frameset(player, "WalkLeft", 0, 101, 16, 24, 4, 30);
-	add_frameset(player, "AttackDown", 0, 132, 32, 24, 4, 5);
-	add_frameset(player, "AttackUp", 0, 164, 32, 24, 4, 5);
-	add_frameset(player, "AttackRight", 0, 196, 32, 24, 4, 5);
-	add_frameset(player, "AttackLeft", 0, 228, 32, 24, 4, 5);
+	add_frameset(player, "IdleDown", 0, 5, 16, 24, 0, 0, 1, 0);
+	add_frameset(player, "WalkDown", 0, 5, 16, 24, 0, 0, 4, 30);
+	add_frameset(player, "IdleRight", 0, 37, 16, 24, 0, 0, 1, 0);
+	add_frameset(player, "WalkRight", 0, 37, 16, 24, 0, 0, 4, 30);
+	add_frameset(player, "IdleUp", 0, 69, 16, 24, 0, 0, 1, 0);
+	add_frameset(player, "WalkUp", 0, 69, 16, 24, 0, 0, 4, 30);
+	add_frameset(player, "IdleLeft", 0, 101, 16, 24, 0, 0, 1, 0);
+	add_frameset(player, "WalkLeft", 0, 101, 16, 24, 0, 0, 4, 30);
+	add_frameset(player, "AttackDown", 0, 132, 32, 24, 8, 0, 4, 5);
+	add_frameset(player, "AttackUp", 0, 164, 32, 24, 8, 0, 4, 5);
+	add_frameset(player, "AttackRight", 0, 196, 32, 24, 8, 0, 4, 5);
+	add_frameset(player, "AttackLeft", 0, 228, 32, 24, 8, 0, 4, 5);
 
-	add_frameset(heart, "Default", 63, 0, 16, 16, 1, 0);
-	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 4, 15);
+	add_frameset(heart, "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
 	create_string(&hello, Roboto, 32, 16, 16, font_color, welcome_message, true);
 	create_string(&timer, Merriweather, 32, -16, 16, font_color, "0", true);

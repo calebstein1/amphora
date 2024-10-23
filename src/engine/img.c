@@ -22,8 +22,8 @@ Uint32 sprite_slots_count = 1;
 Vector2
 get_sprite_center(const AmphoraImage *spr) {
 	return (Vector2){
-		.x = spr->dx + (spr->framesets[spr->current_frameset].w / 2),
-		.y = spr->dy + (spr->framesets[spr->current_frameset].h / 2)
+		.x = spr->dx + (spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
+		.y = spr->dy + (spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
 	};
 }
 
@@ -76,7 +76,7 @@ init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const
 }
 
 void
-add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const Uint16 num_frames, const Uint16 delay) {
+add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const Sint32 off_x, const Sint32 off_y, const Uint16 num_frames, const Uint16 delay) {
 	/* TODO: Cascade error cases and free */
 	if (spr->framesets) {
 		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
@@ -103,7 +103,8 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 		.w = w,
 		.h = h,
 		.num_frames = num_frames,
-		.delay = delay
+		.delay = delay,
+		.position_offset = (Vector2){ off_x, off_y }
 	};
 	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate frameset label\n");
@@ -322,8 +323,8 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 		};
 	} else {
 		dst = (SDL_Rect){
-			.x = spr->dx - camera.x,
-			.y = spr->dy - camera.y,
+			.x = spr->dx - frameset->position_offset.x - camera.x,
+			.y = spr->dy - frameset->position_offset.y - camera.y,
 			.w = frameset->w * spr->scale,
 			.h = frameset->h * spr->scale
 		};

@@ -10,6 +10,7 @@ struct frameset_t {
 	Uint16 num_frames;
 	Uint16 delay;
 	Uint64 last_change;
+	Vector2 position_offset;
 };
 
 struct sprite_slot_t {
