@@ -26,7 +26,7 @@ AmphoraImage *init_sprite_slot(AmphoraImage **spr, ImageName name, Sint32 x, Sin
 void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
 void set_frameset(AmphoraImage *spr, const char *name);
-/* Play a one-shot animation, holding on the lat frame and executing a callback function when finished */
+/* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
 void play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
 /* Move a sprite by the supplied delta values */
 void move_sprite(AmphoraImage *spr, Sint32 delta_x, Sint32 delta_y);
