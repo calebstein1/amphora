@@ -1,9 +1,4 @@
-#include "engine/game_loop.h"
-#include "engine/img.h"
-#include "engine/input.h"
-#include "engine/render.h"
-#include "engine/ttf.h"
-#include "engine/util.h"
+#include "engine/amphora.h"
 
 /* Game globals */
 AmphoraImage *player;
