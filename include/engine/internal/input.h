@@ -1,6 +1,7 @@
 #ifndef INPUT_INTERNAL_H
 #define INPUT_INTERNAL_H
 
+#define MASK 0xfffffffffffffffe
 #define MAX_CONTROLLERS 4
 
 #include "engine/input.h"

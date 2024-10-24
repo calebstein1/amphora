@@ -93,17 +93,16 @@ handle_keydown(const SDL_Event *e) {
 void
 handle_keyup(const SDL_Event *e) {
 	Uint32 i;
-	Uint64 mask = 0xfffffffffffffffe;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key1[i]) {
-			key_actions.bits &= (rotate_left(mask, i));
+			key_actions.bits &= (rotate_left(MASK, i));
 			return;
 		}
 	}
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key2[i]) {
-			key_actions.bits &= (rotate_left(mask, i));
+			key_actions.bits &= (rotate_left(MASK, i));
 			return;
 		}
 	}
@@ -124,11 +123,10 @@ handle_gamepad_down(const SDL_Event *e) {
 void
 handle_gamepad_up(const SDL_Event *e) {
 	Uint32 i;
-	Uint64 mask = 0xfffffffffffffffe;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions.bits &= (rotate_left(mask, i));
+			key_actions.bits &= (rotate_left(MASK, i));
 			return;
 		}
 	}
