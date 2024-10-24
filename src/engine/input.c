@@ -82,12 +82,6 @@ handle_keydown(union input_state_u *key_actions, const SDL_Event *e) {
 			return;
 		}
 	}
-	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions->bits |= (1 << i);
-			return;
-		}
-	}
 }
 
 void
@@ -107,6 +101,25 @@ handle_keyup(union input_state_u *key_actions, const SDL_Event *e) {
 			return;
 		}
 	}
+}
+
+void
+handle_gamepad_down(union input_state_u *key_actions, const SDL_Event *e) {
+	Uint32 i;
+
+	for (i = 0; i < ACTION_COUNT; i++) {
+		if (e->cbutton.button == controller_buttons[i]) {
+			key_actions->bits |= (1 << i);
+			return;
+		}
+	}
+}
+
+void
+handle_gamepad_up(union input_state_u *key_actions, const SDL_Event *e) {
+	Uint32 i;
+	Uint64 mask = 0xfffffffffffffffe;
+
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
 			key_actions->bits &= (rotate_left(mask, i));

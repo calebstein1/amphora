@@ -21,10 +21,10 @@ event_loop(SDL_Event *e, union input_state_u *key_actions) {
 				handle_keyup(key_actions, e);
 				break;
 			case SDL_CONTROLLERBUTTONDOWN:
-				handle_keydown(key_actions, e);
+				handle_gamepad_down(key_actions, e);
 				break;
 			case SDL_CONTROLLERBUTTONUP:
-				handle_keyup(key_actions, e);
+				handle_gamepad_up(key_actions, e);
 				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				add_controller(e->cdevice.which);

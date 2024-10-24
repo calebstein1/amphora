@@ -24,5 +24,7 @@ void remove_controller(SDL_JoystickID id);
 void cleanup_controllers(void);
 void handle_keydown(union input_state_u *key_actions, const SDL_Event *e);
 void handle_keyup(union input_state_u *key_actions, const SDL_Event *e);
+void handle_gamepad_down(union input_state_u *key_actions, const SDL_Event *e);
+void handle_gamepad_up(union input_state_u *key_actions, const SDL_Event *e);
 
 #endif /* INPUT_INTERNAL_H */
