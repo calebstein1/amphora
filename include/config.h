@@ -18,14 +18,14 @@
 
 /* Map actions to keys here following the example in the comment */
 #define ACTIONS										\
-	/* KMAP(action, key1, key2, controller) */					\
-	KMAP(left, SDLK_a, SDLK_LEFT, SDL_CONTROLLER_BUTTON_DPAD_LEFT)			\
-	KMAP(right, SDLK_d, SDLK_RIGHT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT)		\
-	KMAP(up, SDLK_w, SDLK_UP, SDL_CONTROLLER_BUTTON_DPAD_UP)			\
-	KMAP(down, SDLK_s, SDLK_DOWN, SDL_CONTROLLER_BUTTON_DPAD_DOWN)			\
-	KMAP(dash, SDLK_LSHIFT, SDLK_RSHIFT, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)	\
-	KMAP(attack, SDLK_SPACE, SDLK_SPACE, SDL_CONTROLLER_BUTTON_A)			\
-	KMAP(quit, SDLK_ESCAPE, SDLK_ESCAPE, SDL_CONTROLLER_BUTTON_INVALID)
+	/* KMAP(action, key1, key2, controller) */		\
+	KMAP(left, a, LEFT, DPAD_LEFT)					\
+	KMAP(right, d, RIGHT, DPAD_RIGHT)				\
+	KMAP(up, w, UP, DPAD_UP)						\
+	KMAP(down, s, DOWN, DPAD_DOWN)					\
+	KMAP(dash, LSHIFT, RSHIFT, RIGHTSHOULDER)		\
+	KMAP(attack, SPACE, SPACE, A)					\
+	KMAP(quit, ESCAPE, ESCAPE, INVALID)
 
 /* Load image resources */
 #define IMAGES							\

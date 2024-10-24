@@ -10,17 +10,17 @@ Uint64 rotate_left(Uint64 n, Uint32 c); /* Rotate the bits of n to the left by c
 static union input_state_u key_actions;
 static SDL_GameController *controllers[MAX_CONTROLLERS];
 static SDL_Keycode key1[] = {
-#define KMAP(action, key1, key2, controller) key1,
+#define KMAP(action, key1, key2, controller) SDLK_##key1,
     	ACTIONS
 #undef KMAP
 };
 static SDL_Keycode key2[] = {
-#define KMAP(action, key1, key2, controller) key2,
+#define KMAP(action, key1, key2, controller) SDLK_##key2,
 	ACTIONS
 #undef KMAP
 };
 static SDL_GameControllerButton controller_buttons[] = {
-#define KMAP(action, key1, key2, controller) controller,
+#define KMAP(action, key1, key2, controller) SDL_CONTROLLER_BUTTON_##controller,
 	ACTIONS
 #undef KMAP
 };
