@@ -44,7 +44,9 @@ add_controller(Sint32 idx) {
 			break;
 		}
 	}
+#ifdef DEBUG
 	SDL_Log("Added controller %d to slot %d\n", SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controllers[idx])), i);
+#endif
 }
 
 void
@@ -58,7 +60,9 @@ remove_controller(SDL_JoystickID id) {
 			break;
 		}
 	}
+#ifdef DEBUG
 	SDL_Log("Removed joystick %d from slot %d\n", id, i);
+#endif
 }
 
 void
@@ -130,6 +134,17 @@ handle_gamepad_up(const SDL_Event *e) {
 			return;
 		}
 	}
+}
+
+Vector2
+handle_gamepad_joystick(const SDL_Event *e) {
+	Uint8 axis = e->caxis.axis;
+	Sint16 val = e->caxis.value;
+
+	(void)axis;
+	(void)val;
+
+	return (Vector2){ 0, 0 };
 }
 
 /*

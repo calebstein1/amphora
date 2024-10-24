@@ -4,6 +4,7 @@
 #define MASK 0xfffffffffffffffe
 #define MAX_CONTROLLERS 4
 
+#include "engine/internal/render.h"
 #include "engine/input.h"
 
 union input_state_u {
@@ -28,5 +29,6 @@ void handle_keydown(const SDL_Event *e);
 void handle_keyup(const SDL_Event *e);
 void handle_gamepad_down(const SDL_Event *e);
 void handle_gamepad_up(const SDL_Event *e);
+Vector2 handle_gamepad_joystick(const SDL_Event *e);
 
 #endif /* INPUT_INTERNAL_H */

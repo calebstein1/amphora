@@ -26,6 +26,9 @@ event_loop(SDL_Event *e) {
 			case SDL_CONTROLLERBUTTONUP:
 				handle_gamepad_up(e);
 				break;
+			case SDL_CONTROLLERAXISMOTION:
+				handle_gamepad_joystick(e);
+				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				add_controller(e->cdevice.which);
 				break;
