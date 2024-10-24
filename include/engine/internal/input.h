@@ -1,6 +1,8 @@
 #ifndef INPUT_INTERNAL_H
 #define INPUT_INTERNAL_H
 
+#define MAX_CONTROLLERS 4
+
 #include "engine/input.h"
 
 union input_state_u {
@@ -17,8 +19,7 @@ enum input_actions {
 
 _Static_assert(ACTION_COUNT <= 64, "Cannot define more than 64 actions");
 
-void find_controllers(void);
-void add_controller(SDL_JoystickID id);
+void add_controller(Sint32 idx);
 void remove_controller(SDL_JoystickID id);
 void cleanup_controllers(void);
 void handle_keydown(union input_state_u *key_actions, const SDL_Event *e);

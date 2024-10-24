@@ -33,7 +33,6 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL", SDL_GetError(), 0);
 		return -1;
 	}
-	find_controllers();
 
 	if (!IMG_Init(IMG_INIT_PNG)) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_image: %s\n", SDL_GetError());
