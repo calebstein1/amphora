@@ -151,6 +151,38 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 	spr->framesets[frameset].delay = delay;
 }
 
+AmphoraImage *
+reorder_sprite(AmphoraImage **spr, const Sint32 order) {
+	AmphoraImage *sprite_slot_temp = NULL;
+
+	if ((sprite_slot_temp = SDL_malloc(sizeof(AmphoraImage))) == NULL) {
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to reorder sprite\n");
+
+		return NULL;
+	}
+	SDL_memcpy(sprite_slot_temp, *spr, sizeof(AmphoraImage));
+	sprite_slot_temp->order = order;
+	while (1) {
+		if (sprite_slot->next == NULL) {
+			sprite_slot_temp->next = NULL;
+			sprite_slot->next = sprite_slot_temp;
+			break;
+		}
+		if (sprite_slot->next->order >= order) {
+			sprite_slot_temp->next = sprite_slot->next;
+			sprite_slot->next = sprite_slot_temp;
+			break;
+		}
+		sprite_slot = sprite_slot->next;
+	}
+	(*spr)->garbage = true;
+	*spr = sprite_slot_temp;
+	sprite_slots_count++;
+	sprite_slot = sprite_slots_head;
+
+	return *spr;
+}
+
 void
 move_sprite(AmphoraImage *spr, const Sint32 delta_x, const Sint32 delta_y) {
 	spr->dx += delta_x;
