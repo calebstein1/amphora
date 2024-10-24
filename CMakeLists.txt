@@ -12,7 +12,7 @@ set(VCPKG_LIBRARY_LINKAGE static)
 if(WIN32)
 	string(APPEND CMAKE_C_FLAGS_DEBUG " /DDEBUG /W4 /WX")
 else()
-	string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
+	string(APPEND CMAKE_C_FLAGS_DEBUG " -DDEBUG -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
 endif()
 
 find_package(SDL2 CONFIG REQUIRED)
