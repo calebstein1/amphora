@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(VCPKG_LIBRARY_LINKAGE static)
 
 if(WIN32)
-	string(APPEND CMAKE_C_FLAGS_DEBUG " /W4 /WX")
+	string(APPEND CMAKE_C_FLAGS_DEBUG " /DDEBUG /W4 /WX")
 else()
 	string(APPEND CMAKE_C_FLAGS_DEBUG " -fsanitize=address,undefined -Werror=all -Werror=pedantic -Wextra")
 endif()
