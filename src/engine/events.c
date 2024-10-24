@@ -20,6 +20,18 @@ event_loop(SDL_Event *e, union input_state_u *key_actions) {
 			case SDL_KEYUP:
 				handle_keyup(key_actions, e);
 				break;
+			case SDL_CONTROLLERBUTTONDOWN:
+				handle_keydown(key_actions, e);
+				break;
+			case SDL_CONTROLLERBUTTONUP:
+				handle_keyup(key_actions, e);
+				break;
+			case SDL_CONTROLLERDEVICEADDED:
+				add_controller(e->cdevice.which);
+				break;
+			case SDL_CONTROLLERDEVICEREMOVED:
+				remove_controller(e->cdevice.which);
+				break;
 			case SDL_WINDOWEVENT:
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 

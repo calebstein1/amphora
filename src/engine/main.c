@@ -28,11 +28,12 @@ main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL", SDL_GetError(), 0);
 		return -1;
 	}
+	find_controllers();
 
 	if (!IMG_Init(IMG_INIT_PNG)) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_image: %s\n", SDL_GetError());
@@ -84,6 +85,7 @@ main(int argc, char **argv) {
 	free_fonts();
 #endif
 	cleanup_render();
+	cleanup_controllers();
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
