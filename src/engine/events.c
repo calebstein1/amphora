@@ -7,7 +7,7 @@
  */
 
 Uint32
-event_loop(SDL_Event *e, union input_state_u *key_actions) {
+event_loop(SDL_Event *e) {
 	Vector2 window_size;
 
 	while (SDL_PollEvent(e)) {
@@ -15,16 +15,16 @@ event_loop(SDL_Event *e, union input_state_u *key_actions) {
 			case SDL_QUIT:
 				return e->type;
 			case SDL_KEYDOWN:
-				handle_keydown(key_actions, e);
+				handle_keydown(e);
 				break;
 			case SDL_KEYUP:
-				handle_keyup(key_actions, e);
+				handle_keyup(e);
 				break;
 			case SDL_CONTROLLERBUTTONDOWN:
-				handle_gamepad_down(key_actions, e);
+				handle_gamepad_down(e);
 				break;
 			case SDL_CONTROLLERBUTTONUP:
-				handle_gamepad_up(key_actions, e);
+				handle_gamepad_up(e);
 				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				add_controller(e->cdevice.which);

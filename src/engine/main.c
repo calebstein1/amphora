@@ -21,7 +21,6 @@ main(int argc, char **argv) {
 	Uint32 frame_time;
 
 	SDL_Event e;
-	static union input_state_u key_actions;
 	static SaveData save_data;
 
 	/* SDL requires these but we're not actually using them */
@@ -64,9 +63,9 @@ main(int argc, char **argv) {
 		frame_start = SDL_GetTicks64();
 		frame_count++;
 
-		if (event_loop(&e, &key_actions) == SDL_QUIT) quit_requested = true;
+		if (event_loop(&e) == SDL_QUIT) quit_requested = true;
 		clear_bg();
-		game_loop(frame_count, &key_actions.state, &save_data);
+		game_loop(frame_count, get_key_actions_state(), &save_data);
 		draw_all_sprites_and_gc();
 
 		SDL_RenderPresent(get_renderer());

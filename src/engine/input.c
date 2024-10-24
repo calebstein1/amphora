@@ -7,6 +7,7 @@
 Uint64 rotate_left(Uint64 n, Uint32 c); /* Rotate the bits of n to the left by c bits (MSB becomes LSB) */
 
 /* File-scoped variables */
+static union input_state_u key_actions;
 static SDL_GameController *controllers[MAX_CONTROLLERS];
 static SDL_Keycode key1[] = {
 #define KMAP(action, key1, key2, controller) key1,
@@ -27,6 +28,11 @@ static SDL_GameControllerButton controller_buttons[] = {
 /*
  * Internal functions
  */
+
+struct input_state_t *
+get_key_actions_state(void) {
+	return &key_actions.state;
+}
 
 void
 add_controller(Sint32 idx) {
@@ -67,62 +73,62 @@ cleanup_controllers(void) {
 }
 
 void
-handle_keydown(union input_state_u *key_actions, const SDL_Event *e) {
+handle_keydown(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key1[i]) {
-			key_actions->bits |= (1 << i);
+			key_actions.bits |= (1 << i);
 			return;
 		}
 	}
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key2[i]) {
-			key_actions->bits |= (1 << i);
+			key_actions.bits |= (1 << i);
 			return;
 		}
 	}
 }
 
 void
-handle_keyup(union input_state_u *key_actions, const SDL_Event *e) {
+handle_keyup(const SDL_Event *e) {
 	Uint32 i;
 	Uint64 mask = 0xfffffffffffffffe;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key1[i]) {
-			key_actions->bits &= (rotate_left(mask, i));
+			key_actions.bits &= (rotate_left(mask, i));
 			return;
 		}
 	}
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key2[i]) {
-			key_actions->bits &= (rotate_left(mask, i));
+			key_actions.bits &= (rotate_left(mask, i));
 			return;
 		}
 	}
 }
 
 void
-handle_gamepad_down(union input_state_u *key_actions, const SDL_Event *e) {
+handle_gamepad_down(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions->bits |= (1 << i);
+			key_actions.bits |= (1 << i);
 			return;
 		}
 	}
 }
 
 void
-handle_gamepad_up(union input_state_u *key_actions, const SDL_Event *e) {
+handle_gamepad_up(const SDL_Event *e) {
 	Uint32 i;
 	Uint64 mask = 0xfffffffffffffffe;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions->bits &= (rotate_left(mask, i));
+			key_actions.bits &= (rotate_left(mask, i));
 			return;
 		}
 	}

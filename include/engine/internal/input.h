@@ -19,12 +19,13 @@ enum input_actions {
 
 _Static_assert(ACTION_COUNT <= 64, "Cannot define more than 64 actions");
 
+struct input_state_t *get_key_actions_state(void);
 void add_controller(Sint32 idx);
 void remove_controller(SDL_JoystickID id);
 void cleanup_controllers(void);
-void handle_keydown(union input_state_u *key_actions, const SDL_Event *e);
-void handle_keyup(union input_state_u *key_actions, const SDL_Event *e);
-void handle_gamepad_down(union input_state_u *key_actions, const SDL_Event *e);
-void handle_gamepad_up(union input_state_u *key_actions, const SDL_Event *e);
+void handle_keydown(const SDL_Event *e);
+void handle_keyup(const SDL_Event *e);
+void handle_gamepad_down(const SDL_Event *e);
+void handle_gamepad_up(const SDL_Event *e);
 
 #endif /* INPUT_INTERNAL_H */
