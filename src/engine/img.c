@@ -339,7 +339,7 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
 	SDL_Rect src, dst;
 	const Vector2 camera = get_camera();
-	Vector2 logical_size;
+	Vector2 logical_size = get_render_logical_size();
 
 	if (frame_count - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) {
@@ -374,10 +374,7 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 		};
 	}
 
-	if (spr->stationary) {
-		logical_size = get_render_logical_size();
-		set_render_logical_size(get_resolution());
-	}
+	if (spr->stationary) set_render_logical_size(get_resolution());
 	render_texture(open_images[spr->image], &src, &dst);
 	if (spr->stationary) set_render_logical_size(logical_size);
 }
