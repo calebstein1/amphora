@@ -359,8 +359,8 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	};
 	if (spr->stationary) {
 		dst = (SDL_Rect){
-			.x = spr->dx > 0 ? spr->dx : get_resolution().x + spr->dx - frameset->w,
-			.y = spr->dy > 0 ? spr->dy : get_resolution().y + spr->dy - frameset->h,
+			.x = spr->dx > 0 ? spr->dx : get_render_logical_size().x + spr->dx - frameset->w,
+			.y = spr->dy > 0 ? spr->dy : get_render_logical_size().y + spr->dy - frameset->h,
 			.w = frameset->w * spr->scale,
 			.h = frameset->h * spr->scale
 		};
