@@ -34,8 +34,8 @@ set_camera(Sint32 x, Sint32 y) {
 }
 
 void
-set_camera_zoom(double factor, Uint16 delay) {
-	static double current_factor = 1;
+set_camera_zoom(Uint16 factor, Uint16 delay) {
+	static Uint16 current_factor = 100;
 	static Vector2 *scale_steps = NULL;
 	static Uint16 scale_steps_index = 0;
 	static Uint16 scale_steps_count = 0;
@@ -43,8 +43,8 @@ set_camera_zoom(double factor, Uint16 delay) {
 	Vector2 current_logical_size = get_render_logical_size();
 	int i;
 	Vector2 step_size = {
-		.x = (current_logical_size.x - (Sint32)(current_resolution.x / factor)) / (delay ? delay : 1),
-		.y = (current_logical_size.y - (Sint32)(current_resolution.y / factor)) / (delay ? delay : 1)
+		.x = (current_logical_size.x - ((current_resolution.x * 100) / factor)) / (delay ? delay : 1),
+		.y = (current_logical_size.y - ((current_resolution.y * 100) / factor)) / (delay ? delay : 1)
 	};
 
 	if (!scale_steps && delay > 0) {
@@ -62,16 +62,15 @@ set_camera_zoom(double factor, Uint16 delay) {
 				.y = render_logical_size.y - (step_size.y * (i + 1))
 			};
 		}
-		scale_steps[scale_steps_count - 1] = (Vector2){
-			.x = (Sint32)(current_resolution.x / factor),
-			.y = (Sint32)(current_resolution.y / factor)
-		};
 	}
 	if (scale_steps_index == scale_steps_count || factor != current_factor) {
 		SDL_free(scale_steps);
 		scale_steps = NULL;
 		scale_steps_index = 0;
 		scale_steps_count = 0;
+#ifdef DEBUG
+		SDL_Log("Finished scaling to %d, %d\n", current_logical_size.x, current_logical_size.y);
+#endif
 		return;
 	}
 	set_render_logical_size(scale_steps[scale_steps_index++]);
@@ -79,7 +78,7 @@ set_camera_zoom(double factor, Uint16 delay) {
 
 void
 reset_camera_zoom(Uint16 delay) {
-	set_camera_zoom(1, delay);
+	set_camera_zoom(100, delay);
 }
 
 SDL_Color

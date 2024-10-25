@@ -19,7 +19,7 @@ Vector2 get_camera(void);
 /* Set the location of the camera's top left point */
 void set_camera(Sint32 x, Sint32 y);
 /* Set the zoom factor for the camera */
-void set_camera_zoom(double factor, Uint16 delay);
+void set_camera_zoom(Uint16 factor, Uint16 delay);
 /* Reset the camera zoom */
 void reset_camera_zoom(Uint16 delay);
 /* Gets the current background color */
