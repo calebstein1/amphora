@@ -27,7 +27,7 @@ struct sprite_slot_t {
 	bool stationary : 1;
 	bool playing_oneshot : 1;
 	bool garbage : 1;
-	void (*callback)(void);
+	CallbackFn callback;
 	struct sprite_slot_t *next;
 };
 
