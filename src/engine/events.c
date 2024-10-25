@@ -8,8 +8,6 @@
 
 Uint32
 event_loop(SDL_Event *e) {
-	Vector2 window_size;
-
 	while (SDL_PollEvent(e)) {
 		switch (e->type) {
 			case SDL_QUIT:
@@ -38,8 +36,7 @@ event_loop(SDL_Event *e) {
 			case SDL_WINDOWEVENT:
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 
-				window_size = get_resolution();
-				SDL_RenderSetLogicalSize(get_renderer(), window_size.x, window_size.y);
+				set_render_logical_size(get_resolution());
 		}
 	}
 

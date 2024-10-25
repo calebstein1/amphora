@@ -25,6 +25,7 @@
 	KMAP(down, s, DOWN, DPAD_DOWN)					\
 	KMAP(dash, LSHIFT, RSHIFT, RIGHTSHOULDER)		\
 	KMAP(attack, SPACE, SPACE, A)					\
+	KMAP(zoom, m, m, LEFTSHOULDER)					\
 	KMAP(quit, ESCAPE, ESCAPE, INVALID)
 
 /* Load image resources */

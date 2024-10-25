@@ -5,6 +5,7 @@
 
 int init_render(void);
 void cleanup_render(void);
+void set_render_logical_size(Vector2 size);
 void clear_bg(void);
 SDL_Window *get_window(void);
 SDL_Renderer *get_renderer(void);
