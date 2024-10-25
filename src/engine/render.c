@@ -35,20 +35,51 @@ set_camera(Sint32 x, Sint32 y) {
 
 void
 set_camera_zoom(double factor, Uint16 delay) {
-	Vector2 resolution = get_resolution();
-	Vector2 new_size = {
-		.x = (Sint32)(resolution.x / factor),
-		.y = (Sint32)(resolution.y / factor)
+	static double current_factor = 1;
+	static Vector2 *scale_steps = NULL;
+	static Uint16 scale_steps_index = 0;
+	static Uint16 scale_steps_count = 0;
+	Vector2 current_resolution = get_resolution();
+	Vector2 current_logical_size = get_render_logical_size();
+	int i;
+	Vector2 step_size = {
+		.x = (current_logical_size.x - (Sint32)(current_resolution.x / factor)) / (delay ? delay : 1),
+		.y = (current_logical_size.y - (Sint32)(current_resolution.y / factor)) / (delay ? delay : 1)
 	};
 
-	set_render_logical_size(new_size);
-	(void)delay;
+	if (!scale_steps && delay > 0) {
+		scale_steps_count = delay;
+		if (factor == current_factor) return;
+
+		current_factor = factor;
+		if (!((scale_steps = SDL_malloc(delay * sizeof(Vector2))))) {
+			SDL_LogWarn(SDL_LOG_CATEGORY_ERROR, "Failed to allocate scale steps\n");
+			return;
+		}
+		for (i = 0; i < scale_steps_count; i++) {
+			scale_steps[i] = (Vector2){
+				.x = render_logical_size.x - (step_size.x * (i + 1)),
+				.y = render_logical_size.y - (step_size.y * (i + 1))
+			};
+		}
+		scale_steps[scale_steps_count - 1] = (Vector2){
+			.x = (Sint32)(current_resolution.x / factor),
+			.y = (Sint32)(current_resolution.y / factor)
+		};
+	}
+	if (scale_steps_index == scale_steps_count || factor != current_factor) {
+		SDL_free(scale_steps);
+		scale_steps = NULL;
+		scale_steps_index = 0;
+		scale_steps_count = 0;
+		return;
+	}
+	set_render_logical_size(scale_steps[scale_steps_index++]);
 }
 
 void
 reset_camera_zoom(Uint16 delay) {
-	set_render_logical_size(get_resolution());
-	(void)delay;
+	set_camera_zoom(1, delay);
 }
 
 SDL_Color

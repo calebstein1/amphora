@@ -150,9 +150,9 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 		}
 	}
 	if (key_actions->zoom) {
-		set_camera_zoom(1.5, 0);
+		set_camera_zoom(1.5, 60);
 	} else {
-		reset_camera_zoom(0);
+		reset_camera_zoom(60);
 	}
 	if (key_actions->quit) {
 		quit_game();
