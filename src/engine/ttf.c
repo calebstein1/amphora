@@ -95,11 +95,12 @@ void
 render_string(const AmphoraMessage *msg) {
 	SDL_Rect pos_adj;
 	const Vector2 camera = get_camera();
+	Vector2 logical_size;
 
 	if (msg->stationary) {
 		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_render_logical_size().x + msg->rectangle.x - msg->rectangle.w,
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_render_logical_size().y + msg->rectangle.y - msg->rectangle.h,
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
@@ -112,7 +113,12 @@ render_string(const AmphoraMessage *msg) {
 		};
 	}
 
+	if (msg->stationary) {
+		logical_size = get_render_logical_size();
+		set_render_logical_size(get_resolution());
+	}
 	render_texture(msg->texture, NULL, &pos_adj);
+	if (msg->stationary) set_render_logical_size(logical_size);
 }
 
 /*
