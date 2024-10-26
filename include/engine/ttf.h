@@ -19,6 +19,9 @@ enum fonts_e {
 	FONTS_COUNT
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Create a string */
 AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, SDL_Color color, const char *text, bool stationary);
 /* Get the number of characters in a message */
@@ -29,6 +32,9 @@ AmphoraMessage *update_string_text(AmphoraMessage **msg, const char *text);
 AmphoraMessage *update_string_n(AmphoraMessage **msg, size_t n);
 /* Display an AmphoraMessage on the screen */
 void render_string(const AmphoraMessage *msg);
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 #endif /* AMPHORA_TTF_H */

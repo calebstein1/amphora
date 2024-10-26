@@ -10,6 +10,9 @@ typedef struct vector2_t {
 
 typedef Vector2 Camera;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Get the resolution */
 Vector2 get_resolution(void);
 /* Get the renderer logical size */
@@ -26,5 +29,8 @@ void reset_camera_zoom(Uint16 delay);
 SDL_Color get_bg(void);
 /* Sets the background color */
 void set_bg(SDL_Color color);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* UNTITLED_PLATFORMER_RENDER_H */

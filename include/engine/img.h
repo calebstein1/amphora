@@ -19,6 +19,9 @@ typedef enum images_e {
 typedef struct sprite_slot_t AmphoraImage;
 typedef void (*CallbackFn)(void);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Gets the pixel position of the center of a sprite */
 Vector2 get_sprite_center(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
@@ -41,5 +44,8 @@ void show_sprite(AmphoraImage *spr);
 void hide_sprite(AmphoraImage *spr);
 /* Free a sprite slot */
 void *release_sprite_slot(AmphoraImage **spr);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* UNTITLED_PLATFORMER_IMG_H */
