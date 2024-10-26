@@ -1,5 +1,6 @@
 #define BIN_LOADER
 #include "config.h"
+#include "resources.h"
 
 define(`_incbin',dnl
 `
@@ -20,7 +21,7 @@ $1_size:
 #define LOADIMG(name, path) _incbin(_##name, path)
 	IMAGES
 #undef LOADIMG
-#ifdef ENABLE_FONTS
+#ifNdef DISABLE_FONTS
 #define LOADFONT(name, path) _incbin(_##name, path)
 	FONTS
 #undef LOADFONT

@@ -39,7 +39,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 	if (TTF_Init() < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
@@ -78,7 +78,7 @@ main(int argc, char **argv) {
 
 	game_shutdown();
 	cleanup_sprites();
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 	free_all_strings();
 	free_fonts();
 #endif

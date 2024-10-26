@@ -7,8 +7,9 @@
 #include "engine/render.h"
 
 #include "config.h"
+#include "resources.h"
 
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 
 typedef struct amphora_message_t AmphoraMessage;
 

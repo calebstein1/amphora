@@ -7,7 +7,7 @@
 #include "engine/util.h"
 #include "engine/render.h"
 
-#include "config.h"
+#include "resources.h"
 
 typedef enum images_e {
 #define LOADIMG(name, path) name,

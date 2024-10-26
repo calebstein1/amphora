@@ -7,7 +7,7 @@
 
 #include "config.h"
 
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 #define OPEN_MESSAGES_BATCH_COUNT 8
 
 /* Prototypes for private functions */
