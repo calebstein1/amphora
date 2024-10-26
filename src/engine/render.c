@@ -68,8 +68,9 @@ set_camera_zoom(Uint16 factor, Uint16 delay) {
 		scale_steps = NULL;
 		scale_steps_index = 0;
 		scale_steps_count = 0;
+		if (current_factor == 100) set_render_logical_size(current_resolution);
 #ifdef DEBUG
-		SDL_Log("Finished scaling to %d, %d\n", current_logical_size.x, current_logical_size.y);
+		SDL_Log("Finished scaling to %d, %d\n", get_render_logical_size().x, get_render_logical_size().y);
 #endif
 		return;
 	}
