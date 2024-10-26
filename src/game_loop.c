@@ -77,7 +77,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
 	Uint8 player_speed;
-	Vector2 screen_size = get_render_logical_size();
+	Vector2 screen_size;
 
 	(void)save_data;
 
@@ -167,14 +167,15 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 		update_string_n(&hello, ++hello_ticker);
 	}
 
-	render_string(hello);
-	render_string(timer);
-	render_string(stationary);
-
+	screen_size = get_render_logical_size();
 	camera_location = get_sprite_center(player);
 	camera_location.x -= (screen_size.x / 2);
 	camera_location.y -= (screen_size.y / 2);
 	set_camera(camera_location.x, camera_location.y);
+
+	render_string(hello);
+	render_string(timer);
+	render_string(stationary);
 }
 
 void
