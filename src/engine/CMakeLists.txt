@@ -4,4 +4,5 @@ add_library(amphora_engine
 	img.c
 	input.c
 	events.c
-	ttf.c)
+	ttf.c
+	tilemap.c)

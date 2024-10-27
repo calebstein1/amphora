@@ -26,6 +26,11 @@ $1_size:
 	FONTS
 #undef LOADFONT
 #endif
+#ifndef DISABLE_TILEMAP
+#define LOADMAP(name, path) _incbin(_##name, path)
+	MAPS
+#undef LOADMAP
+#endif
 #else
 #define LOADIMG(name, path) _incbin(name, path)
 	IMAGES
@@ -34,6 +39,11 @@ $1_size:
 #define LOADFONT(name, path) _incbin(name, path)
 	FONTS
 #undef LOADFONT
+#endif
+#ifndef DISABLE_TILEMAP
+#define LOADMAP(name, path) _incbin(name, path)
+	MAPS
+#undef LOADMAP
 #endif
 #endif
 

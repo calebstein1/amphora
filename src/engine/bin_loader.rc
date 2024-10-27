@@ -10,5 +10,10 @@ IMAGES
 FONTS
 #undef LOADFONT
 #endif
+#ifndef DISABLE_TILEMAP
+#define LOADMAP(name, path) name TILEMAP path
+MAPS
+#undef LOADMAP
+#endif
 
 #undef BIN_LOADER

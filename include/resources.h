@@ -12,4 +12,8 @@
 	LOADFONT(Merriweather, "../content/font/Merriweather/Merriweather-Regular.ttf")	\
 	LOADFONT(Roboto, "../content/font/Roboto/Roboto-Regular.ttf")
 
-#endif //RESOURCES_H
+#define MAPS							\
+	/* LOADMAP(name, path) */				\
+	LOADMAP(Overworld, "../content/maps/overworld.tmx")
+
+#endif /* RESOURCES_H */

@@ -6,6 +6,7 @@
 #include "engine/img.h"
 #include "engine/input.h"
 #include "engine/render.h"
+#include "engine/tilemap.h"
 #include "engine/ttf.h"
 #include "engine/util.h"
 
