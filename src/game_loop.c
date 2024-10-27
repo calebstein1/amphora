@@ -46,9 +46,9 @@ game_init(void) {
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
 	set_bg((SDL_Color){ 0x87, 0xce, 0xeb, 0xff });
-	init_sprite_slot(&player, Character, 96, 148, 2, false, false, 10);
-	init_sprite_slot(&heart, Objects, -96, 32, 2, false, true, 11);
-	init_sprite_slot(&rotating_heart, Objects, 128, 72, 3, false, false, -1);
+	init_sprite_slot(&player, "Character", 96, 148, 2, false, false, 10);
+	init_sprite_slot(&heart, "Objects", -96, 32, 2, false, true, 11);
+	init_sprite_slot(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 
 	add_frameset(player, "IdleDown", 0, 5, 16, 24, 0, 0, 1, 0);
 	add_frameset(player, "WalkDown", 0, 5, 16, 24, 0, 0, 4, 30);
@@ -66,9 +66,9 @@ game_init(void) {
 	add_frameset(heart, "Default", 63, 0, 16, 16, 0, 0, 1, 0);
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
-	create_string(&hello, Roboto, 32, 16, 16, font_color, welcome_message, true);
-	create_string(&timer, Merriweather, 32, -16, 16, font_color, "0", true);
-	create_string(&stationary, Merriweather, 16, 76, 132, font_color, message, false);
+	create_string(&hello, "Roboto", 32, 16, 16, font_color, welcome_message, true);
+	create_string(&timer, "Merriweather", 32, -16, 16, font_color, "0", true);
+	create_string(&stationary, "Merriweather", 16, 76, 132, font_color, message, false);
 }
 
 void

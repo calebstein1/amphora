@@ -9,6 +9,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
+int get_img_by_name(const char *name);
 int find_frameset(const AmphoraImage *spr, const char *name);
 void update_and_draw_sprite(const AmphoraImage *spr);
 
@@ -17,6 +18,11 @@ static SDL_RWops *images[IMAGES_COUNT];
 static SDL_Texture *open_images[IMAGES_COUNT];
 static AmphoraImage *sprite_slot;
 static AmphoraImage *sprite_slots_head;
+static const char *img_names[] = {
+#define LOADIMG(name, path) #name,
+	IMAGES
+#undef LOADIMG
+};
 Uint32 sprite_slots_count = 1;
 
 Vector2
@@ -28,13 +34,19 @@ get_sprite_center(const AmphoraImage *spr) {
 }
 
 AmphoraImage *
-init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
+init_sprite_slot(AmphoraImage **spr, const char *name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *sprite_slot_temp = NULL;
+	int idx;
 
 	if (*spr) return *spr;
 
-	if (!open_images[name]) {
-		open_images[name] = IMG_LoadTexture_RW(get_renderer(), images[name], 0);
+	if ((idx = get_img_by_name(name)) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate image %s\n", name);
+		return NULL;
+	}
+
+	if (!open_images[idx]) {
+		open_images[idx] = IMG_LoadTexture_RW(get_renderer(), images[idx], 0);
 	}
 
 	if ((sprite_slot_temp = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
@@ -60,7 +72,7 @@ init_sprite_slot(AmphoraImage **spr, const ImageName name, const Sint32 x, const
 	sprite_slots_count++;
 	sprite_slot = sprite_slots_head;
 
-	(*spr)->image = name;
+	(*spr)->image = idx;
 	(*spr)->dx = x;
 	(*spr)->dy = y;
 	(*spr)->scale = scale;
@@ -227,11 +239,6 @@ init_img(void) {
 	HGLOBAL img_resource;
 	SDL_RWops *img_rw;
 	int i;
-	const char *img_names[] = {
-#define LOADIMG(name, path) #name,
-		IMAGES
-#undef LOADIMG
-	};
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
 		if (!((img_info = FindResourceA(NULL, img_names[i], "PNG_IMG")))) {
@@ -248,11 +255,11 @@ init_img(void) {
 		images[i] = img_rw;
 	}
 #else
-#define LOADIMG(name, path) extern char name[]; extern int name##_size;
+#define LOADIMG(name, path) extern char name##_im[]; extern int name##_im_size;
 	IMAGES
 #undef LOADIMG
 	SDL_RWops **img_ptr = images;
-#define LOADIMG(name, path) *img_ptr = SDL_RWFromConstMem(name, name##_size); img_ptr++;
+#define LOADIMG(name, path) *img_ptr = SDL_RWFromConstMem(name##_im, name##_im_size); img_ptr++;
 	IMAGES
 #undef LOADIMG
 #endif
@@ -319,6 +326,16 @@ draw_all_sprites_and_gc(void) {
 /*
  * Private functions
  */
+
+int
+get_img_by_name(const char *name) {
+	int i;
+
+	for (i = 0; i < IMAGES_COUNT; i++) {
+		if (SDL_strcmp(name, img_names[i]) == 0) return i;
+	}
+	return -1;
+}
 
 int
 find_frameset(const AmphoraImage *spr, const char *name) {

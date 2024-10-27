@@ -13,7 +13,7 @@
 typedef struct amphora_message_t AmphoraMessage;
 
 enum fonts_e {
-#define LOADFONT(name, path) name,
+#define LOADFONT(name, path) name##_ft,
 	FONTS
 #undef LOADFONT
 	FONTS_COUNT
@@ -23,7 +23,7 @@ enum fonts_e {
 extern "C" {
 #endif
 /* Create a string */
-AmphoraMessage *create_string(AmphoraMessage **msg, enum fonts_e font_name, int pt, int x, int y, SDL_Color color, const char *text, bool stationary);
+AmphoraMessage *create_string(AmphoraMessage **msg, const char *name, int pt, int x, int y, SDL_Color color, const char *text, bool stationary);
 /* Get the number of characters in a message */
 size_t get_string_length(const AmphoraMessage *msg);
 /* Update the text in a string */
