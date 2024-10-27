@@ -23,9 +23,10 @@
 	KMAP(right, d, RIGHT, DPAD_RIGHT)				\
 	KMAP(up, w, UP, DPAD_UP)						\
 	KMAP(down, s, DOWN, DPAD_DOWN)					\
-	KMAP(dash, LSHIFT, RSHIFT, RIGHTSHOULDER)		\
+	KMAP(dash, LSHIFT, RSHIFT, B)		\
 	KMAP(attack, SPACE, SPACE, A)					\
-	KMAP(zoom, m, m, LEFTSHOULDER)					\
+	KMAP(zoom, m, m, LEFTSHOULDER)              \
+	KMAP(expand, n, n, RIGHTSHOULDER)                         \
 	KMAP(quit, ESCAPE, ESCAPE, INVALID)
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */
