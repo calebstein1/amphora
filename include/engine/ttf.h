@@ -1,3 +1,4 @@
+#ifndef DISABLE_FONTS
 #ifndef AMPHORA_TTF_H
 #define AMPHORA_TTF_H
 
@@ -8,8 +9,6 @@
 
 #include "config.h"
 #include "resources.h"
-
-#ifndef DISABLE_FONTS
 
 typedef struct amphora_message_t AmphoraMessage;
 
@@ -37,5 +36,5 @@ void render_string(const AmphoraMessage *msg);
 }
 #endif
 
-#endif
 #endif /* AMPHORA_TTF_H */
+#endif
