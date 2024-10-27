@@ -14,6 +14,6 @@
 
 #define MAPS							\
 	/* LOADMAP(name, path) */				\
-	LOADMAP(Overworld, "../content/maps/overworld.tmx")
+	LOADMAP(OverworldMap, "../content/maps/overworld.tmx")
 
 #endif /* RESOURCES_H */
