@@ -9,7 +9,7 @@
 
 union input_state_u {
 	struct input_state_t state; /* Individual flags for the named input actions */
-	unsigned int bits; /* The raw input bitfield */
+	Uint64 bits; /* The raw input bitfield */
 };
 
 enum input_actions {
