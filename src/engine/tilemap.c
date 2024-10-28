@@ -15,7 +15,7 @@ static char *map_names[] = {
 #undef LOADMAP
 };
 static Uint32 map_sizes[MAPS_COUNT];
-static Uint8 *map_data[MAPS_COUNT];
+static char *map_data[MAPS_COUNT];
 
 /*
  * Internal functions
@@ -39,7 +39,7 @@ init_maps(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load map resource... Amphora will crash now", 0);
 			return -1;
 		}
-		map_data[i] = (Uint8 *)map_resource;
+		map_data[i] = (char *)map_resource;
 		map_sizes[i] = SizeofResource(NULL, map_info);
 	}
 #else
@@ -47,7 +47,7 @@ init_maps(void) {
 	MAPS
 #undef LOADMAP
 	Uint32 *map_sizes_ptr = map_sizes;
-	Uint8 **map_data_ptr = map_data;
+	char **map_data_ptr = map_data;
 #define LOADMAP(name, path) *map_sizes_ptr = name##_tm_size; *map_data_ptr = name##_tm; map_sizes_ptr++; map_data_ptr++;
 	MAPS
 #undef LOADMAP
