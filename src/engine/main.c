@@ -4,6 +4,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
 
@@ -48,6 +49,13 @@ main(int argc, char **argv) {
 	if (init_fonts() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
+		return -1;
+	}
+#endif
+#ifndef DISABLE_TILEMAP
+	if (init_maps() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load tilemap data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load tilemap data", "Failed to load tilemap data", 0);
 		return -1;
 	}
 #endif
