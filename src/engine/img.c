@@ -131,7 +131,7 @@ set_frameset(AmphoraImage *spr, const char *name) {
 
 	spr->playing_oneshot = false;
 	if ((frameset = find_frameset(spr, name)) == -1) {
-		SDL_LogWarn(SDL_LOG_PRIORITY_WARN, "Failed to update frameset\n");
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
 	spr->current_frameset = frameset;
@@ -143,7 +143,7 @@ play_oneshot(AmphoraImage *spr, const char *name, const CallbackFn callback) {
 
 	spr->playing_oneshot = true;
 	if ((frameset = find_frameset(spr, name)) == -1) {
-		SDL_LogWarn(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset\n");
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
 	spr->current_frameset = frameset;
@@ -156,7 +156,7 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
-		SDL_LogWarn(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset\n");
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
 	spr->framesets[frameset].delay = delay;
