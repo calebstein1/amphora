@@ -52,6 +52,11 @@ init_maps(void) {
 	MAPS
 #undef LOADMAP
 #endif
+#ifdef DEBUG
+	for (i = 0; i < MAPS_COUNT; i++) {
+		SDL_Log("Found map %s\n", map_names[i]);
+	}
+#endif
 
 	return 0;
 }

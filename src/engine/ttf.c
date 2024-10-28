@@ -165,6 +165,11 @@ init_fonts(void) {
 	FONTS
 #undef LOADFONT
 #endif
+#ifdef DEBUG
+	for (i = 0; i < FONTS_COUNT; i++) {
+		SDL_Log("Found font %s\n", font_names[i]);
+	}
+#endif
 	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
 		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
 	} else {

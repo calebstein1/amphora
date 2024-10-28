@@ -262,6 +262,11 @@ init_img(void) {
 	IMAGES
 #undef LOADIMG
 #endif
+#ifdef DEBUG
+	for (i = 0; i < IMAGES_COUNT; i++) {
+		SDL_Log("Found image %s\n", img_names[i]);
+	}
+#endif
 	if ((sprite_slot = SDL_malloc(sizeof(AmphoraImage))) == NULL) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize sprite slots\n");
 
