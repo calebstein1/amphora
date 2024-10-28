@@ -67,7 +67,7 @@ remove_controller(SDL_JoystickID id) {
 
 void
 cleanup_controllers(void) {
-	Sint32 i;
+	Uint32 i;
 
 	for (i = 0; i < MAX_CONTROLLERS; i++) {
 		if (SDL_IsGameController(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controllers[i])))) {
@@ -82,13 +82,13 @@ handle_keydown(const SDL_Event *e) {
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key1[i]) {
-			key_actions.bits |= (1 << i);
+			key_actions.bits |= (1LL << i);
 			return;
 		}
 	}
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == key2[i]) {
-			key_actions.bits |= (1 << i);
+			key_actions.bits |= (1LL << i);
 			return;
 		}
 	}
@@ -118,7 +118,7 @@ handle_gamepad_down(const SDL_Event *e) {
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions.bits |= (1 << i);
+			key_actions.bits |= (1LL << i);
 			return;
 		}
 	}
