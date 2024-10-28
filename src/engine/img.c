@@ -233,11 +233,11 @@ release_sprite_slot(AmphoraImage **spr) {
 
 int
 init_img(void) {
+	int i;
 #ifdef WIN32
 	HRSRC img_info;
 	HGLOBAL img_resource;
 	SDL_RWops *img_rw;
-	int i;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
 		if (!((img_info = FindResourceA(NULL, img_names[i], "PNG_IMG")))) {

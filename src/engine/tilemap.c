@@ -23,10 +23,10 @@ static char *map_data[MAPS_COUNT];
 
 int
 init_maps(void) {
+	int i;
 #ifdef WIN32
 	HRSRC map_info;
 	HGLOBAL map_resource;
-	int i;
 
 	for (i = 0; i < MAPS_COUNT; i++) {
 		if (!((map_info = FindResourceA(NULL, map_names[i], "TILEMAP")))) {

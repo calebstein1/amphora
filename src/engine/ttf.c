@@ -136,11 +136,11 @@ render_string(const AmphoraMessage *msg) {
 
 int
 init_fonts(void) {
+	int i;
 #ifdef WIN32
 	HRSRC ttf_info;
 	HGLOBAL ttf_resource;
 	SDL_RWops *ttf_rw;
-	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
 		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
