@@ -6,7 +6,7 @@
 
 struct frameset_t {
 	Sint32 sx, sy, w, h;
-	Uint16 current_frame;
+	Sint16 current_frame;
 	Uint16 num_frames;
 	Uint16 delay;
 	Uint64 last_change;

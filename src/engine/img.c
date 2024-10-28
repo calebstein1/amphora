@@ -113,6 +113,7 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 		.sy = sy,
 		.w = w,
 		.h = h,
+		.current_frame = -1,
 		.num_frames = num_frames,
 		.delay = delay,
 		.position_offset = (Vector2){ off_x, off_y }
@@ -147,7 +148,8 @@ play_oneshot(AmphoraImage *spr, const char *name, const CallbackFn callback) {
 		return;
 	}
 	spr->current_frameset = frameset;
-	spr->framesets[frameset].current_frame = 0;
+	spr->framesets[frameset].current_frame = -1;
+	spr->framesets[frameset].last_change = frame_count;
 	spr->callback = callback;
 }
 
@@ -373,6 +375,7 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 		}
 		frameset->last_change = frame_count;
 	}
+	if (frameset->current_frame == -1) frameset->current_frame = 0;
 	src = (SDL_Rect){
 		.x = frameset->sx + (frameset->w * frameset->current_frame),
 		.y = frameset->sy,
