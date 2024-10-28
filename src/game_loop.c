@@ -73,13 +73,13 @@ game_init(void) {
 
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_data) {
-	static Vector2 camera_location = { 0, 0 };
+	static Vector2 camera_location = {0, 0};
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
 	Uint8 player_speed;
 	Vector2 screen_size;
 
-	(void)save_data;
+	(void) save_data;
 
 	camera_location = get_camera();
 
@@ -117,7 +117,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	}
 	if (key_actions->attack && p_state != atk) {
 		p_state = atk;
-		switch(p_facing) {
+		switch (p_facing) {
 			case n:
 				play_oneshot(player, "AttackUp", end_player_attack);
 				break;
@@ -151,6 +151,8 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_
 	}
 	if (key_actions->zoom) {
 		set_camera_zoom(150, 60);
+	} else if (key_actions->expand) {
+		set_camera_zoom(75, 60);
 	} else {
 		reset_camera_zoom(60);
 	}
