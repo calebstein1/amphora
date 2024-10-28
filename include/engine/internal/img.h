@@ -38,5 +38,6 @@ struct amphora_spritesheet_t {
 int init_img(void);
 void cleanup_sprites(void);
 void draw_all_sprites_and_gc(void);
+int get_img_by_name(const char *name);
 
 #endif /* IMG_INTERNAL_H */

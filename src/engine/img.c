@@ -9,7 +9,6 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-int get_img_by_name(const char *name);
 int find_frameset(const AmphoraImage *spr, const char *name);
 void update_and_draw_sprite(const AmphoraImage *spr);
 
@@ -323,10 +322,6 @@ draw_all_sprites_and_gc(void) {
 	sprite_slot = sprite_slots_head;
 }
 
-/*
- * Private functions
- */
-
 int
 get_img_by_name(const char *name) {
 	int i;
@@ -336,6 +331,10 @@ get_img_by_name(const char *name) {
 	}
 	return -1;
 }
+
+/*
+ * Private functions
+ */
 
 int
 find_frameset(const AmphoraImage *spr, const char *name) {
