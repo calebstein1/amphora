@@ -148,6 +148,6 @@ get_renderer(void) {
 }
 
 void
-render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect) {
-	SDL_RenderCopy(renderer, texture, srcrect, dstrect);
+render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect, const double angle, const SDL_RendererFlip flip) {
+	SDL_RenderCopyEx(renderer, texture, srcrect, dstrect, angle, NULL, flip);
 }

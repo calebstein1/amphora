@@ -126,7 +126,7 @@ render_string(const AmphoraMessage *msg) {
 	}
 
 	if (msg->stationary) set_render_logical_size(get_resolution());
-	render_texture(msg->texture, NULL, &pos_adj);
+	render_texture(msg->texture, NULL, &pos_adj, 0, 0);
 	if (msg->stationary) set_render_logical_size(logical_size);
 }
 

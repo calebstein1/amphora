@@ -203,6 +203,16 @@ move_sprite(AmphoraImage *spr, const Sint32 delta_x, const Sint32 delta_y) {
 }
 
 void
+flip_sprite(AmphoraImage *spr) {
+	spr->flip = true;
+}
+
+void
+unflip_sprite(AmphoraImage *spr) {
+	spr->flip = false;
+}
+
+void
 show_sprite(AmphoraImage *spr) {
 	spr->display = true;
 }
@@ -399,6 +409,6 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	}
 
 	if (spr->stationary) set_render_logical_size(get_resolution());
-	render_texture(open_images[spr->image], &src, &dst);
+	render_texture(open_images[spr->image], &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	if (spr->stationary) set_render_logical_size(logical_size);
 }

@@ -38,6 +38,10 @@ void set_frameset_delay(AmphoraImage *spr, const char *name, Uint16 delay);
 AmphoraImage *reorder_sprite(AmphoraImage **spr, Sint32 order);
 /* Move a sprite by the supplied delta values */
 void move_sprite(AmphoraImage *spr, Sint32 delta_x, Sint32 delta_y);
+/* Flip a sprite */
+void flip_sprite(AmphoraImage *spr);
+/* Unflip a sprite */
+void unflip_sprite(AmphoraImage *spr);
 /* Show the supplied sprite_slot if hidden */
 void show_sprite(AmphoraImage *spr);
 /* Hide a sprite without free it */
