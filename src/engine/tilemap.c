@@ -6,8 +6,6 @@
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
 
-#include "expat.h"
-
 /* File-scoped vairables */
 static char *map_names[] = {
 #define LOADMAP(name, path) #name,
@@ -62,3 +60,11 @@ init_maps(void) {
 }
 
 #endif
+
+/*
+ * Orivate functions
+ */
+
+void
+parse_map(enum tilemaps_e map) {
+}
