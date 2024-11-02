@@ -6,6 +6,8 @@
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
 
+#include "cjson/cJSON.h"
+
 /* File-scoped vairables */
 static char *map_names[] = {
 #define LOADMAP(name, path) #name,
@@ -59,8 +61,6 @@ init_maps(void) {
 	return 0;
 }
 
-#endif
-
 /*
  * Orivate functions
  */
@@ -68,3 +68,5 @@ init_maps(void) {
 void
 parse_map(enum tilemaps_e map) {
 }
+
+#endif

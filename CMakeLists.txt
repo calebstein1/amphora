@@ -20,7 +20,7 @@ endif()
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_image CONFIG REQUIRED)
 find_package(SDL2_ttf CONFIG REQUIRED)
-find_package(LibXml2 REQUIRED)
+find_package(cJSON CONFIG REQUIRED)
 
 include_directories(
 	include
