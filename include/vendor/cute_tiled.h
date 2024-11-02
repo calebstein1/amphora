@@ -1692,13 +1692,13 @@ cute_tiled_err:
 
 static int cute_tiled_read_bool_internal(cute_tiled_map_internal_t* m, int* out)
 {
-	if ((cute_tiled_peak(m) == 't') | (cute_tiled_peak(m) == 'T'))
+	if ((cute_tiled_peak(m) == 't') || (cute_tiled_peak(m) == 'T'))
 	{
 		m->in += 4;
 		*out = 1;
 	}
 
-	else if ((cute_tiled_peak(m) == 'f') | (cute_tiled_peak(m) == 'F'))
+	else if ((cute_tiled_peak(m) == 'f') || (cute_tiled_peak(m) == 'F'))
 	{
 		m->in += 5;
 		*out = 0;
