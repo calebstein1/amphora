@@ -50,7 +50,7 @@ init_maps(void) {
 #define LOADMAP(name, path) extern char name##_tm[]; extern int name##_tm_size;
 	MAPS
 #undef LOADMAP
-	Uint32 *map_sizes_ptr = map_sizes;
+	Sint32 *map_sizes_ptr = map_sizes;
 	char **map_data_ptr = map_data;
 #define LOADMAP(name, path) *map_sizes_ptr = name##_tm_size; *map_data_ptr = name##_tm; map_sizes_ptr++; map_data_ptr++;
 	MAPS
