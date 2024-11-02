@@ -6,7 +6,11 @@
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
 
-#include "cjson/cJSON.h"
+#define CUTE_TILED_IMPLEMENTATION
+#include "vendor/cute_tiled.h"
+
+/* Prototypes for private functions */
+void parse_map(enum tilemaps_e map_idx);
 
 /* File-scoped vairables */
 static char *map_names[] = {
@@ -14,7 +18,7 @@ static char *map_names[] = {
 	MAPS
 #undef LOADMAP
 };
-static Uint32 map_sizes[MAPS_COUNT];
+static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
 
 /*
@@ -62,11 +66,13 @@ init_maps(void) {
 }
 
 /*
- * Orivate functions
+ * Private functions
  */
 
 void
-parse_map(enum tilemaps_e map) {
+parse_map(const enum tilemaps_e map_idx) {
+	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
+	cute_tiled_free_map(map);
 }
 
 #endif
