@@ -3,6 +3,7 @@
 #include <windows.h>
 #endif
 
+#include <engine/internal/img.h>
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
 
@@ -10,9 +11,9 @@
 #include "vendor/cute_tiled.h"
 
 /* Prototypes for private functions */
-void parse_map(enum tilemaps_e map_idx);
+MapTexture parse_map_to_texture(enum tilemaps_e map_idx);
 
-/* File-scoped vairables */
+/* File-scoped variables */
 static char *map_names[] = {
 #define LOADMAP(name, path) #name,
 	MAPS
@@ -62,6 +63,7 @@ init_maps(void) {
 	}
 #endif
 
+	parse_map_to_texture(0);
 	return 0;
 }
 
@@ -69,10 +71,17 @@ init_maps(void) {
  * Private functions
  */
 
-void
-parse_map(const enum tilemaps_e map_idx) {
+MapTexture
+parse_map_to_texture(const enum tilemaps_e map_idx) {
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
+	cute_tiled_layer_t *layer = map->layers;
+	cute_tiled_tileset_t *tileset = map->tilesets;
+	enum images_e tileset_img = get_img_by_name(tileset->name.ptr);
+	MapTexture texture = SDL_CreateTexture(get_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
+
 	cute_tiled_free_map(map);
+
+	return texture;
 }
 
 #endif

@@ -3,6 +3,8 @@
 
 #include "engine/tilemap.h"
 
+typedef SDL_Texture *MapTexture;
+
 int init_maps(void);
 
 #endif /* AMPHORA_TILEMAP_INTERNAL_H */
