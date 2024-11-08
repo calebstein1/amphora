@@ -3,7 +3,7 @@
 
 #include "engine/tilemap.h"
 
-typedef SDL_Texture *MapTexture;
+typedef SDL_Texture MapTexture;
 
 int init_maps(void);
 

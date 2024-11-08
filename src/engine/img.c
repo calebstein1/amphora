@@ -9,6 +9,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
+int get_img_by_name(const char *name);
 int find_frameset(const AmphoraImage *spr, const char *name);
 void update_and_draw_sprite(const AmphoraImage *spr);
 
@@ -339,6 +340,26 @@ draw_all_sprites_and_gc(void) {
 	sprite_slot = sprite_slots_head;
 }
 
+SDL_Texture *
+get_img_texture_by_name(const char *name) {
+	int idx;
+
+	if ((idx = get_img_by_name(name)) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate image %s\n", name);
+		return NULL;
+	}
+
+	if (!open_images[idx]) {
+		open_images[idx] = IMG_LoadTexture_RW(get_renderer(), images[idx], 0);
+	}
+
+	return open_images[idx];
+}
+
+/*
+ * Private functions
+ */
+
 int
 get_img_by_name(const char *name) {
 	int i;
@@ -348,10 +369,6 @@ get_img_by_name(const char *name) {
 	}
 	return -1;
 }
-
-/*
- * Private functions
- */
 
 int
 find_frameset(const AmphoraImage *spr, const char *name) {

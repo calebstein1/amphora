@@ -11,7 +11,7 @@
 #include "vendor/cute_tiled.h"
 
 /* Prototypes for private functions */
-MapTexture parse_map_to_texture(enum tilemaps_e map_idx);
+MapTexture *parse_map_to_texture(enum tilemaps_e map_idx);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -71,13 +71,31 @@ init_maps(void) {
  * Private functions
  */
 
-MapTexture
+MapTexture *
 parse_map_to_texture(const enum tilemaps_e map_idx) {
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
-	enum images_e tileset_img = get_img_by_name(tileset->name.ptr);
-	MapTexture texture = SDL_CreateTexture(get_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
+	SDL_Texture *tileset_img = get_img_texture_by_name(tileset->name.ptr);
+	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
+	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
+	int tileset_img_w, tileset_img_h;
+	int draw_col, draw_row, tile_idx, tile_x, tile_y, i;
+	MapTexture *texture = SDL_CreateTexture(get_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
+
+	SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
+
+	while (layer) {
+		draw_col = 0;
+		draw_row = 0;
+
+		for (i = 0; i < layer->data_count; i++) {
+			tile_idx = layer->data[i];
+			tile_x = (tile_idx * map->tilewidth) % tileset_img_w;
+			tile_y = (tile_idx * map->tileheight) / tileset_img_w;
+		}
+		layer = layer->next;
+	}
 
 	cute_tiled_free_map(map);
 
