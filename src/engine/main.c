@@ -74,6 +74,9 @@ main(int argc, char **argv) {
 		if (event_loop(&e) == SDL_QUIT) quit_requested = true;
 		clear_bg();
 		game_loop(frame_count, get_key_actions_state(), &save_data);
+#ifndef DISABLE_TILEMAP
+		render_current_map();
+#endif
 		draw_all_sprites_and_gc();
 
 		SDL_RenderPresent(get_renderer());

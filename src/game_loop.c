@@ -29,6 +29,8 @@ game_init(void) {
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
 	set_bg((SDL_Color){ 0x87, 0xce, 0xeb, 0xff });
+	set_map("Overworld", 2);
+
 	init_sprite_slot(&player, "Character", 96, 148, 2, false, false, 10);
 	init_sprite_slot(&heart, "Objects", -96, 32, 2, false, true, 11);
 	init_sprite_slot(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);

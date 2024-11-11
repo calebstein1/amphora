@@ -11,6 +11,7 @@
 #include "vendor/cute_tiled.h"
 
 /* Prototypes for private functions */
+int get_map_by_name(const char *name);
 MapTexture *parse_map_to_texture(enum tilemaps_e map_idx);
 
 /* File-scoped variables */
@@ -21,6 +22,21 @@ static char *map_names[] = {
 };
 static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
+static MapTexture *current_map;
+static int map_scale = 1;
+
+void
+set_map(const char *name, const Uint16 scale) {
+	int idx;
+
+	if ((idx = get_map_by_name(name)) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
+		return;
+	}
+	if (current_map) SDL_DestroyTexture(current_map);
+	current_map = parse_map_to_texture(idx);
+	if (scale) map_scale = scale;
+}
 
 /*
  * Internal functions
@@ -66,9 +82,33 @@ init_maps(void) {
 	return 0;
 }
 
+void
+render_current_map(void) {
+	const Camera camera = get_camera();
+	SDL_Rect map_rect = {
+		.x = -camera.x,
+		.y = -camera.y
+	};
+
+	SDL_QueryTexture(current_map, NULL, NULL, &map_rect.w, &map_rect.h);
+	map_rect.w *= map_scale;
+	map_rect.h *= map_scale;
+	render_texture(current_map, NULL, &map_rect, 0, SDL_FLIP_NONE);
+}
+
 /*
  * Private functions
  */
+
+int
+get_map_by_name(const char *name) {
+	int i;
+
+	for (i = 0; i < MAPS_COUNT; i++) {
+		if (SDL_strcmp(name, map_names[i]) == 0) return i;
+	}
+	return -1;
+}
 
 MapTexture *
 parse_map_to_texture(const enum tilemaps_e map_idx) {
