@@ -63,7 +63,6 @@ init_maps(void) {
 	}
 #endif
 
-	parse_map_to_texture(0);
 	return 0;
 }
 
@@ -73,30 +72,32 @@ init_maps(void) {
 
 MapTexture *
 parse_map_to_texture(const enum tilemaps_e map_idx) {
+	SDL_Renderer *renderer = get_renderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
+	int tileset_img_w, tileset_img_h;
 	SDL_Texture *tileset_img = get_img_texture_by_name(tileset->name.ptr);
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
-	int tileset_img_w, tileset_img_h;
-	int draw_col, draw_row, tile_idx, tile_x, tile_y, i;
-	MapTexture *texture = SDL_CreateTexture(get_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
+	int tile_idx, i;
+	MapTexture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
 
 	SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
-
+	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderTarget(renderer, texture);
 	while (layer) {
-		draw_col = 0;
-		draw_row = 0;
-
 		for (i = 0; i < layer->data_count; i++) {
-			tile_idx = layer->data[i];
-			tile_x = (tile_idx * map->tilewidth) % tileset_img_w;
-			tile_y = (tile_idx * map->tileheight) / tileset_img_w;
+			tile_idx = layer->data[i] - 1;
+			tile_s.x = (tile_idx * map->tilewidth) % tileset_img_w;
+			tile_s.y = ((tile_idx * map->tileheight) / tileset_img_w) * map->tileheight;
+			tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth);
+			tile_d.y = ((i * map->tileheight) / (map->width * map->tilewidth)) * map->tileheight;
+			SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
 		}
 		layer = layer->next;
 	}
-
+	SDL_SetRenderTarget(renderer, NULL);
 	cute_tiled_free_map(map);
 
 	return texture;
