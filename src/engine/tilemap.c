@@ -29,6 +29,11 @@ void
 set_map(const char *name, const Uint16 scale) {
 	int idx;
 
+	if (!name) {
+		if (current_map) SDL_DestroyTexture(current_map);
+		current_map = NULL;
+		return;
+	}
 	if ((idx = get_map_by_name(name)) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
 		return;
