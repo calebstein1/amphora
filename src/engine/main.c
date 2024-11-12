@@ -8,7 +8,15 @@
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "config.h"
+
+/* Prototypes for private functions */
+int main_loop(SDL_Event *e);
+void shutdown_game(void);
 
 /* Globals */
 Uint64 frame_count = 0;
@@ -18,11 +26,7 @@ static bool quit_requested = false;
 
 int
 main(int argc, char **argv) {
-	Uint64 frame_start, frame_end;
-	Uint32 frame_time;
-
 	SDL_Event e;
-	static SaveData save_data;
 
 	/* SDL requires these but we're not actually using them */
 	(void)argc;
@@ -67,26 +71,60 @@ main(int argc, char **argv) {
 
 	game_init();
 
-	while (!quit_requested) {
-		frame_start = SDL_GetTicks64();
-		frame_count++;
-
-		if (event_loop(&e) == SDL_QUIT) quit_requested = true;
-		clear_bg();
-		game_loop(frame_count, get_key_actions_state(), &save_data);
-#ifndef DISABLE_TILEMAP
-		render_current_map();
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop(main_loop, 0, 1);
+#else
+	while (main_loop(&e) == 0) {}
 #endif
-		draw_all_sprites_and_gc();
 
-		SDL_RenderPresent(get_renderer());
+	return 0;
+}
 
-		frame_end = SDL_GetTicks64();
-		if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / FRAMERATE)) {
-			SDL_Delay((1000 / FRAMERATE) - frame_time);
-		}
+void
+quit_game(void) {
+	quit_requested = true;
+}
+
+/*
+ * Private functions
+ */
+
+int
+main_loop(SDL_Event *e) {
+	static Uint64 frame_start, frame_end;
+	static Uint32 frame_time;
+
+	frame_start = SDL_GetTicks64();
+	frame_count++;
+
+	if (event_loop(e) == SDL_QUIT) quit_requested = true;
+	if (quit_requested) {
+		shutdown_game();
+#ifdef __EMSCRIPTEN__
+		emscripten_cancel_main_loop();
+#else
+		return 1;
+#endif
+	}
+	clear_bg();
+	game_loop(frame_count, get_key_actions_state());
+#ifndef DISABLE_TILEMAP
+	render_current_map();
+#endif
+	draw_all_sprites_and_gc();
+
+	SDL_RenderPresent(get_renderer());
+
+	frame_end = SDL_GetTicks64();
+	if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / FRAMERATE)) {
+		SDL_Delay((1000 / FRAMERATE) - frame_time);
 	}
 
+	return 0;
+}
+
+void
+shutdown_game(void) {
 	game_shutdown();
 	cleanup_sprites();
 #ifndef DISABLE_FONTS
@@ -101,11 +139,4 @@ main(int argc, char **argv) {
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
-
-	return 0;
-}
-
-void
-quit_game(void) {
-	quit_requested = true;
 }

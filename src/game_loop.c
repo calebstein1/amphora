@@ -49,14 +49,12 @@ game_init(void) {
 }
 
 void
-game_loop(Uint64 frame, const struct input_state_t *key_actions, SaveData *save_data) {
+game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	static Vector2 camera_location = {0, 0};
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
 	Uint8 player_speed;
 	Vector2 screen_size;
-
-	(void) save_data;
 
 	camera_location = get_camera();
 

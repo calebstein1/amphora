@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 void game_init(void); /* One-time init tasks */
-void game_loop(Uint64 frame, const struct input_state_t *key_actions, struct save_data_t *save_data); /* Main gameplay loop, runs once per frame */
+void game_loop(Uint64 frame, const struct input_state_t *key_actions); /* Main gameplay loop, runs once per frame */
 void game_shutdown(void); /* One-time game shutdown tasks */
 #ifdef __cplusplus
 }
