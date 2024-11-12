@@ -23,23 +23,11 @@
 	KMAP(right, d, RIGHT, DPAD_RIGHT)				\
 	KMAP(up, w, UP, DPAD_UP)						\
 	KMAP(down, s, DOWN, DPAD_DOWN)					\
-	KMAP(dash, LSHIFT, RSHIFT, RIGHTSHOULDER)		\
+	KMAP(dash, LSHIFT, RSHIFT, B)		\
 	KMAP(attack, SPACE, SPACE, A)					\
-	KMAP(zoom, m, m, LEFTSHOULDER)					\
+	KMAP(ko, x, x, INVALID)					\
+	KMAP(zoom, m, m, LEFTSHOULDER)              \
+	KMAP(expand, n, n, RIGHTSHOULDER)                         \
 	KMAP(quit, ESCAPE, ESCAPE, INVALID)
-
-/* Load image resources */
-#define IMAGES							\
-	/* LOADIMG(name, path) */				\
-	LOADIMG(Character, "../content/img/character.png")	\
-	LOADIMG(Objects, "../content/img/objects.png")		\
-	LOADIMG(Overworld, "../content/img/overworld.png")
-
-/* Load TTF fonts */
-#define ENABLE_FONTS
-#define FONTS										\
-	/* LOADFONT(name, path) */							\
-	LOADFONT(Merriweather, "../content/font/Merriweather/Merriweather-Regular.ttf")	\
-	LOADFONT(Roboto, "../content/font/Roboto/Roboto-Regular.ttf")
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */

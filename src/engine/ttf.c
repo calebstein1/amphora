@@ -7,10 +7,11 @@
 
 #include "config.h"
 
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 #define OPEN_MESSAGES_BATCH_COUNT 8
 
 /* Prototypes for private functions */
+int get_font_by_name(const char *name);
 SDL_Texture *render_string_to_texture(AmphoraMessage *msg);
 void free_string(AmphoraMessage *msg);
 
@@ -20,12 +21,23 @@ static struct open_font_t open_fonts[FONTS_COUNT];
 static struct amphora_message_t **open_messages;
 static Uint32 open_message_count;
 static bool allow_leaks = false;
+static const char *font_names[] = {
+#define LOADFONT(name, path) #name,
+	FONTS
+#undef LOADFONT
+};
 
 AmphoraMessage *
-create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, const int x, const int y, const SDL_Color color, const char *text, const bool stationary) {
+create_string(AmphoraMessage **msg, const char *name, const int pt, const int x, const int y, const SDL_Color color, const char *text, const bool stationary) {
 	Uint32 i = 0;
+	int idx;
 
 	if (*msg) return *msg;
+
+	if ((idx = get_font_by_name(name)) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", name);
+		return NULL;
+	}
 
 	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
 		return NULL;
@@ -34,7 +46,7 @@ create_string(AmphoraMessage **msg, const enum fonts_e font_name, const int pt, 
 		return NULL;
 	}
 
-	(*msg)->font = font_name;
+	(*msg)->font = idx;
 	(*msg)->pt = pt;
 	(*msg)->len = SDL_strlen(text);
 	(*msg)->n = 0;
@@ -114,7 +126,7 @@ render_string(const AmphoraMessage *msg) {
 	}
 
 	if (msg->stationary) set_render_logical_size(get_resolution());
-	render_texture(msg->texture, NULL, &pos_adj);
+	render_texture(msg->texture, NULL, &pos_adj, 0, 0);
 	if (msg->stationary) set_render_logical_size(logical_size);
 }
 
@@ -124,16 +136,11 @@ render_string(const AmphoraMessage *msg) {
 
 int
 init_fonts(void) {
+	int i;
 #ifdef WIN32
 	HRSRC ttf_info;
 	HGLOBAL ttf_resource;
 	SDL_RWops *ttf_rw;
-	int i;
-	const char *font_names[] = {
-#define LOADFONT(name, path) #name,
-		FONTS
-#undef LOADFONT
-	};
 
 	for (i = 0; i < FONTS_COUNT; i++) {
 		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
@@ -150,13 +157,18 @@ init_fonts(void) {
 		fonts[i] = ttf_rw;
 	}
 #else
-#define LOADFONT(name, path) extern char name[]; extern int name##_size;
+#define LOADFONT(name, path) extern char name##_ft[]; extern int name##_ft_size;
 	FONTS
 #undef LOADFONT
 	SDL_RWops **fonts_ptr = fonts;
-#define LOADFONT(name, path) *fonts_ptr = SDL_RWFromConstMem(name, name##_size); fonts_ptr++;
+#define LOADFONT(name, path) *fonts_ptr = SDL_RWFromConstMem(name##_ft, name##_ft_size); fonts_ptr++;
 	FONTS
 #undef LOADFONT
+#endif
+#ifdef DEBUG
+	for (i = 0; i < FONTS_COUNT; i++) {
+		SDL_Log("Found font %s\n", font_names[i]);
+	}
 #endif
 	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
 		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
@@ -193,6 +205,16 @@ free_all_strings(void) {
 /*
  * Private functions
  */
+
+int
+get_font_by_name(const char *name) {
+	int i;
+
+	for (i = 0; i < FONTS_COUNT; i++) {
+		if (SDL_strcmp(name, font_names[i]) == 0) return i;
+	}
+	return -1;
+}
 
 SDL_Texture *
 render_string_to_texture(AmphoraMessage *msg) {

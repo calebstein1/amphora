@@ -1,5 +1,6 @@
 #define BIN_LOADER
 #include "config.h"
+#include "resources.h"
 
 define(`_incbin',dnl
 `
@@ -17,22 +18,32 @@ $1_size:
 	.section .rodata,"a"
 
 #if defined(__APPLE__)
-#define LOADIMG(name, path) _incbin(_##name, path)
+#define LOADIMG(name, path) _incbin(_##name##_im, path)
 	IMAGES
 #undef LOADIMG
-#ifdef ENABLE_FONTS
-#define LOADFONT(name, path) _incbin(_##name, path)
+#ifndef DISABLE_FONTS
+#define LOADFONT(name, path) _incbin(_##name##_ft, path)
 	FONTS
 #undef LOADFONT
 #endif
+#ifndef DISABLE_TILEMAP
+#define LOADMAP(name, path) _incbin(_##name##_tm, path)
+	MAPS
+#undef LOADMAP
+#endif
 #else
-#define LOADIMG(name, path) _incbin(name, path)
+#define LOADIMG(name, path) _incbin(name##_im, path)
 	IMAGES
 #undef LOADIMG
 #ifdef ENABLE_FONTS
-#define LOADFONT(name, path) _incbin(name, path)
+#define LOADFONT(name, path) _incbin(name##_ft, path)
 	FONTS
 #undef LOADFONT
+#endif
+#ifndef DISABLE_TILEMAP
+#define LOADMAP(name, path) _incbin(name##_tm, path)
+	MAPS
+#undef LOADMAP
 #endif
 #endif
 

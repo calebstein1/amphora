@@ -6,7 +6,7 @@
 
 struct frameset_t {
 	Sint32 sx, sy, w, h;
-	Uint16 current_frame;
+	Sint16 current_frame;
 	Uint16 num_frames;
 	Uint16 delay;
 	Uint64 last_change;
@@ -38,5 +38,6 @@ struct amphora_spritesheet_t {
 int init_img(void);
 void cleanup_sprites(void);
 void draw_all_sprites_and_gc(void);
+SDL_Texture *get_img_texture_by_name(const char *name);
 
 #endif /* IMG_INTERNAL_H */

@@ -9,6 +9,6 @@ void set_render_logical_size(Vector2 size);
 void clear_bg(void);
 SDL_Window *get_window(void);
 SDL_Renderer *get_renderer(void);
-void render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect);
+void render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect, double angle, SDL_RendererFlip flip);
 
 #endif /* RENDER_INTERNAL_H */

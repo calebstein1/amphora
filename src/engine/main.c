@@ -4,6 +4,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
 
@@ -39,7 +40,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 	if (TTF_Init() < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
@@ -48,6 +49,13 @@ main(int argc, char **argv) {
 	if (init_fonts() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
+		return -1;
+	}
+#endif
+#ifndef DISABLE_TILEMAP
+	if (init_maps() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load tilemap data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load tilemap data", "Failed to load tilemap data", 0);
 		return -1;
 	}
 #endif
@@ -66,6 +74,9 @@ main(int argc, char **argv) {
 		if (event_loop(&e) == SDL_QUIT) quit_requested = true;
 		clear_bg();
 		game_loop(frame_count, get_key_actions_state(), &save_data);
+#ifndef DISABLE_TILEMAP
+		render_current_map();
+#endif
 		draw_all_sprites_and_gc();
 
 		SDL_RenderPresent(get_renderer());
@@ -78,7 +89,7 @@ main(int argc, char **argv) {
 
 	game_shutdown();
 	cleanup_sprites();
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 	free_all_strings();
 	free_fonts();
 #endif
