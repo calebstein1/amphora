@@ -35,7 +35,7 @@ $1_size:
 #define LOADIMG(name, path) _incbin(name##_im, path)
 	IMAGES
 #undef LOADIMG
-#ifdef ENABLE_FONTS
+#ifndef DISABLE_FONTS
 #define LOADFONT(name, path) _incbin(name##_ft, path)
 	FONTS
 #undef LOADFONT
