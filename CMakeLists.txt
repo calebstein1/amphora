@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.21)
 
-file(TO_CMAKE_PATH $ENV{VCPKG_ROOT} VCPKG_ROOT)
-set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+	file(TO_CMAKE_PATH $ENV{VCPKG_ROOT} VCPKG_ROOT)
+	set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+	set(VCPKG_LIBRARY_LINKAGE static)
+endif()
 
-project(amphora LANGUAGES C CXX ASM)
+if(EMSCRIPTEN)
+	project(amphora LANGUAGES C CXX)
+else()
+	project(amphora LANGUAGES C CXX ASM)
+endif()
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
-set(VCPKG_LIBRARY_LINKAGE static)
 
 if(WIN32)
 	string(APPEND CMAKE_C_FLAGS_DEBUG " /DDEBUG /W4 /WX")
@@ -17,9 +23,13 @@ else()
 	string(APPEND CMAKE_CXX_FLAGS_DEBUG " -DDEBUG -fsanitize=address,undefined -Wall -Wextra")
 endif()
 
-find_package(SDL2 CONFIG REQUIRED)
-find_package(SDL2_image CONFIG REQUIRED)
-find_package(SDL2_ttf CONFIG REQUIRED)
+if(EMSCRIPTEN)
+	string(APPEND CMAKE_C_FLAGS " -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2")
+else()
+	find_package(SDL2 CONFIG REQUIRED)
+	find_package(SDL2_image CONFIG REQUIRED)
+	find_package(SDL2_ttf CONFIG REQUIRED)
+endif()
 
 include_directories(
 	include
