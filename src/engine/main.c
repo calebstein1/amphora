@@ -93,6 +93,9 @@ main(int argc, char **argv) {
 	free_all_strings();
 	free_fonts();
 #endif
+#ifndef DISABLE_TILEMAP
+	destroy_current_map();
+#endif
 	cleanup_render();
 	cleanup_controllers();
 	IMG_Quit();

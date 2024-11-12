@@ -96,6 +96,11 @@ render_current_map(void) {
 	render_texture(current_map, NULL, &map_rect, 0, SDL_FLIP_NONE);
 }
 
+void
+destroy_current_map(void) {
+	if (current_map) SDL_DestroyTexture(current_map);
+}
+
 /*
  * Private functions
  */
