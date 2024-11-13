@@ -16,7 +16,7 @@
 
 /* Prototypes for private functions */
 int main_loop(SDL_Event *e);
-void shutdown_game(void);
+void clean_resources(void);
 
 /* Globals */
 Uint64 frame_count = 0;
@@ -76,6 +76,9 @@ main(int argc, char **argv) {
 #else
 	while (main_loop(&e) == 0) {}
 #endif
+	IMG_Quit();
+	TTF_Quit();
+	SDL_Quit();
 
 	return 0;
 }
@@ -99,8 +102,11 @@ main_loop(SDL_Event *e) {
 
 	if (event_loop(e) == SDL_QUIT) quit_requested = true;
 	if (quit_requested) {
-		shutdown_game();
+		clean_resources();
 #ifdef __EMSCRIPTEN__
+		IMG_Quit();
+		TTF_Quit();
+		SDL_Quit();
 		emscripten_cancel_main_loop();
 #else
 		return 1;
@@ -124,7 +130,7 @@ main_loop(SDL_Event *e) {
 }
 
 void
-shutdown_game(void) {
+clean_resources(void) {
 	game_shutdown();
 	cleanup_sprites();
 #ifndef DISABLE_FONTS
@@ -136,7 +142,4 @@ shutdown_game(void) {
 #endif
 	cleanup_render();
 	cleanup_controllers();
-	IMG_Quit();
-	TTF_Quit();
-	SDL_Quit();
 }
