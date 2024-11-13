@@ -11,6 +11,8 @@ struct frameset_t {
 	Uint16 delay;
 	Uint64 last_change;
 	Vector2 position_offset;
+	CallbackFn callback;
+	bool playing_oneshot : 1;
 };
 
 struct sprite_slot_t {
@@ -25,9 +27,7 @@ struct sprite_slot_t {
 	bool flip : 1;
 	bool display : 1;
 	bool stationary : 1;
-	bool playing_oneshot : 1;
 	bool garbage : 1;
-	CallbackFn callback;
 	struct sprite_slot_t *next;
 };
 

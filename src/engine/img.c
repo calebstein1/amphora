@@ -78,11 +78,9 @@ init_sprite_slot(AmphoraImage **spr, const char *name, const Sint32 x, const Sin
 	(*spr)->scale = scale;
 	(*spr)->flip = flip;
 	(*spr)->stationary = stationary;
-	(*spr)->playing_oneshot = false;
 	(*spr)->display = true;
 	(*spr)->garbage = false;
 	(*spr)->order = order;
-	(*spr)->callback = NULL;
 
 	return *spr;
 }
@@ -131,11 +129,11 @@ void
 set_frameset(AmphoraImage *spr, const char *name) {
 	int frameset;
 
-	spr->playing_oneshot = false;
 	if ((frameset = find_frameset(spr, name)) == -1) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
+	spr->framesets[frameset].playing_oneshot = false;
 	spr->current_frameset = frameset;
 }
 
@@ -143,15 +141,15 @@ void
 play_oneshot(AmphoraImage *spr, const char *name, const CallbackFn callback) {
 	int frameset;
 
-	spr->playing_oneshot = true;
 	if ((frameset = find_frameset(spr, name)) == -1) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
+	spr->framesets[frameset].playing_oneshot = true;
 	spr->current_frameset = frameset;
 	spr->framesets[frameset].current_frame = -1;
 	spr->framesets[frameset].last_change = frame_count;
-	spr->callback = callback;
+	spr->framesets[frameset].callback = callback;
 }
 
 void
@@ -387,15 +385,16 @@ find_frameset(const AmphoraImage *spr, const char *name) {
 void
 update_and_draw_sprite(const AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
+	int frameset_idx = spr->current_frameset;
 	SDL_Rect src, dst;
 	const Vector2 camera = get_camera();
 	Vector2 logical_size = get_render_logical_size();
 
 	if (frame_count - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) {
-			if (spr->playing_oneshot) {
+			if (spr->framesets[frameset_idx].playing_oneshot) {
 				frameset->current_frame--;
-				if (spr->callback) spr->callback();
+				if (spr->framesets[frameset_idx].callback) spr->framesets[frameset_idx].callback();
 			} else {
 				frameset->current_frame = 0;
 			}
