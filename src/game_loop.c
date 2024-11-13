@@ -1,4 +1,5 @@
 #include "engine/amphora.h"
+#include "colors.h"
 
 enum player_state_e {
 	idle,
@@ -28,7 +29,7 @@ game_init(void) {
 	const char *message = "I'm going to be fixed right here in place!";
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
-	set_bg((SDL_Color){ 0x87, 0xce, 0xeb, 0xff });
+	set_bg(sky);
 	set_map("Overworld", 2);
 
 	init_sprite_slot(&player, "Character", 96, 148, 2, false, false, 10);
