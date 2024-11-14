@@ -12,7 +12,7 @@
 
 /* Prototypes for private functions */
 int get_map_by_name(const char *name);
-MapTexture *parse_map_to_texture(enum tilemaps_e map_idx);
+SDL_Texture *parse_map_to_texture(enum tilemaps_e map_idx);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -22,25 +22,24 @@ static char *map_names[] = {
 };
 static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
-static MapTexture *current_map;
-static int map_scale = 1;
+static struct amphora_tilemap_t current_map;
 
 void
 set_map(const char *name, const Uint16 scale) {
 	int idx;
 
 	if (!name) {
-		if (current_map) SDL_DestroyTexture(current_map);
-		current_map = NULL;
+		if (current_map.texture) SDL_DestroyTexture(current_map.texture);
+		current_map.texture = NULL;
 		return;
 	}
 	if ((idx = get_map_by_name(name)) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
 		return;
 	}
-	if (current_map) SDL_DestroyTexture(current_map);
-	current_map = parse_map_to_texture(idx);
-	if (scale) map_scale = scale;
+	if (current_map.texture) SDL_DestroyTexture(current_map.texture);
+	current_map.texture = parse_map_to_texture(idx);
+	current_map.scale = scale ? scale : 1;
 }
 
 /*
@@ -95,15 +94,15 @@ render_current_map(void) {
 		.y = -camera.y
 	};
 
-	SDL_QueryTexture(current_map, NULL, NULL, &map_rect.w, &map_rect.h);
-	map_rect.w *= map_scale;
-	map_rect.h *= map_scale;
-	render_texture(current_map, NULL, &map_rect, 0, SDL_FLIP_NONE);
+	SDL_QueryTexture(current_map.texture, NULL, NULL, &map_rect.w, &map_rect.h);
+	map_rect.w *= current_map.scale;
+	map_rect.h *= current_map.scale;
+	render_texture(current_map.texture, NULL, &map_rect, 0, SDL_FLIP_NONE);
 }
 
 void
 destroy_current_map(void) {
-	if (current_map) SDL_DestroyTexture(current_map);
+	if (current_map.texture) SDL_DestroyTexture(current_map.texture);
 }
 
 /*
@@ -120,7 +119,7 @@ get_map_by_name(const char *name) {
 	return -1;
 }
 
-MapTexture *
+SDL_Texture *
 parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Renderer *renderer = get_renderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
@@ -131,7 +130,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int tile_idx, i;
-	MapTexture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
+	SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
 
 	SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
 	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);

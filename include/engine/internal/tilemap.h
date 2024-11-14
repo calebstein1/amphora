@@ -3,7 +3,10 @@
 
 #include "engine/tilemap.h"
 
-typedef SDL_Texture MapTexture;
+struct amphora_tilemap_t {
+    SDL_Texture *texture;
+    int scale;
+};
 
 int init_maps(void);
 void render_current_map(void);
