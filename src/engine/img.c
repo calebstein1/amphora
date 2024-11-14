@@ -11,19 +11,15 @@
 /* Prototypes for private functions */
 int get_img_by_name(const char *name);
 int find_frameset(const AmphoraImage *spr, const char *name);
-void update_and_draw_sprite(const AmphoraImage *spr);
 
 /* File-scoped variables */
 static SDL_RWops *images[IMAGES_COUNT];
 static SDL_Texture *open_images[IMAGES_COUNT];
-static AmphoraImage *sprite_slot;
-static AmphoraImage *sprite_slots_head;
 static const char *img_names[] = {
 #define LOADIMG(name, path) #name,
 	IMAGES
 #undef LOADIMG
 };
-Uint32 sprite_slots_count = 1;
 
 Vector2
 get_sprite_center(const AmphoraImage *spr) {
@@ -34,14 +30,15 @@ get_sprite_center(const AmphoraImage *spr) {
 }
 
 AmphoraImage *
-init_sprite_slot(AmphoraImage **spr, const char *name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
-	AmphoraImage *sprite_slot_temp = NULL;
+create_sprite(AmphoraImage **spr, const char *image_name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
+	AmphoraImage *new_sprite = NULL;
+	struct render_list_node_t *render_list_node = NULL;
 	int idx;
 
 	if (*spr) return *spr;
 
-	if ((idx = get_img_by_name(name)) == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate image %s\n", name);
+	if ((idx = get_img_by_name(image_name)) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate image %s\n", image_name);
 		return NULL;
 	}
 
@@ -49,38 +46,27 @@ init_sprite_slot(AmphoraImage **spr, const char *name, const Sint32 x, const Sin
 		open_images[idx] = IMG_LoadTexture_RW(get_renderer(), images[idx], 0);
 	}
 
-	if ((sprite_slot_temp = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
+	if ((new_sprite = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
 		*spr = NULL;
 
 		return NULL;
 	}
-	while (1) {
-		if (sprite_slot->next == NULL) {
-			sprite_slot_temp->next = NULL;
-			sprite_slot->next = sprite_slot_temp;
-			break;
-		}
-		if (sprite_slot->next->order >= order) {
-			sprite_slot_temp->next = sprite_slot->next;
-			sprite_slot->next = sprite_slot_temp;
-			break;
-		}
-		sprite_slot = sprite_slot->next;
-	}
-	*spr = sprite_slot_temp;
-	sprite_slots_count++;
-	sprite_slot = sprite_slots_head;
+	render_list_node = add_render_list_node(order);
+
+	*spr = new_sprite;
 
 	(*spr)->image = idx;
 	(*spr)->dx = x;
 	(*spr)->dy = y;
 	(*spr)->scale = scale;
+	(*spr)->render_list_node = render_list_node;
 	(*spr)->flip = flip;
-	(*spr)->stationary = stationary;
-	(*spr)->display = true;
-	(*spr)->garbage = false;
-	(*spr)->order = order;
+	render_list_node->type = SPRITE;
+	render_list_node->data = *spr;
+	render_list_node->stationary = stationary;
+	render_list_node->display = true;
+	render_list_node->garbage = false;
 
 	return *spr;
 }
@@ -164,35 +150,12 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 }
 
 AmphoraImage *
-reorder_sprite(AmphoraImage **spr, const Sint32 order) {
-	AmphoraImage *sprite_slot_temp = NULL;
+reorder_sprite(AmphoraImage *spr, const Sint32 order) {
+	/*
+	 * Doesn't work right yet
+	 */
 
-	if ((sprite_slot_temp = SDL_malloc(sizeof(AmphoraImage))) == NULL) {
-		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to reorder sprite\n");
-
-		return NULL;
-	}
-	SDL_memcpy(sprite_slot_temp, *spr, sizeof(AmphoraImage));
-	sprite_slot_temp->order = order;
-	while (1) {
-		if (sprite_slot->next == NULL) {
-			sprite_slot_temp->next = NULL;
-			sprite_slot->next = sprite_slot_temp;
-			break;
-		}
-		if (sprite_slot->next->order >= order) {
-			sprite_slot_temp->next = sprite_slot->next;
-			sprite_slot->next = sprite_slot_temp;
-			break;
-		}
-		sprite_slot = sprite_slot->next;
-	}
-	(*spr)->garbage = true;
-	*spr = sprite_slot_temp;
-	sprite_slots_count++;
-	sprite_slot = sprite_slots_head;
-
-	return *spr;
+	return spr;
 }
 
 void
@@ -213,29 +176,28 @@ unflip_sprite(AmphoraImage *spr) {
 
 void
 show_sprite(AmphoraImage *spr) {
-	spr->display = true;
+	spr->render_list_node->display = true;
 }
 
 void
 hide_sprite(AmphoraImage *spr) {
-	spr->display = false;
+	spr->render_list_node->display = false;
 }
 
-void *
-release_sprite_slot(AmphoraImage **spr) {
+void
+free_sprite(AmphoraImage *spr) {
 	int i;
 
 	if (spr) {
-		for (i = 0; i < (*spr)->num_framesets; i++) {
-			SDL_free((*spr)->frameset_labels[i]);
+		for (i = 0; i < spr->num_framesets; i++) {
+			SDL_free(spr->frameset_labels[i]);
 		}
-		if ((*spr)->frameset_labels) SDL_free((*spr)->frameset_labels);
-		if ((*spr)->framesets) SDL_free((*spr)->framesets);
-		(*spr)->garbage = true;
-		*spr = NULL;
+		if (spr->frameset_labels) SDL_free(spr->frameset_labels);
+		if (spr->framesets) SDL_free(spr->framesets);
+		spr->render_list_node->garbage = true;
+		SDL_free(spr);
+		spr = NULL;
 	}
-
-	return NULL;
 }
 
 /*
@@ -278,64 +240,18 @@ init_img(void) {
 		SDL_Log("Found image %s\n", img_names[i]);
 	}
 #endif
-	if ((sprite_slot = SDL_malloc(sizeof(AmphoraImage))) == NULL) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize sprite slots\n");
-
-		return -1;
-	}
-	sprite_slot->order = SDL_MIN_SINT32;
-	sprite_slot->display = false;
-	sprite_slot->garbage = false;
-	sprite_slot->next = NULL;
-	sprite_slots_head = sprite_slot;
 
 	return 0;
 }
 
 void
-cleanup_sprites(void) {
-	AmphoraImage **allocated_addrs = SDL_malloc(sprite_slots_count * sizeof(AmphoraImage *));
-	AmphoraImage *garbage;
-	Uint32 i = 0;
+cleanup_img(void) {
+	int i;
 
-	while (sprite_slot) {
-		allocated_addrs[i++] = sprite_slot;
-		sprite_slot = sprite_slot->next;
-	}
-	for (i = 0; i < sprite_slots_count; i++) {
-		garbage = allocated_addrs[i];
-		if (i > 0) release_sprite_slot(&allocated_addrs[i]);
-		SDL_free(garbage);
-	}
 	for (i = 0; i < IMAGES_COUNT; i++) {
 		SDL_RWclose(images[i]);
 		if (open_images[i]) SDL_DestroyTexture(open_images[i]);
 	}
-	SDL_free(allocated_addrs);
-}
-
-void
-draw_all_sprites_and_gc(void) {
-	AmphoraImage *garbage;
-
-	if (!sprite_slot->next) return;
-
-	while(1) {
-		if (!sprite_slot) break;
-
-		if (sprite_slot->next && sprite_slot->next->garbage) {
-			garbage = sprite_slot->next;
-			sprite_slot->next = sprite_slot->next->next;
-			SDL_free(garbage);
-			garbage = NULL;
-			sprite_slots_count--;
-		}
-		if (sprite_slot->display && sprite_slot->num_framesets > 0) update_and_draw_sprite(sprite_slot);
-
-		sprite_slot = sprite_slot->next;
-	}
-
-	sprite_slot = sprite_slots_head;
 }
 
 SDL_Texture *
@@ -352,6 +268,55 @@ get_img_texture_by_name(const char *name) {
 	}
 
 	return open_images[idx];
+}
+
+void
+update_and_draw_sprite(const AmphoraImage *spr) {
+	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
+	int frameset_idx = spr->current_frameset;
+	SDL_Rect src, dst;
+	const Vector2 camera = get_camera();
+	Vector2 logical_size = get_render_logical_size();
+
+	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
+
+	if (frame_count - frameset->last_change > frameset->delay) {
+		if (++frameset->current_frame == frameset->num_frames) {
+			if (spr->framesets[frameset_idx].playing_oneshot) {
+				frameset->current_frame--;
+				if (spr->framesets[frameset_idx].callback) spr->framesets[frameset_idx].callback();
+			} else {
+				frameset->current_frame = 0;
+			}
+		}
+		frameset->last_change = frame_count;
+	}
+	if (frameset->current_frame == -1) frameset->current_frame = 0;
+	src = (SDL_Rect){
+		.x = frameset->sx + (frameset->w * frameset->current_frame),
+		.y = frameset->sy,
+		.w = frameset->w,
+		.h = frameset->h
+	};
+	if (spr->render_list_node->stationary) {
+		dst = (SDL_Rect){
+			.x = spr->dx > 0 ? spr->dx : get_resolution().x + spr->dx - frameset->w,
+			.y = spr->dy > 0 ? spr->dy : get_resolution().y + spr->dy - frameset->h,
+			.w = frameset->w * spr->scale,
+			.h = frameset->h * spr->scale
+		};
+	} else {
+		dst = (SDL_Rect){
+			.x = spr->dx - frameset->position_offset.x - camera.x,
+			.y = spr->dy - frameset->position_offset.y - camera.y,
+			.w = frameset->w * spr->scale,
+			.h = frameset->h * spr->scale
+		};
+	}
+
+	if (spr->render_list_node->stationary) set_render_logical_size(get_resolution());
+	render_texture(open_images[spr->image], &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+	if (spr->render_list_node->stationary) set_render_logical_size(logical_size);
 }
 
 /*
@@ -380,51 +345,4 @@ find_frameset(const AmphoraImage *spr, const char *name) {
 	}
 
 	return i;
-}
-
-void
-update_and_draw_sprite(const AmphoraImage *spr) {
-	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
-	int frameset_idx = spr->current_frameset;
-	SDL_Rect src, dst;
-	const Vector2 camera = get_camera();
-	Vector2 logical_size = get_render_logical_size();
-
-	if (frame_count - frameset->last_change > frameset->delay) {
-		if (++frameset->current_frame == frameset->num_frames) {
-			if (spr->framesets[frameset_idx].playing_oneshot) {
-				frameset->current_frame--;
-				if (spr->framesets[frameset_idx].callback) spr->framesets[frameset_idx].callback();
-			} else {
-				frameset->current_frame = 0;
-			}
-		}
-		frameset->last_change = frame_count;
-	}
-	if (frameset->current_frame == -1) frameset->current_frame = 0;
-	src = (SDL_Rect){
-		.x = frameset->sx + (frameset->w * frameset->current_frame),
-		.y = frameset->sy,
-		.w = frameset->w,
-		.h = frameset->h
-	};
-	if (spr->stationary) {
-		dst = (SDL_Rect){
-			.x = spr->dx > 0 ? spr->dx : get_resolution().x + spr->dx - frameset->w,
-			.y = spr->dy > 0 ? spr->dy : get_resolution().y + spr->dy - frameset->h,
-			.w = frameset->w * spr->scale,
-			.h = frameset->h * spr->scale
-		};
-	} else {
-		dst = (SDL_Rect){
-			.x = spr->dx - frameset->position_offset.x - camera.x,
-			.y = spr->dy - frameset->position_offset.y - camera.y,
-			.w = frameset->w * spr->scale,
-			.h = frameset->h * spr->scale
-		};
-	}
-
-	if (spr->stationary) set_render_logical_size(get_resolution());
-	render_texture(open_images[spr->image], &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-	if (spr->stationary) set_render_logical_size(logical_size);
 }

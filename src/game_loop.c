@@ -32,9 +32,9 @@ game_init(void) {
 	set_bg(sky);
 	set_map("Overworld", 2);
 
-	init_sprite_slot(&player, "Character", 96, 148, 2, false, false, 10);
-	init_sprite_slot(&heart, "Objects", -96, 32, 2, false, true, 11);
-	init_sprite_slot(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
+	create_sprite(&player, "Character", 96, 148, 2, false, false, 10);
+	create_sprite(&heart, "Objects", -96, 32, 2, false, true, 11);
+	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 
 	add_frameset(player, "Idle", 0, 17, 32, 48, 0, 0, 1, 0);
 	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 30);
@@ -117,10 +117,6 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	camera_location.x -= (screen_size.x / 2);
 	camera_location.y -= (screen_size.y / 2);
 	set_camera(camera_location.x, camera_location.y);
-
-	render_string(hello);
-	render_string(timer);
-	render_string(stationary);
 }
 
 void

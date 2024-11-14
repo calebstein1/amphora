@@ -117,7 +117,7 @@ main_loop(SDL_Event *e) {
 #ifndef DISABLE_TILEMAP
 	render_current_map();
 #endif
-	draw_all_sprites_and_gc();
+	draw_render_list_and_gc();
 
 	SDL_RenderPresent(get_renderer());
 
@@ -132,7 +132,7 @@ main_loop(SDL_Event *e) {
 void
 clean_resources(void) {
 	game_shutdown();
-	cleanup_sprites();
+	cleanup_img();
 #ifndef DISABLE_FONTS
 	free_all_strings();
 	free_fonts();
@@ -140,6 +140,7 @@ clean_resources(void) {
 #ifndef DISABLE_TILEMAP
 	destroy_current_map();
 #endif
+	free_render_list();
 	cleanup_render();
 	cleanup_controllers();
 }

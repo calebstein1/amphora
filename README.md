@@ -21,7 +21,7 @@ You can see how some of the built-in functions work, as well as how to use certa
 
 More documentation on built-in functions, and how the sprite/zone system works will be coming soon, and there is a custom sprite editor in development.
 
-Note that certain functions that allocate memory, like `init_sprite_slot` may cause stutters in gameplay when built using the Debug configuration.
+Note that certain functions that allocate memory, like `create_sprite` may cause stutters in gameplay when built using the Debug configuration.
 These stutters should not exist in the Release configuration.
 
 ## Building

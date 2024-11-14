@@ -9,6 +9,9 @@ static SDL_Window *window;
 static Camera camera = { 0, 0 };
 static SDL_Color bg = { 0, 0, 0, 0xff };
 static Vector2 render_logical_size = { 0, 0 };
+static struct render_list_node_t *render_list;
+static struct render_list_node_t *render_list_head;
+static Uint32 render_list_node_count;
 
 Vector2
 get_resolution(void) {
@@ -116,6 +119,18 @@ init_render(void) {
 	}
 	set_render_logical_size(get_resolution());
 
+	if ((render_list = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize render list\n");
+
+		return -1;
+	}
+	render_list->type = NONE;
+	render_list->order = SDL_MIN_SINT32;
+	render_list->garbage = false;
+	render_list->next = NULL;
+	render_list_head = render_list;
+	render_list_node_count = 1;
+
 	return 0;
 }
 
@@ -145,6 +160,83 @@ get_window(void) {
 SDL_Renderer *
 get_renderer(void) {
 	return renderer;
+}
+
+struct render_list_node_t *
+add_render_list_node(int order) {
+	struct render_list_node_t *new_render_list_node = NULL;
+
+	if ((new_render_list_node = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
+		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
+
+		return NULL;
+	}
+	while (1) {
+		if (render_list->next == NULL) {
+			new_render_list_node->next = NULL;
+			render_list->next = new_render_list_node;
+			break;
+		}
+		if (render_list->next->order >= order) {
+			new_render_list_node->next = render_list->next;
+			render_list->next = new_render_list_node;
+			break;
+		}
+		render_list = render_list->next;
+	}
+	new_render_list_node->order = order;
+	render_list = render_list_head;
+	render_list_node_count++;
+
+	return new_render_list_node;
+}
+
+void
+draw_render_list_and_gc(void) {
+	struct render_list_node_t *garbage;
+
+	while(render_list) {
+		if (render_list->next && render_list->next->garbage) {
+			garbage = render_list->next;
+			render_list->next = render_list->next->next;
+			SDL_free(garbage);
+			garbage = NULL;
+			render_list_node_count--;
+		}
+		switch (render_list->type) {
+			case SPRITE:
+				update_and_draw_sprite(render_list->data);
+				break;
+			default:
+				break;
+		}
+
+		render_list = render_list->next;
+	}
+
+	render_list = render_list_head;
+}
+
+void
+free_render_list(void) {
+	struct render_list_node_t **allocated_addrs = SDL_malloc(render_list_node_count * sizeof(struct render_list_node_t *));
+	Uint32 i = 0;
+
+	while (render_list) {
+		allocated_addrs[i++] = render_list;
+		render_list = render_list->next;
+	}
+	for (i = 0; i < render_list_node_count; i++) {
+		switch(allocated_addrs[i]->type) {
+			case SPRITE:
+				free_sprite(allocated_addrs[i]->data);
+				break;
+			default:
+				break;
+		}
+		SDL_free(allocated_addrs[i]);
+	}
+	SDL_free(allocated_addrs);
 }
 
 void

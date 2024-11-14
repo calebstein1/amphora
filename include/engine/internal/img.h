@@ -15,29 +15,21 @@ struct frameset_t {
 	bool playing_oneshot : 1;
 };
 
-struct sprite_slot_t {
+struct sprite_t {
 	ImageName image;
 	Sint32 dx, dy;
-	Sint32 order;
 	Uint8 scale;
+	bool flip : 1;
 	Sint32 current_frameset;
 	Sint32 num_framesets;
 	char **frameset_labels;
 	struct frameset_t *framesets;
-	bool flip : 1;
-	bool display : 1;
-	bool stationary : 1;
-	bool garbage : 1;
-	struct sprite_slot_t *next;
-};
-
-struct amphora_spritesheet_t {
-	SDL_Texture *texture;
+	struct render_list_node_t *render_list_node;
 };
 
 int init_img(void);
-void cleanup_sprites(void);
-void draw_all_sprites_and_gc(void);
+void cleanup_img(void);
 SDL_Texture *get_img_texture_by_name(const char *name);
+void update_and_draw_sprite(const AmphoraImage *spr);
 
 #endif /* IMG_INTERNAL_H */
