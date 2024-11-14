@@ -126,7 +126,7 @@ main_loop(SDL_Event *e) {
 		SDL_Delay((1000 / FRAMERATE) - frame_time);
 	} else if (frame_time > (1000 / FRAMERATE)) {
 #ifdef DEBUG
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Lag on frame %lld (frame took %lld ticks, %d per frame)\n", frame_count, frame_end - frame_start, 1000 / FRAMERATE);
+		SDL_Log("Lag on frame %lld (frame took %lld ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 / FRAMERATE);
 #endif
 	}
 
