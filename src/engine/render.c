@@ -57,7 +57,7 @@ set_camera_zoom(Uint16 factor, Uint16 delay) {
 
 		current_factor = factor;
 		if (!((scale_steps = SDL_malloc(delay * sizeof(Vector2))))) {
-			SDL_LogWarn(SDL_LOG_CATEGORY_ERROR, "Failed to allocate scale steps\n");
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate scale steps\n");
 			return;
 		}
 		for (i = 0; i < scale_steps_count; i++) {
