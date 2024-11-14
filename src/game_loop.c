@@ -37,7 +37,7 @@ game_init(void) {
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 
 	add_frameset(player, "Idle", 0, 17, 32, 48, 0, 0, 1, 0);
-	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 30);
+	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 15);
 	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 15);
 	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 30);
 
@@ -59,12 +59,12 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 
 	camera_location = get_camera();
 
+	set_frameset_delay(player, "Walk", key_actions->dash ? 10 : 15);
 	if (key_actions->left && p_state != atk && p_state != ko) {
 		p_state = walk;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		flip_sprite(player);
-		set_frameset_delay(player, "Walk", key_actions->dash ? 15 : 30);
 		move_sprite(player, -player_speed, 0);
 	}
 	if (key_actions->right && p_state != atk && p_state != ko) {
@@ -72,7 +72,6 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
-		set_frameset_delay(player, "Walk", key_actions->dash ? 15 : 30);
 		move_sprite(player, player_speed, 0);
 	}
 	if (key_actions->attack && p_state != atk) {
