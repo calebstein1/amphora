@@ -1,6 +1,8 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
+#define MAX_HEALTH 3
+
 enum player_state_e {
 	idle,
 	walk,
@@ -10,21 +12,23 @@ enum player_state_e {
 
 /* Game globals */
 AmphoraImage *player;
-AmphoraImage *heart;
 AmphoraImage *rotating_heart;
+AmphoraImage *health_bar[MAX_HEALTH];
 AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
-enum player_state_e p_state = idle;
+enum player_state_e player_state = idle;
+int player_health = MAX_HEALTH;
 
 void
 end_player_attack(void) {
-	p_state = idle;
+	player_state = idle;
 	set_frameset(player, "Idle");
 }
 
 void
 game_init(void) {
+	int i;
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *message = "I'm going to be fixed right here in place!";
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
@@ -33,15 +37,17 @@ game_init(void) {
 	set_map("Overworld", 2);
 
 	create_sprite(&player, "Character", 96, 148, 2, false, false, 10);
-	create_sprite(&heart, "Objects", -96, 32, 2, false, true, 11);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
+	for (i = 0; i < MAX_HEALTH; i++) {
+		create_sprite(&health_bar[i], "Objects", -96 - (32 * i), 24, 2, false, true, 11);
+		add_frameset(health_bar[i], "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+	}
 
 	add_frameset(player, "Idle", 0, 17, 32, 48, 0, 0, 1, 0);
 	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 15);
 	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 15);
 	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 30);
 
-	add_frameset(heart, "Default", 63, 0, 16, 16, 0, 0, 1, 0);
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
 	create_string(&hello, "Roboto", 32, 16, 16, -1, font_color, welcome_message, true);
@@ -51,45 +57,60 @@ game_init(void) {
 
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions) {
-	static Vector2 camera_location = {0, 0};
+	static Vector2 camera_location = { 0, 0 };
 	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
+	static Uint64 damage_cooldown = 0;
 	Uint8 player_speed;
 	Vector2 screen_size;
+	int i;
 
 	camera_location = get_camera();
 
+	for (i = 0; i < MAX_HEALTH; i++) {
+		if (i >= player_health) {
+			hide_sprite(health_bar[i]);
+		} else {
+			show_sprite(health_bar[i]);
+		}
+	}
+	if (player_health <= 0 && player_state != ko) {
+		player_state = ko;
+		play_oneshot(player, "KO", NULL);
+	}
+
 	set_frameset_delay(player, "Walk", key_actions->dash ? 10 : 15);
-	if (key_actions->left && p_state != atk && p_state != ko) {
-		p_state = walk;
+	if (key_actions->left && player_state != atk && player_state != ko) {
+		player_state = walk;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		flip_sprite(player);
 		move_sprite(player, -player_speed, 0);
 	}
-	if (key_actions->right && p_state != atk && p_state != ko) {
-		p_state = walk;
+	if (key_actions->right && player_state != atk && player_state != ko) {
+		player_state = walk;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
 		move_sprite(player, player_speed, 0);
 	}
-	if (key_actions->attack && p_state != atk) {
-		if (p_state == ko) {
-			p_state = idle;
+	if (key_actions->attack && player_state != atk) {
+		if (player_state == ko) {
+			player_health = MAX_HEALTH;
+			player_state = idle;
 			set_frameset(player, "Idle");
 		} else {
-			p_state = atk;
+			player_state = atk;
 			play_oneshot(player, "Attack", end_player_attack);
 		}
 	}
-	if (!key_actions->left && !key_actions->right && p_state == walk) {
-		p_state = idle;
+	if (!key_actions->left && !key_actions->right && player_state == walk) {
+		player_state = idle;
 		set_frameset(player, "Idle");
 	}
-	if (key_actions->ko && p_state != ko) {
-		p_state = ko;
-		play_oneshot(player, "KO", NULL);
+	if (key_actions->damage && frame - damage_cooldown > 30) {
+		damage_cooldown = frame;
+		player_health--;
 	}
 	if (key_actions->zoom) {
 		set_camera_zoom(150, 60);
