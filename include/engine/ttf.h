@@ -10,7 +10,7 @@
 #include "config.h"
 #include "resources.h"
 
-typedef struct amphora_message_t AmphoraMessage;
+typedef struct amphora_message_t AmphoraString;
 
 enum fonts_e {
 #define LOADFONT(name, path) name##_ft,
@@ -23,15 +23,17 @@ enum fonts_e {
 extern "C" {
 #endif
 /* Create a string */
-AmphoraMessage *create_string(AmphoraMessage **msg, const char *name, int pt, int x, int y, SDL_Color color, const char *text, bool stationary);
+AmphoraString *create_string(AmphoraString **msg, const char *name, int pt, int x, int y, int order, SDL_Color color, const char *text, bool stationary);
 /* Get the number of characters in a message */
-size_t get_string_length(const AmphoraMessage *msg);
+size_t get_string_length(const AmphoraString *msg);
 /* Update the text in a string */
-AmphoraMessage *update_string_text(AmphoraMessage **msg, const char *text);
+AmphoraString *update_string_text(AmphoraString **msg, const char *text);
 /* Change the number of characters displayed in a string, 0 displays all characters */
-AmphoraMessage *update_string_n(AmphoraMessage **msg, size_t n);
-/* Display an AmphoraMessage on the screen */
-void render_string(const AmphoraMessage *msg);
+AmphoraString *update_string_n(AmphoraString **msg, size_t n);
+/* Free a string */
+void free_string(AmphoraString *msg);
+/* Display an AmphoraString on the screen */
+void render_string(const AmphoraString *msg);
 #ifdef __cplusplus
 }
 #endif

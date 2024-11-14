@@ -134,7 +134,6 @@ clean_resources(void) {
 	game_shutdown();
 	cleanup_img();
 #ifndef DISABLE_FONTS
-	free_all_strings();
 	free_fonts();
 #endif
 #ifndef DISABLE_TILEMAP

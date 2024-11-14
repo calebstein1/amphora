@@ -12,8 +12,7 @@ struct amphora_message_t {
 	size_t n;
 	SDL_Color color;
 	char *text;
-	Uint32 idx;
-	bool stationary : 1;
+	struct render_list_node_t *render_list_node;
 };
 
 struct open_font_t {
@@ -23,6 +22,5 @@ struct open_font_t {
 
 int init_fonts(void);
 void free_fonts(void);
-void free_all_strings(void);
 
 #endif /* TTF_INTERNAL_H */

@@ -12,9 +12,9 @@ enum player_state_e {
 AmphoraImage *player;
 AmphoraImage *heart;
 AmphoraImage *rotating_heart;
-AmphoraMessage *hello;
-AmphoraMessage *timer;
-AmphoraMessage *stationary;
+AmphoraString *hello;
+AmphoraString *timer;
+AmphoraString *stationary;
 enum player_state_e p_state = idle;
 
 void
@@ -44,9 +44,9 @@ game_init(void) {
 	add_frameset(heart, "Default", 63, 0, 16, 16, 0, 0, 1, 0);
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
-	create_string(&hello, "Roboto", 32, 16, 16, font_color, welcome_message, true);
-	create_string(&timer, "Merriweather", 32, -16, 16, font_color, "0", true);
-	create_string(&stationary, "Merriweather", 16, 76, 132, font_color, message, false);
+	create_string(&hello, "Roboto", 32, 16, 16, -1, font_color, welcome_message, true);
+	create_string(&timer, "Merriweather", 32, -16, 16, -1, font_color, "0", true);
+	create_string(&stationary, "Merriweather", 16, 76, 132, -1, font_color, message, false);
 }
 
 void

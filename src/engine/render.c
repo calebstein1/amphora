@@ -1,5 +1,6 @@
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
+#include "engine/internal/ttf.h"
 
 #include "config.h"
 
@@ -207,6 +208,9 @@ draw_render_list_and_gc(void) {
 			case SPRITE:
 				update_and_draw_sprite(render_list->data);
 				break;
+			case STRING:
+				render_string(render_list->data);
+				break;
 			default:
 				break;
 		}
@@ -230,6 +234,9 @@ free_render_list(void) {
 		switch(allocated_addrs[i]->type) {
 			case SPRITE:
 				free_sprite(allocated_addrs[i]->data);
+				break;
+			case STRING:
+				free_string(allocated_addrs[i]->data);
 				break;
 			default:
 				break;

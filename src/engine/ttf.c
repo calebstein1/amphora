@@ -8,28 +8,23 @@
 #include "config.h"
 
 #ifndef DISABLE_FONTS
-#define OPEN_MESSAGES_BATCH_COUNT 8
 
 /* Prototypes for private functions */
 int get_font_by_name(const char *name);
-SDL_Texture *render_string_to_texture(AmphoraMessage *msg);
-void free_string(AmphoraMessage *msg);
+SDL_Texture *render_string_to_texture(AmphoraString *msg);
 
 /* File-scoped variables */
 static SDL_RWops *fonts[FONTS_COUNT];
 static struct open_font_t open_fonts[FONTS_COUNT];
-static struct amphora_message_t **open_messages;
-static Uint32 open_message_count;
-static bool allow_leaks = false;
 static const char *font_names[] = {
 #define LOADFONT(name, path) #name,
 	FONTS
 #undef LOADFONT
 };
 
-AmphoraMessage *
-create_string(AmphoraMessage **msg, const char *name, const int pt, const int x, const int y, const SDL_Color color, const char *text, const bool stationary) {
-	Uint32 i = 0;
+AmphoraString *
+create_string(AmphoraString **msg, const char *name, const int pt, const int x, const int y, const int order, const SDL_Color color, const char *text, const bool stationary) {
+	struct render_list_node_t *render_list_node = add_render_list_node(order);
 	int idx;
 
 	if (*msg) return *msg;
@@ -53,34 +48,26 @@ create_string(AmphoraMessage **msg, const char *name, const int pt, const int x,
 	(*msg)->color = color;
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
-	(*msg)->stationary = stationary;
+	(*msg)->render_list_node = render_list_node;
+	render_list_node->type = STRING;
+	render_list_node->data = *msg;
+	render_list_node->stationary = stationary;
+	render_list_node->display = true;
+	render_list_node->garbage = false;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
 
 	(*msg)->texture = render_string_to_texture(*msg);
-
-	if (allow_leaks) return *msg;
-
-	while (open_messages[i]) {
-		if (++i == open_message_count) {
-			open_message_count += OPEN_MESSAGES_BATCH_COUNT;
-			open_messages = SDL_realloc(open_messages, open_message_count * sizeof(struct amphora_message_t *));
-			SDL_memset(&open_messages[open_message_count - OPEN_MESSAGES_BATCH_COUNT], 0, OPEN_MESSAGES_BATCH_COUNT * sizeof(struct amphora_message_t *));
-			break;
-		}
-	}
-	open_messages[i] = *msg;
-	(*msg)->idx = i;
 
 	return *msg;
 }
 
 size_t
-get_string_length(const AmphoraMessage *msg) {
+get_string_length(const AmphoraString *msg) {
 	return msg->len;
 }
 
-AmphoraMessage *
-update_string_text(AmphoraMessage **msg, const char *text) {
+AmphoraString *
+update_string_text(AmphoraString **msg, const char *text) {
 	(*msg)->len = SDL_strlen(text);
 	SDL_free((*msg)->text);
 	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
@@ -93,8 +80,8 @@ update_string_text(AmphoraMessage **msg, const char *text) {
 	return *msg;
 }
 
-AmphoraMessage *
-update_string_n(AmphoraMessage **msg, size_t n) {
+AmphoraString *
+update_string_n(AmphoraString **msg, size_t n) {
 	if (n >= (*msg)->len) n = 0;
 	(*msg)->n = n;
 	SDL_DestroyTexture((*msg)->texture);
@@ -104,12 +91,22 @@ update_string_n(AmphoraMessage **msg, size_t n) {
 }
 
 void
-render_string(const AmphoraMessage *msg) {
+free_string(AmphoraString *msg) {
+	if (!msg) return;
+
+	SDL_DestroyTexture(msg->texture);
+	SDL_free(msg->text);
+	msg->render_list_node->garbage = true;
+	SDL_free(msg);
+}
+
+void
+render_string(const AmphoraString *msg) {
 	SDL_Rect pos_adj;
 	const Vector2 camera = get_camera();
 	Vector2 logical_size = get_render_logical_size();
 
-	if (msg->stationary) {
+	if (msg->render_list_node->stationary) {
 		pos_adj = (SDL_Rect){
 			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
 			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
@@ -125,9 +122,9 @@ render_string(const AmphoraMessage *msg) {
 		};
 	}
 
-	if (msg->stationary) set_render_logical_size(get_resolution());
+	if (msg->render_list_node->stationary) set_render_logical_size(get_resolution());
 	render_texture(msg->texture, NULL, &pos_adj, 0, 0);
-	if (msg->stationary) set_render_logical_size(logical_size);
+	if (msg->render_list_node->stationary) set_render_logical_size(logical_size);
 }
 
 /*
@@ -170,13 +167,7 @@ init_fonts(void) {
 		SDL_Log("Found font %s\n", font_names[i]);
 	}
 #endif
-	if ((open_messages = SDL_calloc(OPEN_MESSAGES_BATCH_COUNT, sizeof(struct amphora_message_t *)))) {
-		open_message_count = OPEN_MESSAGES_BATCH_COUNT;
-	} else {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize open messages tracker\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Memory allocation error", "Failed to initialize message tracker... Amphora will attempt to continue with memory leaks, but a crash is likely incoming ¯\\_(ツ)_/¯", 0);
-		allow_leaks = true;
-	}
+
 	return 0;
 }
 
@@ -187,18 +178,6 @@ free_fonts(void) {
 	for (i = 0; i < FONTS_COUNT; i++) {
 		SDL_RWclose(fonts[i]);
 		TTF_CloseFont(open_fonts[i].font);
-	}
-}
-
-void
-free_all_strings(void) {
-	Uint32 i;
-
-	if (allow_leaks) return;
-	for (i = 0; i < open_message_count; i++) {
-		if (!open_messages[i]) continue;
-
-		free_string(open_messages[i]);
 	}
 }
 
@@ -217,7 +196,7 @@ get_font_by_name(const char *name) {
 }
 
 SDL_Texture *
-render_string_to_texture(AmphoraMessage *msg) {
+render_string_to_texture(AmphoraString *msg) {
 	enum fonts_e font_name = msg->font;
 	int pt = msg->pt;
 	size_t n = msg->n;
@@ -251,15 +230,5 @@ render_string_to_texture(AmphoraMessage *msg) {
 	if (n_buff) SDL_free(n_buff);
 
 	return texture;
-}
-
-void
-free_string(AmphoraMessage *msg) {
-	if (!msg) return;
-
-	open_messages[msg->idx] = NULL;
-	SDL_DestroyTexture(msg->texture);
-	SDL_free(msg->text);
-	SDL_free(msg);
 }
 #endif
