@@ -12,7 +12,7 @@
 
 /* Prototypes for private functions */
 int get_map_by_name(const char *name);
-SDL_Texture *parse_map_to_texture(enum tilemaps_e map_idx);
+enum map_orientation_e parse_map_to_texture(SDL_Texture **texture, enum tilemaps_e map_idx);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -38,7 +38,10 @@ set_map(const char *name, const Uint16 scale) {
 		return;
 	}
 	if (current_map.texture) SDL_DestroyTexture(current_map.texture);
-	current_map.texture = parse_map_to_texture(idx);
+	if ((current_map.orientation = parse_map_to_texture(&current_map.texture, idx)) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create texture from map: %s\n", name);
+		return;
+	}
 	current_map.scale = scale ? scale : 1;
 }
 
@@ -119,8 +122,8 @@ get_map_by_name(const char *name) {
 	return -1;
 }
 
-SDL_Texture *
-parse_map_to_texture(const enum tilemaps_e map_idx) {
+enum map_orientation_e
+parse_map_to_texture(SDL_Texture **texture, const enum tilemaps_e map_idx) {
 	SDL_Renderer *renderer = get_renderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
 	cute_tiled_layer_t *layer = map->layers;
@@ -129,19 +132,43 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Texture *tileset_img = get_img_texture_by_name(tileset->name.ptr);
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
-	int tile_idx, i;
-	SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, map->width * map->tilewidth, map->height * map->tileheight);
+	enum map_orientation_e orientation;
+	int pixel_width = map->width * map->tilewidth;
+	int pixel_height = map->height * map->tileheight;
+	int tile_idx, i, row;
 
+	if (SDL_strcmp(map->orientation.ptr, "orthogonal") == 0) {
+		orientation = orthogonal;
+		*texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width, pixel_height);
+	} else if (SDL_strcmp(map->orientation.ptr, "isometric") == 0) {
+		orientation = isometric;
+		/* This needs to be updated to restrict the texture size to the bounding rectangle of the isometric map */
+		*texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width + (pixel_width / 2), pixel_height + (pixel_height / 2));
+	} else {
+		return unknown;
+	}
 	SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
-	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderTarget(renderer, texture);
+	SDL_SetTextureBlendMode(*texture, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderTarget(renderer, *texture);
+	//layer = layer->next;
 	while (layer) {
 		for (i = 0; i < layer->data_count; i++) {
 			tile_idx = layer->data[i] - 1;
-			tile_s.x = (tile_idx * map->tilewidth) % tileset_img_w;
-			tile_s.y = ((tile_idx * map->tileheight) / tileset_img_w) * map->tileheight;
-			tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth);
-			tile_d.y = ((i * map->tileheight) / (map->width * map->tilewidth)) * map->tileheight;
+			row = ((i * map->tilewidth) / (map->width * map->tilewidth));
+			tile_s.x = (tile_idx * map->tilesets->tilewidth) % tileset_img_w;
+			tile_s.y = ((tile_idx * map->tilesets->tilewidth) / tileset_img_w) * map->tileheight;
+			switch (orientation) {
+				case orthogonal:
+					tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth);
+					tile_d.y = row * map->tileheight;
+					break;
+				case isometric:
+					tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth) + (((map->width * map->tilewidth) / 2) - ((i % map->width) * (map->tilewidth / 2)) - (row * (map->tilewidth / 2)));
+					tile_d.y = row * map->tileheight + ((i % map->width) * (map->tileheight / 2)) - (row * (map->tileheight / 2));
+					break;
+				default:
+					return -1;
+			}
 			SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
 		}
 		layer = layer->next;
@@ -149,7 +176,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_SetRenderTarget(renderer, NULL);
 	cute_tiled_free_map(map);
 
-	return texture;
+	return orientation;
 }
 
 #endif

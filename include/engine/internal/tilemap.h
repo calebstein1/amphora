@@ -3,9 +3,16 @@
 
 #include "engine/tilemap.h"
 
+enum map_orientation_e {
+    	unknown = -1,
+	orthogonal,
+	isometric
+};
+
 struct amphora_tilemap_t {
     SDL_Texture *texture;
     int scale;
+    enum map_orientation_e orientation;
 };
 
 int init_maps(void);

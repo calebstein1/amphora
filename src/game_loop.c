@@ -34,7 +34,7 @@ game_init(void) {
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
 	set_bg(sky);
-	set_map("Overworld", 2);
+	set_map("Grassland", 2);
 
 	create_sprite(&player, "Character", 96, 148, 2, false, false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);

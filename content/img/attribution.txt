@@ -1,6 +1,9 @@
-Sprites from Zelda-Like Tilesets and Sprites, by ArMM1998; and MV Platformer Female by MoikMellah
+Sprites from Zelda-Like Tilesets and Sprites, by ArMM1998; MV Platformer Female, by MoikMellah; and Grassland Tileset, by Clint Bellanger
 https://opengameart.org/content/zelda-like-tilesets-and-sprites
 https://opengameart.org/users/armm1998
 https://opengameart.org/content/mv-platformer-female-32x64
 https://opengameart.org/users/moikmellah
+https://opengameart.org/content/grassland-tileset
+https://opengameart.org/users/clint-bellanger
+
 

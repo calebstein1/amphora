@@ -5,7 +5,8 @@
 	/* LOADIMG(name, path) */				\
 	LOADIMG(Character, "../content/img/character.png")	\
 	LOADIMG(Objects, "../content/img/objects.png")		\
-	LOADIMG(Overworld, "../content/img/overworld.png")
+	LOADIMG(Overworld, "../content/img/overworld.png")	\
+	LOADIMG(Grassland, "../content/img/grassland.png")
 
 #define FONTS										\
 	/* LOADFONT(name, path) */							\
@@ -14,6 +15,6 @@
 
 #define MAPS							\
 	/* LOADMAP(name, path) */				\
-	LOADMAP(Overworld, "../content/maps/overworld.tmj")
-
+	LOADMAP(Overworld, "../content/maps/overworld.tmj")	\
+	LOADMAP(Grassland, "../content/maps/grassland.tmj")
 #endif /* RESOURCES_H */
