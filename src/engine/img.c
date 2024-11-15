@@ -151,9 +151,15 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 
 AmphoraImage *
 reorder_sprite(AmphoraImage *spr, const Sint32 order) {
-	/*
-	 * Doesn't work right yet
-	 */
+	struct render_list_node_t *new_node = add_render_list_node(order);
+	struct render_list_node_t *old_node = spr->render_list_node;
+
+	new_node->type = SPRITE;
+	new_node->data = spr;
+	new_node->display = old_node->display;
+	new_node->stationary = old_node->stationary;
+	old_node->garbage = true;
+	spr->render_list_node = new_node;
 
 	return spr;
 }
