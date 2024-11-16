@@ -23,6 +23,7 @@ static char *map_names[] = {
 static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
 static struct amphora_tilemap_t current_map;
+static SDL_Rect map_rect;
 
 void
 set_map(const char *name, const Uint16 scale) {
@@ -37,12 +38,12 @@ set_map(const char *name, const Uint16 scale) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
 		return;
 	}
+	current_map.scale = scale ? scale : 1;
 	if (current_map.texture) SDL_DestroyTexture(current_map.texture);
 	if (parse_map_to_texture(idx) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create texture from map: %s\n", name);
 		return;
 	}
-	current_map.scale = scale ? scale : 1;
 }
 
 /*
@@ -92,14 +93,9 @@ init_maps(void) {
 void
 render_current_map(void) {
 	const Camera camera = get_camera();
-	SDL_Rect map_rect = {
-		.x = -camera.x,
-		.y = -camera.y
-	};
 
-	SDL_QueryTexture(current_map.texture, NULL, NULL, &map_rect.w, &map_rect.h);
-	map_rect.w *= current_map.scale;
-	map_rect.h *= current_map.scale;
+	map_rect.x = -camera.x;
+	map_rect.y = -camera.y;
 	render_texture(current_map.texture, NULL, &map_rect, 0, SDL_FLIP_NONE);
 }
 
@@ -171,6 +167,9 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	}
 	SDL_SetRenderTarget(renderer, NULL);
 	cute_tiled_free_map(map);
+	SDL_QueryTexture(current_map.texture, NULL, NULL, &map_rect.w, &map_rect.h);
+	map_rect.w *= current_map.scale;
+	map_rect.h *= current_map.scale;
 
 	return 0;
 }
