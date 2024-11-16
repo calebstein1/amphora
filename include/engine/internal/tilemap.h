@@ -4,7 +4,6 @@
 #include "engine/tilemap.h"
 
 enum map_orientation_e {
-    	unknown = -1,
 	orthogonal,
 	isometric
 };
