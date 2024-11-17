@@ -137,8 +137,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 		current_map.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width, pixel_height);
 	} else if (SDL_strcmp(map->orientation.ptr, "isometric") == 0) {
 		current_map.orientation = isometric;
-		/* This needs to be updated to restrict the texture size to the bounding rectangle of the isometric map */
-		current_map.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width + (pixel_width / 2), pixel_height + (pixel_height / 2));
+		current_map.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width + (map->tilewidth / 2), pixel_height);
 	} else {
 		return -1;
 	}
