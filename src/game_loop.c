@@ -1,7 +1,8 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
-#define MAX_HEALTH 3
+#define MAX_HEALTH 10
+#define DEFAULT_HEALTH 3
 
 enum player_state_e {
 	idle,
@@ -33,7 +34,7 @@ game_init(void) {
 	const char *message = "I'm going to be fixed right here in place!";
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
-	player_health = get_number_value("health", MAX_HEALTH);
+	player_health = (int)get_number_value("health", DEFAULT_HEALTH);
 
 	set_bg(sky);
 	set_map("Grassland", 2);
@@ -98,7 +99,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	}
 	if (key_actions->attack && player_state != atk) {
 		if (player_state == ko) {
-			player_health = MAX_HEALTH;
+			player_health = DEFAULT_HEALTH;
 			player_state = idle;
 			set_frameset(player, "Idle");
 		} else {
