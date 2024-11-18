@@ -18,7 +18,7 @@ AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
 enum player_state_e player_state = idle;
-int player_health = MAX_HEALTH;
+int player_health;
 
 void
 end_player_attack(void) {
@@ -33,10 +33,12 @@ game_init(void) {
 	const char *message = "I'm going to be fixed right here in place!";
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
+	player_health = get_number_value("health", MAX_HEALTH);
+
 	set_bg(sky);
 	set_map("Grassland", 2);
 
-	create_sprite(&player, "Character", 96, 148, 2, false, false, 10);
+	create_sprite(&player, "Character", get_number_value("x", 96), get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 	for (i = 0; i < MAX_HEALTH; i++) {
 		create_sprite(&health_bar[i], "Objects", -96 - (32 * i), 24, 2, false, true, 11);
@@ -141,4 +143,9 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 
 void
 game_shutdown(void) {
+	Vector2 player_pos = get_sprite_position(player);
+	save_number_value("x", player_pos.x);
+	save_number_value("y", player_pos.y);
+	save_number_value("flip", is_flipped(player));
+	save_number_value("health", player_health);
 }
