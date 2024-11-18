@@ -9,7 +9,7 @@ sqlite3 *save_db;
 int
 save_number_value(const char *attribute, Sint64 value) {
 	sqlite3_stmt *stmt;
-	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, number_value) VALUES (?, ?);";
+	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, value) VALUES (?, ?);";
 
 	sqlite3_prepare_v2(save_db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
@@ -23,7 +23,7 @@ save_number_value(const char *attribute, Sint64 value) {
 int
 save_string_value(const char *attribute, const char *value) {
 	sqlite3_stmt *stmt;
-	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, text_value) VALUES (?, ?);";
+	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, value) VALUES (?, ?);";
 
 	sqlite3_prepare_v2(save_db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
@@ -37,7 +37,7 @@ save_string_value(const char *attribute, const char *value) {
 Sint64
 get_number_value(const char *attribute, Sint64 default_value) {
 	sqlite3_stmt *stmt;
-	const char *sql = "SELECT number_value FROM save_data WHERE attribute=?";
+	const char *sql = "SELECT value FROM save_data WHERE attribute=?";
 	Sint64 val;
 
 	sqlite3_prepare_v2(save_db, sql, (int)SDL_strlen(sql), &stmt, NULL);
@@ -68,8 +68,7 @@ init_save(void) {
 	size_t new_len = SDL_strlen(path) + SDL_strlen(filename) + 1;
 	const char *sql = "CREATE TABLE IF NOT EXISTS save_data("
 			  "attribute TEXT PRIMARY KEY NOT NULL,"
-			  "number_value INT,"
-			  "text_value TEXT);";
+			  "value BLOB);";
 	char *err_msg;
 
 	path = SDL_realloc(path, new_len);
