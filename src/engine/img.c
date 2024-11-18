@@ -22,6 +22,11 @@ static const char *img_names[] = {
 };
 
 Vector2
+get_sprite_position(const AmphoraImage *spr) {
+	return (Vector2){ spr->dx, spr->dy };
+}
+
+Vector2
 get_sprite_center(const AmphoraImage *spr) {
 	return (Vector2){
 		.x = spr->dx + (spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
@@ -162,6 +167,12 @@ reorder_sprite(AmphoraImage *spr, const Sint32 order) {
 	spr->render_list_node = new_node;
 
 	return spr;
+}
+
+void
+set_sprite_location(AmphoraImage *spr, Sint32 x, Sint32 y) {
+	spr->dx = x;
+	spr->dy = y;
 }
 
 void
