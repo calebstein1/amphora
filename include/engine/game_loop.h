@@ -5,8 +5,6 @@
 
 #include "engine/input.h"
 
-#include "save_data.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1,0 +1,4 @@
+#ifndef AMPHORA_SAVE_DATA_H
+#define AMPHORA_SAVE_DATA_H
+
+#endif /* AMPHORA_SAVE_DATA_H */
