@@ -4,6 +4,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/save_data.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
@@ -63,11 +64,11 @@ main(int argc, char **argv) {
 		return -1;
 	}
 #endif
-
 	if (init_render() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init renderer\n");
 		return -1;
 	}
+	init_save();
 
 	game_init();
 
@@ -76,6 +77,7 @@ main(int argc, char **argv) {
 #else
 	while (main_loop(&e) == 0) {}
 #endif
+	clean_resources();
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
@@ -102,8 +104,8 @@ main_loop(SDL_Event *e) {
 
 	if (event_loop(e) == SDL_QUIT) quit_requested = true;
 	if (quit_requested) {
-		clean_resources();
 #ifdef __EMSCRIPTEN__
+		clean_resources();
 		IMG_Quit();
 		TTF_Quit();
 		SDL_Quit();
@@ -146,4 +148,5 @@ clean_resources(void) {
 	free_render_list();
 	cleanup_render();
 	cleanup_controllers();
+	cleanup_save();
 }

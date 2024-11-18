@@ -4,6 +4,7 @@
 #include "engine/util.h"
 
 #define GAME_TITLE "Amphora Demo"
+#define GAME_AUTHOR "Syoma Codes"
 
 #define FRAMERATE 60
 #define WINDOW_X 1280
