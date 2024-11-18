@@ -52,9 +52,28 @@ get_number_value(const char *attribute, Sint64 default_value) {
 	return val;
 }
 
-char *
-get_string_value(const char *attribute) {
-	return NULL;
+int
+get_string_value(const char *attribute, char **out_string) {
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT value FROM save_data WHERE attribute=?";
+	const unsigned char *val;
+
+	sqlite3_prepare_v2(save_db, sql, (int)SDL_strlen(sql), &stmt, NULL);
+	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
+	if (sqlite3_step(stmt) != SQLITE_ROW) {
+		sqlite3_finalize(stmt);
+		return -1;
+	}
+	val = sqlite3_column_text(stmt, 0);
+	if (!(*out_string = SDL_malloc(sqlite3_column_bytes(stmt, 0) + 1))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate space for string\n");
+		sqlite3_finalize(stmt);
+		return -1;
+	}
+	SDL_memcpy(*out_string, val, sqlite3_column_bytes(stmt, 0) + 1);
+	sqlite3_finalize(stmt);
+
+	return 0;
 }
 
 /*
@@ -68,7 +87,7 @@ init_save(void) {
 	size_t new_len = SDL_strlen(path) + SDL_strlen(filename) + 1;
 	const char *sql = "CREATE TABLE IF NOT EXISTS save_data("
 			  "attribute TEXT PRIMARY KEY NOT NULL,"
-			  "value BLOB);";
+			  "value ANY);";
 	char *err_msg;
 
 	path = SDL_realloc(path, new_len);
