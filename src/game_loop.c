@@ -38,7 +38,7 @@ game_init(void) {
 	set_bg(sky);
 	set_map("Grassland", 2);
 
-	create_sprite(&player, "Character", get_number_value("x", 96), get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
+	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 	for (i = 0; i < MAX_HEALTH; i++) {
 		create_sprite(&health_bar[i], "Objects", -96 - (32 * i), 24, 2, false, true, 11);

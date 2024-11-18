@@ -7,13 +7,13 @@
 sqlite3 *save_db;
 
 int
-save_number_value(const char *attribute, int value) {
+save_number_value(const char *attribute, Sint64 value) {
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, number_value) VALUES (?, ?);";
 
 	sqlite3_prepare_v2(save_db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
-	sqlite3_bind_int(stmt, 2, value);
+	sqlite3_bind_int64(stmt, 2, value);
 	sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 
@@ -34,11 +34,11 @@ save_string_value(const char *attribute, const char *value) {
 	return 0;
 }
 
-int
-get_number_value(const char *attribute, int default_value) {
+Sint64
+get_number_value(const char *attribute, Sint64 default_value) {
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT number_value FROM save_data WHERE attribute=?";
-	int val;
+	Sint64 val;
 
 	sqlite3_prepare_v2(save_db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
@@ -46,7 +46,7 @@ get_number_value(const char *attribute, int default_value) {
 		sqlite3_finalize(stmt);
 		return default_value;
 	}
-	val = sqlite3_column_int(stmt, 0);
+	val = sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
 	return val;
