@@ -26,6 +26,8 @@ extern "C" {
 Vector2 get_sprite_position(const AmphoraImage *spr);
 /* Gets the pixel position of the center of a sprite */
 Vector2 get_sprite_center(const AmphoraImage *spr);
+/* Get whether a sprite is flipped */
+bool is_flipped(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
 AmphoraImage *create_sprite(AmphoraImage **spr, const char *image_name, Sint32 x, Sint32 y, Uint8 scale,
 			    SDL_bool flip, SDL_bool stationary, Sint32 order);

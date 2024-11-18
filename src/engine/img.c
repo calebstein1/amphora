@@ -34,6 +34,11 @@ get_sprite_center(const AmphoraImage *spr) {
 	};
 }
 
+bool
+is_flipped(const AmphoraImage *spr) {
+	return spr->flip;
+}
+
 AmphoraImage *
 create_sprite(AmphoraImage **spr, const char *image_name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *new_sprite = NULL;
