@@ -1,5 +1,5 @@
-#ifndef AMPHORA_SAVE_DATA_H
-#define AMPHORA_SAVE_DATA_H
+#ifndef AMPHORA_DB_H
+#define AMPHORA_DB_H
 
 #include "SDL.h"
 
@@ -12,4 +12,4 @@ Sint64 get_number_value(const char *attribute, Sint64 default_value);
 /* Get the string stored with key attribute and store it in out_string */
 int get_string_value(const char *attribute, char **out_string);
 
-#endif /* AMPHORA_SAVE_DATA_H */
+#endif /* AMPHORA_DB_H */

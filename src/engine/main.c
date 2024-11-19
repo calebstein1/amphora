@@ -4,7 +4,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
-#include "engine/internal/save_data.h"
+#include "engine/internal/db.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
@@ -68,7 +68,7 @@ main(int argc, char **argv) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init renderer\n");
 		return -1;
 	}
-	init_save();
+	init_db();
 
 	game_init();
 
