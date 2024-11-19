@@ -15,12 +15,44 @@ static const char *action_names[] = {
 	DEFAULT_KEYMAP
 #undef KMAP
 };
-static SDL_Keycode key[ACTION_COUNT];
+static SDL_Keycode keys[ACTION_COUNT];
 static SDL_GameControllerButton controller_buttons[ACTION_COUNT];
 
 void
 load_keymap(void) {
-	get_key_map_or_default(action_names, key, controller_buttons);
+	sqlite3 *db = get_db();
+	sqlite3_stmt *stmt;
+	const char *sql_write = "INSERT INTO key_map (idx, action, keys, key_name, gamepad, gamepad_name)"
+				"VALUES (?, ?, ?, ?, ?, ?)";
+	const char *sql_read = "SELECT keys, gamepad FROM key_map ORDER BY idx";
+	int sql_write_len = (int)SDL_strlen(sql_write);
+	int i;
+
+	/* Load the default keymap for any mappings that are missing */
+#define KMAP(action, key, gamepad)						\
+	sqlite3_prepare_v2(db, sql_write, sql_write_len, &stmt, NULL);		\
+        sqlite3_bind_int(stmt, 1, ACTION_##action);				\
+	sqlite3_bind_text(stmt, 2, #action, -1, NULL);				\
+	sqlite3_bind_int(stmt, 3, SDLK_##key);					\
+	sqlite3_bind_text(stmt, 4, #key, -1, NULL);				\
+	sqlite3_bind_int(stmt, 5, SDL_CONTROLLER_BUTTON_##gamepad);		\
+	sqlite3_bind_text(stmt, 6, #gamepad, -1, NULL);				\
+	sqlite3_step(stmt);							\
+	sqlite3_finalize(stmt);
+	DEFAULT_KEYMAP
+#undef KMAP
+
+	sqlite3_prepare_v2(db, sql_read, (int)SDL_strlen(sql_read), &stmt, NULL);
+	for (i = 0; i < ACTION_COUNT; i++) {
+		if (sqlite3_step(stmt) != SQLITE_ROW) {
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to read keymap for action: %s\n", action_names[i]);
+			sqlite3_finalize(stmt);
+			continue;
+		}
+		keys[i] = sqlite3_column_int(stmt, 0);
+		controller_buttons[i] = sqlite3_column_int(stmt, 1);
+	}
+	sqlite3_finalize(stmt);
 }
 
 /*
@@ -79,7 +111,7 @@ handle_keydown(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->key.keysym.sym == key[i]) {
+		if (e->key.keysym.sym == keys[i]) {
 			key_actions.bits |= (1LL << i);
 			return;
 		}
@@ -91,7 +123,7 @@ handle_keyup(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->key.keysym.sym == key[i]) {
+		if (e->key.keysym.sym == keys[i]) {
 			key_actions.bits &= (rotate_left(MASK, i));
 			return;
 		}

@@ -19,7 +19,7 @@
 
 /* Map actions to keys here following the example in the comment */
 #define DEFAULT_KEYMAP										\
-	/* KMAP(action, key, controller) */		\
+	/* KMAP(action, keys, controller) */		\
 	KMAP(left, a, DPAD_LEFT)					\
 	KMAP(right, d, DPAD_RIGHT)				\
 	KMAP(up, w, DPAD_UP)						\
