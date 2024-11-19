@@ -115,7 +115,7 @@ cleanup_db(void) {
 void
 get_key_map_or_default(const char **actions, SDL_Keycode *keys, SDL_GameControllerButton *gamepad) {
 	sqlite3_stmt *stmt;
-	const char *sql_write = "INSERT OR REPLACE INTO key_map (action, key, key_name, gamepad, gamepad_name)"
+	const char *sql_write = "INSERT INTO key_map (action, key, key_name, gamepad, gamepad_name)"
 				"VALUES (?, ?, ?, ?, ?)";
 	const char *sql_read = "SELECT key, gamepad FROM key_map WHERE action=?";
 	int sql_write_len = (int)SDL_strlen(sql_write);
