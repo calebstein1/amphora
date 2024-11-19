@@ -92,7 +92,9 @@ init_db(void) {
 			  "CREATE TABLE IF NOT EXISTS key_map("
 			  "action TEXT PRIMARY KEY NOT NULL,"
 			  "key INT,"
-			  "gamepad INT);";
+			  "key_name TEXT,"
+			  "gamepad INT,"
+			  "gamepad_name TEXT);";
 	char *err_msg;
 
 	path = SDL_realloc(path, new_len);
@@ -113,7 +115,8 @@ cleanup_db(void) {
 void
 get_key_map_or_default(const char **actions, SDL_Keycode *keys, SDL_GameControllerButton *gamepad) {
 	sqlite3_stmt *stmt;
-	const char *sql_write = "INSERT OR REPLACE INTO key_map (action, key, gamepad) VALUES (?, ?, ?)";
+	const char *sql_write = "INSERT OR REPLACE INTO key_map (action, key, key_name, gamepad, gamepad_name)"
+				"VALUES (?, ?, ?, ?, ?)";
 	const char *sql_read = "SELECT key, gamepad FROM key_map WHERE action=?";
 	int sql_write_len = (int)SDL_strlen(sql_write);
 	int i;
@@ -123,7 +126,9 @@ get_key_map_or_default(const char **actions, SDL_Keycode *keys, SDL_GameControll
 	sqlite3_prepare_v2(game_db, sql_write, sql_write_len, &stmt, NULL);	\
 	sqlite3_bind_text(stmt, 1, #action, -1, NULL);				\
 	sqlite3_bind_int(stmt, 2, SDLK_##key);					\
-	sqlite3_bind_int(stmt, 3, SDL_CONTROLLER_BUTTON_##gamepad);		\
+	sqlite3_bind_text(stmt, 3, #key, -1, NULL);				\
+	sqlite3_bind_int(stmt, 4, SDL_CONTROLLER_BUTTON_##gamepad);		\
+	sqlite3_bind_text(stmt, 5, #gamepad, -1, NULL);				\
 	sqlite3_step(stmt);							\
 	sqlite3_finalize(stmt);
 DEFAULT_KEYMAP
