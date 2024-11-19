@@ -21,6 +21,7 @@ enum input_actions {
 
 _Static_assert(ACTION_COUNT <= 64, "Cannot define more than 64 actions");
 
+int init_input(void);
 struct input_state_t *get_key_actions_state(void);
 void add_controller(Sint32 idx);
 void remove_controller(SDL_JoystickID id);

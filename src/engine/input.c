@@ -59,6 +59,27 @@ load_keymap(void) {
  * Internal functions
  */
 
+int
+init_input(void) {
+	sqlite3 *db = get_db();
+	const char *sql = "CREATE TABLE IF NOT EXISTS key_map("
+			  "idx INT NOT NULL PRIMARY KEY,"
+			  "action TEXT NOT NULL,"
+			  "keys INT,"
+			  "key_name TEXT,"
+			  "gamepad INT,"
+			  "gamepad_name TEXT);";
+	char *err_msg;
+
+	sqlite3_exec(db, sql, NULL, NULL, &err_msg);
+	if (err_msg) {
+		SDL_Log("%s\n", err_msg);
+		return -1;
+	}
+
+	return 0;
+}
+
 struct input_state_t *
 get_key_actions_state(void) {
 	return &key_actions.state;

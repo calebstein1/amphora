@@ -1,10 +1,11 @@
 #include "engine/game_loop.h"
 #include "engine/util.h"
+#include "engine/internal/db.h"
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
-#include "engine/internal/db.h"
+#include "engine/internal/save_data.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
@@ -69,6 +70,8 @@ main(int argc, char **argv) {
 		return -1;
 	}
 	init_db();
+	init_save();
+	init_input();
 	load_keymap();
 
 	game_init();
