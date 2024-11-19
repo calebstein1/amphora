@@ -1,4 +1,5 @@
 #include "engine/internal/db.h"
+#include "engine/internal/input.h"
 
 #include "config.h"
 
@@ -105,6 +106,39 @@ init_db(void) {
 }
 
 void
-cleanup_save(void) {
+cleanup_db(void) {
 	sqlite3_close_v2(game_db);
+}
+
+void
+get_key_map_or_default(const char **actions, SDL_Keycode *keys, SDL_GameControllerButton *gamepad) {
+	sqlite3_stmt *stmt;
+	const char *sql_write = "INSERT OR REPLACE INTO key_map (action, key, gamepad) VALUES (?, ?, ?)";
+	const char *sql_read = "SELECT key, gamepad FROM key_map WHERE action=?";
+	int sql_write_len = (int)SDL_strlen(sql_write);
+	int i;
+
+	/* Load the default keymap for any mappings that are missing */
+#define KMAP(action, key, gamepad)						\
+	sqlite3_prepare_v2(game_db, sql_write, sql_write_len, &stmt, NULL);	\
+	sqlite3_bind_text(stmt, 1, #action, -1, NULL);				\
+	sqlite3_bind_int(stmt, 2, SDLK_##key);					\
+	sqlite3_bind_int(stmt, 3, SDL_CONTROLLER_BUTTON_##gamepad);		\
+	sqlite3_step(stmt);							\
+	sqlite3_finalize(stmt);
+DEFAULT_KEYMAP
+#undef KMAP
+
+	for (i = 0; i < ACTION_COUNT; i++) {
+		sqlite3_prepare_v2(game_db, sql_read, (int)SDL_strlen(sql_read), &stmt, NULL);
+		sqlite3_bind_text(stmt, 1, actions[i], -1, NULL);
+		if (sqlite3_step(stmt) != SQLITE_ROW) {
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to read keymap for action: %s\n", actions[i]);
+			sqlite3_finalize(stmt);
+			continue;
+		}
+		keys[i] = sqlite3_column_int(stmt, 0);
+		gamepad[i] = sqlite3_column_int(stmt, 1);
+		sqlite3_finalize(stmt);
+	}
 }

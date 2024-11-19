@@ -1,3 +1,4 @@
+#include "engine/internal/db.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
 
@@ -9,21 +10,18 @@ Uint64 rotate_left(Uint64 n, Uint32 c); /* Rotate the bits of n to the left by c
 /* File-scoped variables */
 static union input_state_u key_actions;
 static SDL_GameController *controllers[MAX_CONTROLLERS];
-static SDL_Keycode key1[] = {
-#define KMAP(action, key1, key2, controller) SDLK_##key1,
-    	ACTIONS
+static const char *action_names[] = {
+#define KMAP(action, key, gamepad) #action,
+	DEFAULT_KEYMAP
 #undef KMAP
 };
-static SDL_Keycode key2[] = {
-#define KMAP(action, key1, key2, controller) SDLK_##key2,
-	ACTIONS
-#undef KMAP
-};
-static SDL_GameControllerButton controller_buttons[] = {
-#define KMAP(action, key1, key2, controller) SDL_CONTROLLER_BUTTON_##controller,
-	ACTIONS
-#undef KMAP
-};
+static SDL_Keycode key[ACTION_COUNT];
+static SDL_GameControllerButton controller_buttons[ACTION_COUNT];
+
+void
+load_keymap(void) {
+	get_key_map_or_default(action_names, key, controller_buttons);
+}
 
 /*
  * Internal functions
@@ -81,13 +79,7 @@ handle_keydown(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->key.keysym.sym == key1[i]) {
-			key_actions.bits |= (1LL << i);
-			return;
-		}
-	}
-	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->key.keysym.sym == key2[i]) {
+		if (e->key.keysym.sym == key[i]) {
 			key_actions.bits |= (1LL << i);
 			return;
 		}
@@ -99,13 +91,7 @@ handle_keyup(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->key.keysym.sym == key1[i]) {
-			key_actions.bits &= (rotate_left(MASK, i));
-			return;
-		}
-	}
-	for (i = 0; i < ACTION_COUNT; i++) {
-		if (e->key.keysym.sym == key2[i]) {
+		if (e->key.keysym.sym == key[i]) {
 			key_actions.bits &= (rotate_left(MASK, i));
 			return;
 		}

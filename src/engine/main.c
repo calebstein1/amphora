@@ -69,6 +69,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 	init_db();
+	load_keymap();
 
 	game_init();
 
@@ -148,5 +149,5 @@ clean_resources(void) {
 	free_render_list();
 	cleanup_render();
 	cleanup_controllers();
-	cleanup_save();
+	cleanup_db();
 }
