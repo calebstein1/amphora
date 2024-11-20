@@ -22,9 +22,9 @@ void
 load_keymap(void) {
 	sqlite3 *db = get_db();
 	sqlite3_stmt *stmt;
-	const char *sql_write = "INSERT INTO key_map (idx, action, keys, key_name, gamepad, gamepad_name)"
+	const char *sql_write = "INSERT INTO key_map (idx, action, key, key_name, gamepad, gamepad_name)"
 				"VALUES (?, ?, ?, ?, ?, ?)";
-	const char *sql_read = "SELECT keys, gamepad FROM key_map ORDER BY idx";
+	const char *sql_read = "SELECT key, gamepad FROM key_map ORDER BY idx";
 	int sql_write_len = (int)SDL_strlen(sql_write);
 	int i;
 
@@ -65,7 +65,7 @@ init_input(void) {
 	const char *sql = "CREATE TABLE IF NOT EXISTS key_map("
 			  "idx INT NOT NULL PRIMARY KEY,"
 			  "action TEXT NOT NULL,"
-			  "keys INT,"
+			  "key INT,"
 			  "key_name TEXT,"
 			  "gamepad INT,"
 			  "gamepad_name TEXT);";
