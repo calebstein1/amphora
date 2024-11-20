@@ -30,7 +30,7 @@ Vector2 get_sprite_center(const AmphoraImage *spr);
 bool is_flipped(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
 AmphoraImage *create_sprite(AmphoraImage **spr, const char *image_name, Sint32 x, Sint32 y, Uint8 scale,
-			    SDL_bool flip, SDL_bool stationary, Sint32 order);
+			    bool flip, bool stationary, Sint32 order);
 /* Add a frameset to a sprite */
 void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, Sint32 off_x, Sint32 off_y, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */

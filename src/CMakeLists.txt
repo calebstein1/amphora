@@ -1,6 +1,6 @@
 add_subdirectory(engine)
 
-add_executable(amphora game_loop.c)
+add_executable(amphora game_loop.cpp)
 
 if(WIN32)
 	target_sources(amphora PRIVATE engine/bin_loader.rc)

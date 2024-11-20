@@ -11,7 +11,13 @@ enum tilemaps_e {
 	MAPS_COUNT
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void set_map(const char *name, Uint16 scale);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TILEMAP_H */
 #endif

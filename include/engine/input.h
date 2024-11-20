@@ -11,6 +11,12 @@ struct input_state_t {
 #undef KMAP
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void load_keymap(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* UNTITLED_PLATFORMER_INPUT_H */
