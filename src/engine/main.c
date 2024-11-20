@@ -40,7 +40,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 
-	if (!IMG_Init(IMG_INIT_PNG)) {
+	if (IMG_Init(IMG_INIT_PNG) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_image: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_image", SDL_GetError(), 0);
 		return -1;
