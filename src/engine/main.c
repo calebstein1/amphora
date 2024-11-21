@@ -1,9 +1,11 @@
 #include "engine/game_loop.h"
 #include "engine/util.h"
+#include "engine/internal/db.h"
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/save_data.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
@@ -38,7 +40,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 
-	if (!IMG_Init(IMG_INIT_PNG)) {
+	if (IMG_Init(IMG_INIT_PNG) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_image: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_image", SDL_GetError(), 0);
 		return -1;
@@ -63,11 +65,14 @@ main(int argc, char **argv) {
 		return -1;
 	}
 #endif
-
 	if (init_render() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init renderer\n");
 		return -1;
 	}
+	init_db();
+	init_save();
+	init_input();
+	load_keymap();
 
 	game_init();
 
@@ -76,6 +81,7 @@ main(int argc, char **argv) {
 #else
 	while (main_loop(&e) == 0) {}
 #endif
+	clean_resources();
 	IMG_Quit();
 	TTF_Quit();
 	SDL_Quit();
@@ -102,8 +108,8 @@ main_loop(SDL_Event *e) {
 
 	if (event_loop(e) == SDL_QUIT) quit_requested = true;
 	if (quit_requested) {
-		clean_resources();
 #ifdef __EMSCRIPTEN__
+		clean_resources();
 		IMG_Quit();
 		TTF_Quit();
 		SDL_Quit();
@@ -146,4 +152,5 @@ clean_resources(void) {
 	free_render_list();
 	cleanup_render();
 	cleanup_controllers();
+	cleanup_db();
 }

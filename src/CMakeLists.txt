@@ -1,6 +1,6 @@
 add_subdirectory(engine)
 
-add_executable(amphora game_loop.c)
+add_executable(amphora game_loop.cpp)
 
 if(WIN32)
 	target_sources(amphora PRIVATE engine/bin_loader.rc)
@@ -31,5 +31,6 @@ else()
 		$<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>, SDL2::SDL2, SDL2::SDL2-static>
 		$<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
 		$<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+		unofficial::sqlite3::sqlite3
 	)
 endif()

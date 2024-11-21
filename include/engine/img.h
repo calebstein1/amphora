@@ -22,11 +22,15 @@ typedef void (*CallbackFn)(void);
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* Gets the pixel posiiton of the upper left corner of a sprite */
+Vector2 get_sprite_position(const AmphoraImage *spr);
 /* Gets the pixel position of the center of a sprite */
 Vector2 get_sprite_center(const AmphoraImage *spr);
+/* Get whether a sprite is flipped */
+bool is_flipped(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
 AmphoraImage *create_sprite(AmphoraImage **spr, const char *image_name, Sint32 x, Sint32 y, Uint8 scale,
-			    SDL_bool flip, SDL_bool stationary, Sint32 order);
+			    bool flip, bool stationary, Sint32 order);
 /* Add a frameset to a sprite */
 void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, Sint32 off_x, Sint32 off_y, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
@@ -37,6 +41,8 @@ void play_oneshot(AmphoraImage *spr, const char *name, CallbackFn callback);
 void set_frameset_delay(AmphoraImage *spr, const char *name, Uint16 delay);
 /* Change the draw order of a sprite */
 AmphoraImage *reorder_sprite(AmphoraImage *spr, Sint32 order);
+/* Sets a sprite's absolute location */
+void set_sprite_location(AmphoraImage *spr, Sint32 x, Sint32 y);
 /* Move a sprite by the supplied delta values */
 void move_sprite(AmphoraImage *spr, Sint32 delta_x, Sint32 delta_y);
 /* Flip a sprite */

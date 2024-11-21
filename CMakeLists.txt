@@ -13,6 +13,7 @@ else()
 endif()
 
 set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 if(WIN32)
@@ -29,6 +30,7 @@ else()
 	find_package(SDL2 CONFIG REQUIRED)
 	find_package(SDL2_image CONFIG REQUIRED)
 	find_package(SDL2_ttf CONFIG REQUIRED)
+	find_package(unofficial-sqlite3 CONFIG REQUIRED)
 endif()
 
 include_directories(

@@ -7,8 +7,16 @@
 
 struct input_state_t {
 #define KMAP(action, ...) bool action : 1;
-	ACTIONS
+	DEFAULT_KEYMAP
 #undef KMAP
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+void load_keymap(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* UNTITLED_PLATFORMER_INPUT_H */

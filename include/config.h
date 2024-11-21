@@ -4,6 +4,7 @@
 #include "engine/util.h"
 
 #define GAME_TITLE "Amphora Demo"
+#define GAME_AUTHOR "Syoma Codes"
 
 #define FRAMERATE 60
 #define WINDOW_X 1280
@@ -17,17 +18,17 @@
 #define WINDOW_MODE resizable
 
 /* Map actions to keys here following the example in the comment */
-#define ACTIONS										\
-	/* KMAP(action, key1, key2, controller) */		\
-	KMAP(left, a, LEFT, DPAD_LEFT)					\
-	KMAP(right, d, RIGHT, DPAD_RIGHT)				\
-	KMAP(up, w, UP, DPAD_UP)						\
-	KMAP(down, s, DOWN, DPAD_DOWN)					\
-	KMAP(dash, LSHIFT, RSHIFT, B)		\
-	KMAP(attack, SPACE, SPACE, A)					\
-	KMAP(damage, x, x, INVALID)					\
-	KMAP(zoom, m, m, LEFTSHOULDER)              \
-	KMAP(expand, n, n, RIGHTSHOULDER)                         \
-	KMAP(quit, ESCAPE, ESCAPE, INVALID)
+#define DEFAULT_KEYMAP										\
+	/* KMAP(action, keys, controller) */		\
+	KMAP(left, a, DPAD_LEFT)					\
+	KMAP(right, d, DPAD_RIGHT)				\
+	KMAP(up, w, DPAD_UP)						\
+	KMAP(down, s, DPAD_DOWN)					\
+	KMAP(dash, LSHIFT, B)		\
+	KMAP(attack, SPACE, A)					\
+	KMAP(damage, x, INVALID)					\
+	KMAP(zoom, m, LEFTSHOULDER)              \
+	KMAP(expand, n, RIGHTSHOULDER)                         \
+	KMAP(quit, ESCAPE, INVALID)
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */

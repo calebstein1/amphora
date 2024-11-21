@@ -1,7 +1,8 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
-#define MAX_HEALTH 3
+#define MAX_HEALTH 10
+#define DEFAULT_HEALTH 3
 
 enum player_state_e {
 	idle,
@@ -18,25 +19,21 @@ AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
 enum player_state_e player_state = idle;
-int player_health = MAX_HEALTH;
+int player_health;
 
 void
-end_player_attack(void) {
-	player_state = idle;
-	set_frameset(player, "Idle");
-}
-
-void
-game_init(void) {
+game_init() {
 	int i;
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *message = "I'm going to be fixed right here in place!";
 	const SDL_Color font_color = { 0, 0, 0, 0xff };
 
+	player_health = (int)get_number_value("health", DEFAULT_HEALTH);
+
 	set_bg(sky);
 	set_map("Grassland", 2);
 
-	create_sprite(&player, "Character", 96, 148, 2, false, false, 10);
+	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 	for (i = 0; i < MAX_HEALTH; i++) {
 		create_sprite(&health_bar[i], "Objects", -96 - (32 * i), 24, 2, false, true, 11);
@@ -96,12 +93,15 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	}
 	if (key_actions->attack && player_state != atk) {
 		if (player_state == ko) {
-			player_health = MAX_HEALTH;
+			player_health = DEFAULT_HEALTH;
 			player_state = idle;
 			set_frameset(player, "Idle");
 		} else {
 			player_state = atk;
-			play_oneshot(player, "Attack", end_player_attack);
+			play_oneshot(player, "Attack", []{
+				player_state = idle;
+				set_frameset(player, "Idle");
+			});
 		}
 	}
 	if (!key_actions->left && !key_actions->right && player_state == walk) {
@@ -140,5 +140,10 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 }
 
 void
-game_shutdown(void) {
+game_shutdown() {
+	Vector2 player_pos = get_sprite_position(player);
+	save_number_value("x", player_pos.x);
+	save_number_value("y", player_pos.y);
+	save_number_value("flip", is_flipped(player));
+	save_number_value("health", player_health);
 }
