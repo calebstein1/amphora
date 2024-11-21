@@ -5,6 +5,35 @@
 
 #define DEFAULT_HEALTH 3
 
+class HealthBar {
+private:
+	std::vector<AmphoraImage *> health_bar;
+	int current_health;
+public:
+	HealthBar() {
+		current_health = 0;
+	}
+
+	void increase_health() {
+		current_health++;
+		health_bar.push_back(nullptr);
+		create_sprite(&health_bar.back(), "Objects", -96 - (Sint32)(32 * (health_bar.size() - 1)), 24, 2, false, true, 11);
+		add_frameset(health_bar.back(), "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+	}
+
+	void decrease_health() {
+		if (current_health == 0) return;
+
+		current_health--;
+		free_sprite(health_bar.back());
+		health_bar.pop_back();
+	}
+
+	[[nodiscard]] int get_health() const {
+		return current_health;
+	}
+};
+
 enum player_state_e {
 	idle,
 	walk,
@@ -15,31 +44,25 @@ enum player_state_e {
 /* Game globals */
 AmphoraImage *player;
 AmphoraImage *rotating_heart;
-std::vector<AmphoraImage *> health_bar;
+HealthBar health_bar;
 AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
 enum player_state_e player_state = idle;
-int player_health;
 
 void
 game_init() {
 	int i;
 	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
 	const char *message = "I'm going to be fixed right here in place!";
-	const SDL_Color font_color = { 0, 0, 0, 0xff };
-
-	player_health = (int)get_number_value("health", DEFAULT_HEALTH);
 
 	set_bg(sky);
 	set_map("Grassland", 2);
 
 	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
-	for (i = 0; i < player_health; i++) {
-		health_bar.push_back(nullptr);
-		create_sprite(&health_bar[i], "Objects", -96 - (32 * i), 24, 2, false, true, 11);
-		add_frameset(health_bar[i], "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+	for (i = 0; i < (int)get_number_value("health", DEFAULT_HEALTH); i++) {
+		health_bar.increase_health();
 	}
 
 	add_frameset(player, "Idle", 0, 17, 32, 48, 0, 0, 1, 0);
@@ -49,9 +72,9 @@ game_init() {
 
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
-	create_string(&hello, "Roboto", 32, 16, 16, -1, font_color, welcome_message, true);
-	create_string(&timer, "Merriweather", 32, -16, 16, -1, font_color, "0", true);
-	create_string(&stationary, "Merriweather", 16, 76, 132, -1, font_color, message, false);
+	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message, true);
+	create_string(&timer, "Merriweather", 32, -16, 16, -1, black, "0", true);
+	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message, false);
 }
 
 void
@@ -66,7 +89,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 
 	camera_location = get_camera();
 
-	if (player_health <= 0 && player_state != ko) {
+	if (health_bar.get_health() <= 0 && player_state != ko) {
 		player_state = ko;
 		play_oneshot(player, "KO", nullptr);
 	}
@@ -99,18 +122,11 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	}
 	if (key_actions->damage && frame - damage_cooldown > 30) {
 		damage_cooldown = frame;
-		if (player_health > 0) {
-			player_health--;
-			free_sprite(health_bar.back());
-			health_bar.pop_back();
-		}
+		health_bar.decrease_health();
 	}
 	if (key_actions->heal && frame - damage_cooldown > 30) {
 		damage_cooldown = frame;
-		player_health++;
-		health_bar.push_back(nullptr);
-		create_sprite(&health_bar.back(), "Objects", -96 - (Sint32)(32 * (health_bar.size() - 1)), 24, 2, false, true, 11);
-		add_frameset(health_bar.back(), "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+		health_bar.increase_health();
 		if (player_state == ko) {
 			player_state = idle;
 			set_frameset(player, "Idle");
@@ -149,5 +165,5 @@ game_shutdown() {
 	save_number_value("x", player_pos.x);
 	save_number_value("y", player_pos.y);
 	save_number_value("flip", is_flipped(player));
-	save_number_value("health", player_health);
+	save_number_value("health", health_bar.get_health());
 }
