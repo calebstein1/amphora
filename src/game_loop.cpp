@@ -1,7 +1,8 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
-#define MAX_HEALTH 10
+#include <vector>
+
 #define DEFAULT_HEALTH 3
 
 enum player_state_e {
@@ -14,7 +15,7 @@ enum player_state_e {
 /* Game globals */
 AmphoraImage *player;
 AmphoraImage *rotating_heart;
-AmphoraImage *health_bar[MAX_HEALTH];
+std::vector<AmphoraImage *> health_bar;
 AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
@@ -35,7 +36,8 @@ game_init() {
 
 	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
-	for (i = 0; i < MAX_HEALTH; i++) {
+	for (i = 0; i < player_health; i++) {
+		health_bar.push_back(nullptr);
 		create_sprite(&health_bar[i], "Objects", -96 - (32 * i), 24, 2, false, true, 11);
 		add_frameset(health_bar[i], "Default", 63, 0, 16, 16, 0, 0, 1, 0);
 	}
@@ -64,16 +66,9 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 
 	camera_location = get_camera();
 
-	for (i = 0; i < MAX_HEALTH; i++) {
-		if (i >= player_health) {
-			hide_sprite(health_bar[i]);
-		} else {
-			show_sprite(health_bar[i]);
-		}
-	}
 	if (player_health <= 0 && player_state != ko) {
 		player_state = ko;
-		play_oneshot(player, "KO", NULL);
+		play_oneshot(player, "KO", nullptr);
 	}
 
 	set_frameset_delay(player, "Walk", key_actions->dash ? 10 : 15);
@@ -91,18 +86,12 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		unflip_sprite(player);
 		move_sprite(player, player_speed, 0);
 	}
-	if (key_actions->attack && player_state != atk) {
-		if (player_state == ko) {
-			player_health = DEFAULT_HEALTH;
+	if (key_actions->attack && player_state != atk && player_state != ko) {
+		player_state = atk;
+		play_oneshot(player, "Attack", []{
 			player_state = idle;
 			set_frameset(player, "Idle");
-		} else {
-			player_state = atk;
-			play_oneshot(player, "Attack", []{
-				player_state = idle;
-				set_frameset(player, "Idle");
-			});
-		}
+		});
 	}
 	if (!key_actions->left && !key_actions->right && player_state == walk) {
 		player_state = idle;
@@ -110,7 +99,22 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	}
 	if (key_actions->damage && frame - damage_cooldown > 30) {
 		damage_cooldown = frame;
-		player_health--;
+		if (player_health > 0) {
+			player_health--;
+			free_sprite(health_bar.back());
+			health_bar.pop_back();
+		}
+	}
+	if (key_actions->heal && frame - damage_cooldown > 30) {
+		damage_cooldown = frame;
+		player_health++;
+		health_bar.push_back(nullptr);
+		create_sprite(&health_bar.back(), "Objects", -96 - (Sint32)(32 * (health_bar.size() - 1)), 24, 2, false, true, 11);
+		add_frameset(health_bar.back(), "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+		if (player_state == ko) {
+			player_state = idle;
+			set_frameset(player, "Idle");
+		}
 	}
 	if (key_actions->zoom) {
 		set_camera_zoom(150, 60);
