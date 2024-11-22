@@ -4,6 +4,7 @@
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
+#include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/save_data.h"
 #include "engine/internal/tilemap.h"
@@ -46,6 +47,13 @@ main(int argc, char **argv) {
 		return -1;
 	}
 
+#ifndef DISABLE_MIXER
+	if (Mix_Init(MIX_INIT_OGG) < 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_mixer: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_mixer", SDL_GetError(), 0);
+		return -1;
+	}
+#endif
 #ifndef DISABLE_FONTS
 	if (TTF_Init() < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
@@ -83,7 +91,12 @@ main(int argc, char **argv) {
 #endif
 	clean_resources();
 	IMG_Quit();
+#ifndef DISABLE_MIXER
+	Mix_Quit();
+#endif
+#ifndef DISABLE_FONTS
 	TTF_Quit();
+#endif
 	SDL_Quit();
 
 	return 0;
@@ -111,7 +124,12 @@ main_loop(SDL_Event *e) {
 #ifdef __EMSCRIPTEN__
 		clean_resources();
 		IMG_Quit();
+#ifndef DISABLE_MIXER
+		Mix_Quit();
+#endif
+#ifndef DISABLE_FONTS
 		TTF_Quit();
+#endif
 		SDL_Quit();
 		emscripten_cancel_main_loop();
 #else

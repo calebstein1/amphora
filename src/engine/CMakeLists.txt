@@ -8,4 +8,5 @@ add_library(amphora_engine
 	tilemap.c
 	db.c
 	save_data.c
+	mixer.c
 )
