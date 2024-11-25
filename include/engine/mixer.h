@@ -16,7 +16,8 @@ typedef enum sfx_e {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/* Play a sound effect */
+void play_sfx(const char *name, int channel, int repeat);
 #ifdef __cplusplus
 };
 #endif

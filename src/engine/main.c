@@ -53,6 +53,10 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_mixer", SDL_GetError(), 0);
 		return -1;
 	}
+	if (Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 2048) < 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to open audio device: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to open audio device", SDL_GetError(), 0);
+	}
 	if (init_sfx() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load sfx data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load sfx data", "Failed to load sfx data", 0);
@@ -97,6 +101,7 @@ main(int argc, char **argv) {
 	clean_resources();
 	IMG_Quit();
 #ifndef DISABLE_MIXER
+	Mix_CloseAudio();
 	Mix_Quit();
 #endif
 #ifndef DISABLE_FONTS
@@ -130,6 +135,7 @@ main_loop(SDL_Event *e) {
 		clean_resources();
 		IMG_Quit();
 #ifndef DISABLE_MIXER
+		Mix_CloseAudio();
 		Mix_Quit();
 #endif
 #ifndef DISABLE_FONTS
@@ -171,6 +177,9 @@ clean_resources(void) {
 #endif
 #ifndef DISABLE_TILEMAP
 	destroy_current_map();
+#endif
+#ifndef DISABLE_MIXER
+	cleanup_sfx();
 #endif
 	free_render_list();
 	cleanup_render();

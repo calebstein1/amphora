@@ -102,6 +102,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		player_speed = key_actions->dash ? 2 : 1;
 		flip_sprite(player);
 		move_sprite(player, -player_speed, 0);
+		play_sfx("leaves01", 1, 0);
 	}
 	if (key_actions->right && player_state != atk && player_state != ko) {
 		player_state = walk;
@@ -109,6 +110,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		player_speed = key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
 		move_sprite(player, player_speed, 0);
+		play_sfx("leaves02", 1, 0);
 	}
 	if (key_actions->attack && player_state != atk && player_state != ko) {
 		player_state = atk;
