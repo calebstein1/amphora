@@ -3,4 +3,6 @@
 
 #include "engine/mixer.h"
 
+int init_sfx(void);
+
 #endif /* AMPHORA_MIXER_INTERNAL_H */

@@ -4,6 +4,15 @@
 #include "SDL.h"
 #include "SDL_mixer.h"
 
+#include "resources.h"
+
+typedef enum sfx_e {
+#define LOADSFX(name, path) name##_sf,
+	SFX
+#undef LOADSFX
+	SFX_COUNT
+} SfxName;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

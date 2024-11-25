@@ -53,6 +53,11 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_mixer", SDL_GetError(), 0);
 		return -1;
 	}
+	if (init_sfx() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load sfx data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load sfx data", "Failed to load sfx data", 0);
+		return -1;
+	}
 #endif
 #ifndef DISABLE_FONTS
 	if (TTF_Init() < 0) {
@@ -61,20 +66,20 @@ main(int argc, char **argv) {
 		return -1;
 	}
 	if (init_fonts() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load TTF font data\n");
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
 		return -1;
 	}
 #endif
 #ifndef DISABLE_TILEMAP
 	if (init_maps() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to load tilemap data\n");
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load tilemap data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load tilemap data", "Failed to load tilemap data", 0);
 		return -1;
 	}
 #endif
 	if (init_render() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init renderer\n");
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to init renderer\n");
 		return -1;
 	}
 	init_db();

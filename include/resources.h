@@ -17,4 +17,10 @@
 	/* LOADMAP(name, path) */				\
 	LOADMAP(Overworld, "../content/maps/overworld.tmj")	\
 	LOADMAP(Grassland, "../content/maps/grassland.tmj")
+
+#define SFX							\
+	/* LOADSFX(name, path) */				\
+	LOADSFX(grass01, "../content/sfx/leaves01.ogg")		\
+	LOADSFX(leaves02, "../content/sfx/leaves02.ogg")
+
 #endif /* RESOURCES_H */
