@@ -8,6 +8,7 @@
 /* Prototypes for private functions */
 int get_sfx_by_name(const char *name);
 int get_music_by_name(const char *name);
+void free_music(void);
 
 /* File-scoped variables */
 static SDL_RWops *sfx[SFX_COUNT];
@@ -41,12 +42,8 @@ play_sfx(const char *name, const int channel, const int repeat) {
 	Mix_PlayChannel(channel, open_sfx[idx], repeat);
 }
 
-/*
- * TODO: Break this out into set_music() and play_music() functions
- */
-
 void
-play_music(const char *name) {
+set_music(const char *name) {
 	const int idx = get_music_by_name(name);
 
 	if (idx == -1) {
@@ -60,7 +57,48 @@ play_music(const char *name) {
 	}
 
 	current_music = Mix_LoadMUS_RW(music[idx], 0);
-	Mix_PlayMusic(current_music, -1);
+}
+
+void
+play_music(int ms) {
+	if (Mix_PlayingMusic()) return;
+
+	Mix_FadeInMusic(current_music, -1, ms);
+}
+
+void
+play_music_n(int n, int ms) {
+	if (Mix_PlayingMusic()) return;
+
+	Mix_FadeInMusic(current_music, n, ms);
+}
+
+void
+pause_music(void) {
+	if (!Mix_PlayingMusic()) return;
+
+	Mix_PauseMusic();
+}
+
+void
+unpause_music(void) {
+	if (!Mix_PausedMusic()) return;
+
+	Mix_ResumeMusic();
+}
+
+void
+stop_music(void) {
+	if (!Mix_PlayingMusic()) return;
+
+	Mix_HaltMusic();
+}
+
+void
+fade_music(int ms) {
+	if (!Mix_PlayingMusic()) return;
+
+	Mix_FadeOutMusic(ms);
 }
 
 /*
@@ -143,6 +181,7 @@ init_music(void) {
 		SDL_Log("Found music %s\n", music_names[i]);
 	}
 #endif
+	Mix_HookMusicFinished(free_music);
 
 	return 0;
 }
@@ -170,8 +209,7 @@ cleanup_music(void) {
 		sfx[i] = NULL;
 	}
 	if (current_music) {
-		Mix_FreeMusic(current_music);
-		current_music = NULL;
+		free_music();
 	}
 }
 
@@ -197,6 +235,12 @@ get_music_by_name(const char *name) {
 		if (SDL_strcmp(name, music_names[i]) == 0) return i;
 	}
 	return -1;
+}
+
+void
+free_music(void) {
+	Mix_FreeMusic(current_music);
+	current_music = NULL;
 }
 
 #endif

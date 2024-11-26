@@ -25,7 +25,13 @@ extern "C" {
 #endif
 /* Play a sound effect */
 void play_sfx(const char *name, int channel, int repeat);
-void play_music(const char *name);
+void set_music(const char *name);
+void play_music(int ms);
+void play_music_n(int n, int ms);
+void pause_music(void);
+void unpause_music(void);
+void stop_music(void);
+void fade_music(int ms);
 #ifdef __cplusplus
 };
 #endif

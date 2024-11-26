@@ -60,6 +60,7 @@ game_init() {
 
 	set_bg(sky);
 	set_map("Grassland", 2);
+	set_music("forest");
 
 	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
@@ -77,7 +78,6 @@ game_init() {
 	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, -1, black, "0", true);
 	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message.c_str(), false);
-	play_music("forest");
 }
 
 void
@@ -89,6 +89,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	Uint8 player_speed;
 	Vector2 screen_size;
 
+	play_music(500);
 	camera_location = get_camera();
 
 	if (health_bar.get_health() <= 0 && player_state != ko) {
