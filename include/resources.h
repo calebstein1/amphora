@@ -20,7 +20,11 @@
 
 #define SFX							\
 	/* LOADSFX(name, path) */				\
-	LOADSFX(leaves01, "../content/sfx/leaves01.ogg")		\
+	LOADSFX(leaves01, "../content/sfx/leaves01.ogg")	\
 	LOADSFX(leaves02, "../content/sfx/leaves02.ogg")
+
+#define MUSIC							\
+	/* LOADMUSIC(name, path) */				\
+	LOADMUSIC(forest, "../content/music/forest.ogg")
 
 #endif /* RESOURCES_H */

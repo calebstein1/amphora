@@ -13,11 +13,19 @@ typedef enum sfx_e {
 	SFX_COUNT
 } SfxName;
 
+typedef enum music_e {
+#define LOADMUSIC(name, path) name##_mu,
+	MUSIC
+#undef LOADMUSIC
+	MUSIC_COUNT
+} MusicName;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 /* Play a sound effect */
 void play_sfx(const char *name, int channel, int repeat);
+void play_music(const char *name);
 #ifdef __cplusplus
 };
 #endif

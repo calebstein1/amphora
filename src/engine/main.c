@@ -62,6 +62,11 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load sfx data", "Failed to load sfx data", 0);
 		return -1;
 	}
+	if (init_music() == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load music data\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load music data", "Failed to load sfx data", 0);
+		return -1;
+	}
 #endif
 #ifndef DISABLE_FONTS
 	if (TTF_Init() < 0) {
@@ -180,6 +185,7 @@ clean_resources(void) {
 #endif
 #ifndef DISABLE_MIXER
 	cleanup_sfx();
+	cleanup_music();
 #endif
 	free_render_list();
 	cleanup_render();

@@ -77,6 +77,7 @@ game_init() {
 	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, -1, black, "0", true);
 	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message.c_str(), false);
+	play_music("forest");
 }
 
 void
