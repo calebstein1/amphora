@@ -35,6 +35,9 @@ $1_size:
 #define LOADSFX(name, path) _incbin(_##name##_sf, path)
 	SFX
 #undef LOADSFX
+#define LOADMUSIC(name, path) _incbin(_##name##_mu, path)
+	MUSIC
+#undef LOADMUSIC
 #endif
 #else
 #define LOADIMG(name, path) _incbin(name##_im, path)
@@ -54,6 +57,9 @@ $1_size:
 #define LOADSFX(name, path) _incbin(name##_sf, path)
 	SFX
 #undef LOADSFX
+#define LOADMUSIC(name, path) _incbin(name##_mu, path)
+	MUSIC
+#undef LOADMUSIC
 #endif
 #endif
 
