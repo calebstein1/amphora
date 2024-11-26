@@ -1,6 +1,8 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
+#include <sstream>
+#include <string>
 #include <vector>
 
 #define DEFAULT_HEALTH 3
@@ -53,11 +55,12 @@ enum player_state_e player_state = idle;
 void
 game_init() {
 	int i;
-	const char *welcome_message = "Hello, and welcome to the Amphora demo!";
-	const char *message = "I'm going to be fixed right here in place!";
+	const std::string welcome_message = "Hello, and welcome to the Amphora demo!";
+	const std::string message = "I'm going to be fixed right here in place!";
 
 	set_bg(sky);
 	set_map("Grassland", 2);
+	set_music("forest");
 
 	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
@@ -72,21 +75,21 @@ game_init() {
 
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
-	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message, true);
+	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, -1, black, "0", true);
-	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message, false);
+	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message.c_str(), false);
 }
 
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	static Vector2 camera_location = { 0, 0 };
-	static char timer_string[128] = "0";
 	static Uint8 hello_ticker = 0;
 	static Uint64 damage_cooldown = 0;
+	std::stringstream timer_stream;
 	Uint8 player_speed;
 	Vector2 screen_size;
-	int i;
 
+	play_music(500);
 	camera_location = get_camera();
 
 	if (health_bar.get_health() <= 0 && player_state != ko) {
@@ -101,6 +104,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		player_speed = key_actions->dash ? 2 : 1;
 		flip_sprite(player);
 		move_sprite(player, -player_speed, 0);
+		play_sfx("leaves01", 1, 0);
 	}
 	if (key_actions->right && player_state != atk && player_state != ko) {
 		player_state = walk;
@@ -108,6 +112,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		player_speed = key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
 		move_sprite(player, player_speed, 0);
+		play_sfx("leaves02", 1, 0);
 	}
 	if (key_actions->attack && player_state != atk && player_state != ko) {
 		player_state = atk;
@@ -144,8 +149,8 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	}
 
 	if (frame % 60 == 0) {
-		snprintf(timer_string, 128, "%d", SDL_atoi(timer_string) + 1);
-		update_string_text(&timer, timer_string);
+		timer_stream << frame / FRAMERATE;
+		update_string_text(&timer, timer_stream.str().c_str());
 	}
 
 	if (IS_EVEN(frame) && hello_ticker < get_string_length(hello)) {

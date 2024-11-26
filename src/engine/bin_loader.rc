@@ -15,5 +15,13 @@ FONTS
 MAPS
 #undef LOADMAP
 #endif
+#ifndef DISABLE_MIXER
+#define LOADSFX(name, path) name SFX path
+SFX
+#undef LOADSFX
+#define LOADMUSIC(name, path) name MUSIC path
+MUSIC
+#undef LOADMUSIC
+#endif
 
 #undef BIN_LOADER
