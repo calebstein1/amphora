@@ -51,3 +51,14 @@ make
 
 Any IDE with CMake support should work as well, though CLion is the only IDE that's been officially tested on MacOS and Linux.
 
+#### Note for Linux builds
+
+If you intend to use the built-in audio system and are building for Linux, you will need to make sure you have your audio library headers installed _before_ vcpkg builds SDL2_mixer.
+
+This can be accomplished on Ubuntu/Debian-based systems with the following command:
+
+```shell
+sudo apt install libasound2-dev libpulse-dev
+```
+
+Alternatively, you can modify the build scripts to use system libraries and skip vcpkg altogether, but that's far beyond the scope of this document.
