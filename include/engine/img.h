@@ -16,7 +16,6 @@ typedef enum images_e {
 	IMAGES_COUNT
 } ImageName;
 
-typedef struct sprite_t AmphoraImage;
 typedef void (*CallbackFn)(void);
 
 #ifdef __cplusplus

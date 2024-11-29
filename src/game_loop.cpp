@@ -78,19 +78,18 @@ game_init() {
 	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, -1, black, "0", true);
 	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message.c_str(), false);
+
+	set_camera_target(player);
 }
 
 void
 game_loop(Uint64 frame, const struct input_state_t *key_actions) {
-	static Vector2 camera_location = { 0, 0 };
 	static Uint8 hello_ticker = 0;
 	static Uint64 damage_cooldown = 0;
 	std::stringstream timer_stream;
 	Uint8 player_speed;
-	Vector2 screen_size;
 
 	play_music(500);
-	camera_location = get_camera();
 
 	if (health_bar.get_health() <= 0 && player_state != ko) {
 		player_state = ko;
@@ -156,12 +155,6 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 	if (IS_EVEN(frame) && hello_ticker < get_string_length(hello)) {
 		update_string_n(&hello, ++hello_ticker);
 	}
-
-	screen_size = get_render_logical_size();
-	camera_location = get_sprite_center(player);
-	camera_location.x -= (screen_size.x / 2);
-	camera_location.y -= (screen_size.y / 2);
-	set_camera(camera_location.x, camera_location.y);
 }
 
 void

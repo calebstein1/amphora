@@ -9,6 +9,8 @@ typedef struct vector2_t {
 } Vector2;
 
 typedef Vector2 Camera;
+typedef struct sprite_t AmphoraImage;
+typedef struct amphora_message_t AmphoraString;
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +23,10 @@ Vector2 get_render_logical_size(void);
 Vector2 get_camera(void);
 /* Set the location of the camera's top left point */
 void set_camera(Sint32 x, Sint32 y);
+/* Move the camera */
+void move_camera(Sint32 x, Sint32 y);
+/* Set the sprite for the camera to follow, NULL to disable tracking */
+void set_camera_target(AmphoraImage *target);
 /* Set the zoom factor for the camera */
 void set_camera_zoom(Uint16 factor, Uint16 delay);
 /* Reset the camera zoom */

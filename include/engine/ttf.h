@@ -10,8 +10,6 @@
 #include "config.h"
 #include "resources.h"
 
-typedef struct amphora_message_t AmphoraString;
-
 enum fonts_e {
 #define LOADFONT(name, path) name##_ft,
 	FONTS

@@ -158,6 +158,7 @@ main_loop(SDL_Event *e) {
 	render_current_map();
 #endif
 	draw_render_list_and_gc();
+	update_camera();
 
 	SDL_RenderPresent(get_renderer());
 

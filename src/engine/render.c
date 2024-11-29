@@ -8,10 +8,12 @@
 static SDL_Renderer *renderer;
 static SDL_Window *window;
 static Camera camera = { 0, 0 };
+static enum camera_mode_e camera_mode = manual;
 static SDL_Color bg = { 0, 0, 0, 0xff };
 static Vector2 render_logical_size = { 0, 0 };
 static struct render_list_node_t *render_list;
 static struct render_list_node_t *render_list_head;
+static AmphoraImage *camera_target;
 static Uint32 render_list_node_count;
 
 Vector2
@@ -35,6 +37,18 @@ void
 set_camera(Sint32 x, Sint32 y) {
 	camera.x = x;
 	camera.y = y;
+}
+
+void
+move_camera(Sint32 x, Sint32 y) {
+	camera.x += x;
+	camera.y += y;
+}
+
+void
+set_camera_target(AmphoraImage *target) {
+	camera_mode = target ? tracking : manual;
+	camera_target = target;
 }
 
 void
@@ -244,6 +258,15 @@ free_render_list(void) {
 		SDL_free(allocated_addrs[i]);
 	}
 	SDL_free(allocated_addrs);
+}
+
+void
+update_camera(void) {
+	if (camera_mode == manual) return;
+
+	camera = get_sprite_center(camera_target);
+	camera.x -= (render_logical_size.x / 2);
+	camera.y -= (render_logical_size.y / 2);
 }
 
 void
