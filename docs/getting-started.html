@@ -1,0 +1,47 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="en-US" data-preset="contrast" data-primary-color="#307FFF"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="UTF-8"><meta name="built-on" content="2024-11-29T22:24:22.275954"><title>Getting Started | Amphora Docs</title><script type="application/json" id="virtual-toc-data">[{"id":"prerequisites","level":0,"title":"Prerequisites","anchor":"#prerequisites"},{"id":"getting-the-engine","level":0,"title":"Getting the Engine","anchor":"#getting-the-engine"},{"id":"building-the-project","level":0,"title":"Building the Project","anchor":"#building-the-project"}]</script><script type="application/json" id="topic-shortcuts"></script><link href="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b518/app.css" rel="stylesheet"><meta name="msapplication-TileColor" content="#000000"><link rel="apple-touch-icon" sizes="180x180" href="https://jetbrains.com/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://jetbrains.com/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://jetbrains.com/favicon-16x16.png"><meta name="msapplication-TileImage" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-144x144.png"><meta name="msapplication-square70x70logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-70x70.png"><meta name="msapplication-square150x150logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-310x150.png"><meta name="msapplication-square310x310logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-310x310.png"><meta name="image" content=""><!-- Open Graph --><meta property="og:title" content="Getting Started | Amphora Docs"><meta property="og:description" content=""><meta property="og:image" content=""><meta property="og:site_name" content="Amphora Docs Help"><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="writerside-documentation/getting-started.html"><!-- End Open Graph --><!-- Twitter Card --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content=""><meta name="twitter:title" content="Getting Started | Amphora Docs"><meta name="twitter:description" content=""><meta name="twitter:creator" content=""><meta name="twitter:image:src" content=""><!-- End Twitter Card --><!-- Schema.org WebPage --><script type="application/ld+json">{
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "@id": "writerside-documentation/getting-started.html#webpage",
+    "url": "writerside-documentation/getting-started.html",
+    "name": "Getting Started | Amphora Docs",
+    "description": "",
+    "image": "",
+    "inLanguage":"en-US"
+}</script><!-- End Schema.org --><!-- Schema.org WebSite --><script type="application/ld+json">{
+    "@type": "WebSite",
+    "@id": "writerside-documentation/#website",
+    "url": "writerside-documentation/",
+    "name": "Amphora Docs Help"
+}</script><!-- End Schema.org --></head><body data-id="Getting-Started" data-main-title="Getting Started" data-article-props="{&quot;seeAlsoStyle&quot;:&quot;links&quot;}" data-template="article" data-breadcrumbs=""><div class="wrapper"><main class="panel _main"><header class="panel__header"><div class="container"><h3>Amphora Docs  Help</h3><div class="panel-trigger"></div></div></header><section class="panel__content"><div class="container"><article class="article" data-shortcut-switcher="inactive"><h1 data-toc="Getting-Started" id="Getting-Started.md">Getting Started</h1><section class="chapter"><h2 id="prerequisites" data-toc="prerequisites">Prerequisites</h2><p id="tw0hbr_6">Before getting started with Amphora, you will need to install Microsoft's vcpkg, as this is how Amphora manages its dependencies. Instructions on how to do this can be found <a href="https://learn.microsoft.com/en-us/vcpkg/get_started/get-started" id="tw0hbr_8" data-external="true" rel="noopener noreferrer">here</a>. You'll need to follow the steps up through setting the VCPKG_ROOT environment variable.</p><section class="chapter"><div class="collapse"><div class="collapse__title"><h3 id="note-for-linux-builds" data-toc="note-for-linux-builds">Note for Linux Builds</h3></div><div class="collapse__content"><p id="tw0hbr_9">If you intend to use Amphora's audio system on Linux, you'll need to ensure that the headers for your sound system are installed <span class="emphasis" id="tw0hbr_11">before</span> vcpkg builds SDL2_mixer. This can be accomplished using the following command on Debian/Ubuntu based systems:</p><div class="code-block" data-lang="bash">
+sudo apt install libasound2-dev libpulse-dev
+</div></div></div></section></section><section class="chapter"><h2 id="getting-the-engine" data-toc="getting-the-engine">Getting the Engine</h2><p id="tw0hbr_12">Amphora is distributed in source form, so any new project should be started by cloning the Amphora repository:</p><div class="code-block" data-lang="bash">
+git clone https://github.com/calebstein1/amphora
+</div><p id="tw0hbr_14">The <code class="code" id="tw0hbr_17">src</code> directory is where code files are found, <code class="code" id="tw0hbr_18">include</code> is for headers, and <code class="code" id="tw0hbr_19">content</code> is for any assets your game will need. The engine source and header files are located in <code class="code" id="tw0hbr_20">src/engine</code> and <code class="code" id="tw0hbr_21">include/engine</code> respectively.</p><p id="tw0hbr_15">The most basic, barebones project is one file in <code class="code" id="tw0hbr_22">src</code> containing the following content:</p><div class="tabs" id="tw0hbr_16" data-anchors="[tw0hbr_23,tw0hbr_24]"><div class="tabs__content" data-gtm="tab" id="tw0hbr_23" data-title="C"><div class="code-block" data-lang="c" data-title="C">
+            #include &quot;engine/amphora.h&quot;
+
+            void game_init(void) {
+            }
+
+            void game_loop(Uint64 frame, const struct input_state_t *key_actions) {
+            }
+
+            void game_shutdown(void) {
+            }
+        </div></div><div class="tabs__content" data-gtm="tab" id="tw0hbr_24" data-title="C++"><div class="code-block" data-lang="cpp" data-title="C++">
+            #include &quot;engine/amphora.h&quot;
+
+            void game_init() {
+            }
+
+            void game_loop(Uint64 frame, const input_state_t *key_actions) {
+            }
+
+            void game_shutdown() {
+            }
+        </div></div></div></section><section class="chapter"><h2 id="building-the-project" data-toc="building-the-project">Building the Project</h2><p id="tw0hbr_27">Amphora uses CMake for builds. Assuming you have CMake and vcpkg installed, and the VCPKG_ROOT environment variable set, you should be able to build and debug your project easily using Visual Studio or any other CMake-compatible IDE.</p><p id="tw0hbr_28">On Linux, you can also build from the command-line with the following commands:</p><div class="code-block" data-lang="bash">
+mkdir -p build
+cd build
+cake ..
+make
+</div></section><div class="last-modified">Last modified: 30 November 2024</div><div data-feedback-placeholder="true"></div><div class="navigation-links _bottom"><a href="amphora.html" class="navigation-links__prev">Amphora</a><a href="configuring-a-project.html" class="navigation-links__next">Configuring a Project</a></div></article><div id="disqus_thread"></div></div></section></main></div><script src="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b518/app.js"></script></body></html>
