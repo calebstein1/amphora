@@ -247,10 +247,10 @@ free_render_list(void) {
 	for (i = 0; i < render_list_node_count; i++) {
 		switch(allocated_addrs[i]->type) {
 			case SPRITE:
-				free_sprite(allocated_addrs[i]->data);
+				free_sprite((AmphoraImage**)&allocated_addrs[i]->data);
 				break;
 			case STRING:
-				free_string(allocated_addrs[i]->data);
+				free_string((AmphoraString **)&allocated_addrs[i]->data);
 				break;
 			default:
 				break;

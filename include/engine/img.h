@@ -53,7 +53,7 @@ void show_sprite(AmphoraImage *spr);
 /* Hide a sprite without free it */
 void hide_sprite(AmphoraImage *spr);
 /* Free a sprite slot */
-void free_sprite(AmphoraImage *spr);
+void free_sprite(AmphoraImage **spr);
 #ifdef __cplusplus
 }
 #endif

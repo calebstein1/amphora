@@ -207,19 +207,19 @@ hide_sprite(AmphoraImage *spr) {
 }
 
 void
-free_sprite(AmphoraImage *spr) {
+free_sprite(AmphoraImage **spr) {
 	int i;
 
-	if (spr) {
-		for (i = 0; i < spr->num_framesets; i++) {
-			SDL_free(spr->frameset_labels[i]);
-		}
-		if (spr->frameset_labels) SDL_free(spr->frameset_labels);
-		if (spr->framesets) SDL_free(spr->framesets);
-		spr->render_list_node->garbage = true;
-		SDL_free(spr);
-		spr = NULL;
+	if (!*spr) return;
+
+	for (i = 0; i < (*spr)->num_framesets; i++) {
+		SDL_free((*spr)->frameset_labels[i]);
 	}
+	if ((*spr)->frameset_labels) SDL_free((*spr)->frameset_labels);
+	if ((*spr)->framesets) SDL_free((*spr)->framesets);
+	(*spr)->render_list_node->garbage = true;
+	SDL_free(*spr);
+	*spr = NULL;
 }
 
 /*

@@ -29,7 +29,7 @@ AmphoraString *update_string_text(AmphoraString **msg, const char *text);
 /* Change the number of characters displayed in a string, 0 displays all characters */
 AmphoraString *update_string_n(AmphoraString **msg, size_t n);
 /* Free a string */
-void free_string(AmphoraString *msg);
+void free_string(AmphoraString **msg);
 /* Display an AmphoraString on the screen */
 void render_string(const AmphoraString *msg);
 #ifdef __cplusplus

@@ -27,7 +27,7 @@ public:
 		if (current_health == 0) return;
 
 		current_health--;
-		free_sprite(health_bar.back());
+		free_sprite(&health_bar.back());
 		health_bar.pop_back();
 	}
 
