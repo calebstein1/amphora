@@ -83,7 +83,7 @@ game_init() {
 }
 
 void
-game_loop(Uint64 frame, const struct input_state_t *key_actions) {
+game_loop(Uint64 frame, const input_state_t *key_actions) {
 	static Uint8 hello_ticker = 0;
 	static Uint64 damage_cooldown = 0;
 	std::stringstream timer_stream;
@@ -113,6 +113,20 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 		move_sprite(player, player_speed, 0);
 		play_sfx("leaves02", 1, 0);
 	}
+	if (key_actions->up && player_state != atk && player_state != ko) {
+		player_state = walk;
+		set_frameset(player, "Walk");
+		player_speed = key_actions->dash ? 2 : 1;
+		move_sprite(player, 0, -player_speed);
+		play_sfx("leaves01", 1, 0);
+	}
+	if (key_actions->down && player_state != atk && player_state != ko) {
+		player_state = walk;
+		set_frameset(player, "Walk");
+		player_speed = key_actions->dash ? 2 : 1;
+		move_sprite(player, 0, player_speed);
+		play_sfx("leaves02", 1, 0);
+	}
 	if (key_actions->attack && player_state != atk && player_state != ko) {
 		player_state = atk;
 		play_oneshot(player, "Attack", []{
@@ -120,7 +134,7 @@ game_loop(Uint64 frame, const struct input_state_t *key_actions) {
 			set_frameset(player, "Idle");
 		});
 	}
-	if (!key_actions->left && !key_actions->right && player_state == walk) {
+	if (!key_actions->left && !key_actions->right && !key_actions->up && !key_actions->down && player_state == walk) {
 		player_state = idle;
 		set_frameset(player, "Idle");
 	}
