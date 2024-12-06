@@ -19,7 +19,7 @@ public:
 	void increase_health() {
 		current_health++;
 		health_bar.push_back(nullptr);
-		create_sprite(&health_bar.back(), "Objects", -96 - (Sint32)(32 * (health_bar.size() - 1)), 24, 2, false, true, 11);
+		create_sprite(&health_bar.back(), "Objects", -96 - (Sint32)(32 * (health_bar.size() - 1)), 24, 2, false, true, 1000);
 		add_frameset(health_bar.back(), "Default", 63, 0, 16, 16, 0, 0, 1, 0);
 	}
 
@@ -50,6 +50,7 @@ HealthBar health_bar;
 AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
+AmphoraString *coords;
 enum player_state_e player_state = idle;
 
 void
@@ -62,7 +63,7 @@ game_init() {
 	set_map("Grassland", 2);
 	set_music("forest");
 
-	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 10);
+	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 101);
 	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
 	for (i = 0; i < (int)get_number_value("health", DEFAULT_HEALTH); i++) {
 		health_bar.increase_health();
@@ -75,9 +76,10 @@ game_init() {
 
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
-	create_string(&hello, "Roboto", 32, 16, 16, -1, black, welcome_message.c_str(), true);
-	create_string(&timer, "Merriweather", 32, -16, 16, -1, black, "0", true);
+	create_string(&hello, "Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
+	create_string(&timer, "Merriweather", 32, -16, 16, 1000, black, "0", true);
 	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message.c_str(), false);
+	create_string(&coords, "Roboto", 32, 16, -16, 1000, black, "0, 0", true);
 
 	set_camera_target(player);
 }
@@ -87,6 +89,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	static Uint8 hello_ticker = 0;
 	static Uint64 damage_cooldown = 0;
 	std::stringstream timer_stream;
+	std::stringstream coords_stream;
 	Uint8 player_speed;
 
 	play_music(500);
@@ -159,6 +162,17 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 	if (key_actions->quit) {
 		quit_game();
+	}
+
+	coords_stream << get_sprite_position(player).x << ", " << get_sprite_position(player).y;
+	update_string_text(&coords, coords_stream.str().c_str());
+
+	if (get_sprite_position(player).y > 730) {
+		reorder_sprite(player, 301);
+	} else if (get_sprite_position(player).y > 200) {
+		reorder_sprite(player, 201);
+	} else {
+		reorder_sprite(player, 101);
 	}
 
 	if (frame % 60 == 0) {

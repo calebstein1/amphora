@@ -27,22 +27,25 @@ static SDL_Rect map_rect;
 
 void
 set_map(const char *name, const Uint16 scale) {
-	int idx;
+	int idx, i;
+	struct render_list_node_t *render_list_node;
 
-	if (!name) {
-		if (current_map.texture) SDL_DestroyTexture(current_map.texture);
-		current_map.texture = NULL;
-		return;
-	}
+	destroy_current_map();
+	if (!name) return;
+
 	if ((idx = get_map_by_name(name)) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
 		return;
 	}
 	current_map.scale = scale ? scale : 1;
-	if (current_map.texture) SDL_DestroyTexture(current_map.texture);
 	if (parse_map_to_texture(idx) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create texture from map: %s\n", name);
 		return;
+	}
+	for (i = 0; i < current_map.num_layers; i++) {
+		render_list_node = add_render_list_node(100 * i);
+		render_list_node->type = MAP;
+		render_list_node->data = current_map.layers[i];
 	}
 }
 
@@ -90,18 +93,21 @@ init_maps(void) {
 	return 0;
 }
 
-void
-render_current_map(void) {
-	const Camera camera = get_camera();
-
-	map_rect.x = -camera.x;
-	map_rect.y = -camera.y;
-	render_texture(current_map.texture, NULL, &map_rect, 0, SDL_FLIP_NONE);
+SDL_Rect *
+get_map_rectangle(void) {
+	return &map_rect;
 }
 
 void
 destroy_current_map(void) {
-	if (current_map.texture) SDL_DestroyTexture(current_map.texture);
+	int i;
+
+	for (i = 0; i < current_map.num_layers; i++) {
+		SDL_DestroyTexture(current_map.layers[i]);
+		current_map.layers[i] = NULL;
+	}
+	if (current_map.num_layers > 0) SDL_free(current_map.layers);
+	current_map.num_layers = 0;
 }
 
 /*
@@ -130,34 +136,54 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int pixel_width = map->width * map->tilewidth;
 	int pixel_height = map->height * map->tileheight;
-	int tile_idx, i, row;
+	int tile_idx, i, j, row;
 
+	while (layer) {
+		current_map.num_layers++;
+		layer = layer->next;
+	}
+	if (!(current_map.layers = SDL_malloc(current_map.num_layers * sizeof(SDL_Texture *)))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate map layers\n");
+		return -1;
+	}
+	layer = map->layers;
 	if (SDL_strcmp(map->orientation.ptr, "orthogonal") == 0) {
 		current_map.orientation = orthogonal;
-		current_map.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width, pixel_height);
+		for (i = 0; i < current_map.num_layers; i++) {
+			current_map.layers[i] = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+								  SDL_TEXTUREACCESS_TARGET, pixel_width,
+								  pixel_height);
+		}
 	} else if (SDL_strcmp(map->orientation.ptr, "isometric") == 0) {
 		current_map.orientation = isometric;
-		current_map.texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pixel_width + (map->tilewidth / 2), pixel_height);
+		for (i = 0; i < current_map.num_layers; i++) {
+			current_map.layers[i] = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+								SDL_TEXTUREACCESS_TARGET,
+								pixel_width + (map->tilewidth / 2), pixel_height);
+		}
 	} else {
 		return -1;
 	}
 	SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
-	SDL_SetTextureBlendMode(current_map.texture, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderTarget(renderer, current_map.texture);
-	while (layer) {
-		for (i = 0; i < layer->data_count; i++) {
-			tile_idx = layer->data[i] - 1;
-			row = ((i * map->tilewidth) / (map->width * map->tilewidth));
+	for (i = 0; i < current_map.num_layers; i++) {
+		SDL_SetTextureBlendMode(current_map.layers[i], SDL_BLENDMODE_BLEND);
+		SDL_SetRenderTarget(renderer, current_map.layers[i]);
+		for (j = 0; j < layer->data_count; j++) {
+			tile_idx = layer->data[j] - 1;
+			row = ((j * map->tilewidth) / (map->width * map->tilewidth));
 			tile_s.x = (tile_idx * map->tilesets->tilewidth) % tileset_img_w;
 			tile_s.y = ((tile_idx * map->tilesets->tilewidth) / tileset_img_w) * map->tileheight;
 			switch (current_map.orientation) {
 				case orthogonal:
-					tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth);
+					tile_d.x = (j * map->tilewidth) % (map->width * map->tilewidth);
 					tile_d.y = row * map->tileheight;
 					break;
 				case isometric:
-					tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth) + (((map->width * map->tilewidth) / 2) - ((i % map->width) * (map->tilewidth / 2)) - (row * (map->tilewidth / 2)));
-					tile_d.y = row * map->tileheight + ((i % map->width) * (map->tileheight / 2)) - (row * (map->tileheight / 2));
+					tile_d.x = (j * map->tilewidth) % (map->width * map->tilewidth) +
+						(((map->width * map->tilewidth) / 2) - ((j % map->width) *
+						(map->tilewidth / 2)) - (row * (map->tilewidth / 2)));
+					tile_d.y = row * map->tileheight + ((j % map->width) * (map->tileheight / 2)) -
+						(row * (map->tileheight / 2));
 					break;
 			}
 			SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
@@ -166,7 +192,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	}
 	SDL_SetRenderTarget(renderer, NULL);
 	cute_tiled_free_map(map);
-	SDL_QueryTexture(current_map.texture, NULL, NULL, &map_rect.w, &map_rect.h);
+	SDL_QueryTexture(current_map.layers[0], NULL, NULL, &map_rect.w, &map_rect.h);
 	map_rect.w *= current_map.scale;
 	map_rect.h *= current_map.scale;
 

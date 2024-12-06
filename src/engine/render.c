@@ -1,5 +1,6 @@
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
+#include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"
 
 #include "config.h"
@@ -209,6 +210,7 @@ add_render_list_node(int order) {
 void
 draw_render_list_and_gc(void) {
 	struct render_list_node_t *garbage;
+	SDL_Rect *map_rect;
 
 	while(render_list) {
 		if (render_list->next && render_list->next->garbage) {
@@ -220,10 +222,16 @@ draw_render_list_and_gc(void) {
 		}
 		switch (render_list->type) {
 			case SPRITE:
-				update_and_draw_sprite(render_list->data);
+				update_and_draw_sprite((const AmphoraImage *)render_list->data);
 				break;
 			case STRING:
-				render_string(render_list->data);
+				render_string((const AmphoraString *)render_list->data);
+				break;
+			case MAP:
+				map_rect = get_map_rectangle();
+				map_rect->x = -camera.x;
+				map_rect->y = -camera.y;
+				render_texture((SDL_Texture *)render_list->data, NULL, map_rect, 0, SDL_FLIP_NONE);
 				break;
 			default:
 				break;
@@ -237,6 +245,9 @@ draw_render_list_and_gc(void) {
 
 void
 free_render_list(void) {
+	/*
+	 * TODO: Add functionality to free map layers
+	 */
 	struct render_list_node_t **allocated_addrs = SDL_malloc(render_list_node_count * sizeof(struct render_list_node_t *));
 	Uint32 i = 0;
 

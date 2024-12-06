@@ -9,13 +9,14 @@ enum map_orientation_e {
 };
 
 struct amphora_tilemap_t {
-    SDL_Texture *texture;
+    SDL_Texture **layers;
+    int num_layers;
     int scale;
     enum map_orientation_e orientation;
 };
 
 int init_maps(void);
-void render_current_map(void);
+SDL_Rect *get_map_rectangle(void);
 void destroy_current_map(void);
 
 #endif /* AMPHORA_TILEMAP_INTERNAL_H */
