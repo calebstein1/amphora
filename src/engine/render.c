@@ -182,7 +182,7 @@ struct render_list_node_t *
 add_render_list_node(int order) {
 	struct render_list_node_t *new_render_list_node = NULL;
 
-	if ((new_render_list_node = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
+	if ((new_render_list_node = SDL_calloc(1, sizeof(struct render_list_node_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to initialize new render list node\n");
 
 		return NULL;
