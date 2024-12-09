@@ -193,7 +193,7 @@ add_render_list_node(int order) {
 			render_list->next = new_render_list_node;
 			break;
 		}
-		if (render_list->next->order >= order) {
+		if (render_list->next->order > order) {
 			new_render_list_node->next = render_list->next;
 			render_list->next = new_render_list_node;
 			break;
