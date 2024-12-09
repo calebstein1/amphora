@@ -162,11 +162,13 @@ main_loop(SDL_Event *e) {
 	frame_end = SDL_GetTicks64();
 	if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / FRAMERATE)) {
 		SDL_Delay((1000 / FRAMERATE) - frame_time);
-	} else if (frame_time > (1000 / FRAMERATE)) {
 #ifdef DEBUG
+	} else if (frame_time > (1000 / FRAMERATE)) {
 		SDL_Log("Lag on frame %lld (frame took %lld ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 / FRAMERATE);
-#endif
 	}
+#else
+	}
+#endif
 
 	return 0;
 }
