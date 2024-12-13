@@ -134,7 +134,7 @@ set_frameset(AmphoraImage *spr, const char *name) {
 }
 
 void
-play_oneshot(AmphoraImage *spr, const char *name, const CallbackFn callback) {
+play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {

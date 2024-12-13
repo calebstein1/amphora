@@ -11,7 +11,7 @@ struct frameset_t {
 	Uint16 delay;
 	Uint64 last_change;
 	Vector2 position_offset;
-	CallbackFn callback;
+	void (*callback)(void);
 	bool playing_oneshot : 1;
 };
 

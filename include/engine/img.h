@@ -16,8 +16,6 @@ typedef enum images_e {
 	IMAGES_COUNT
 } ImageName;
 
-typedef void (*CallbackFn)(void);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,7 +33,7 @@ void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sin
 /* Set a sprite slot's frameset */
 void set_frameset(AmphoraImage *spr, const char *name);
 /* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
-void play_oneshot(AmphoraImage *spr, const char *name, CallbackFn callback);
+void play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
 /* Set the delay between frames of a frameset animation */
 void set_frameset_delay(AmphoraImage *spr, const char *name, Uint16 delay);
 /* Change the draw order of a sprite */
