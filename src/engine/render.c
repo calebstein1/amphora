@@ -4,6 +4,8 @@
 #include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"
 
+#include "config.h"
+
 /* File-scoped variables */
 static SDL_Renderer *renderer;
 static SDL_Window *window;
@@ -117,7 +119,7 @@ set_bg(SDL_Color color) {
 int
 init_render(void) {
 	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-					 (int)load_window_x(), (int)load_window_y(), load_win_flags())))) {
+					 (int)load_window_x(), (int)load_window_y(), (Uint32)load_win_flags())))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
