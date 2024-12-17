@@ -1,5 +1,6 @@
 #include "engine/game_loop.h"
 #include "engine/util.h"
+#include "engine/internal/config.h"
 #include "engine/internal/db.h"
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
@@ -15,16 +16,16 @@
 #include <emscripten.h>
 #endif
 
-#include "config.h"
-
 /* Prototypes for private functions */
 int main_loop(SDL_Event *e);
+void save_config(void);
 void clean_resources(void);
 
 /* Globals */
 Uint64 frame_count = 0;
 
 /* File-scored variables */
+static Uint32 framerate;
 static bool quit_requested = false;
 
 int
@@ -87,14 +88,17 @@ main(int argc, char **argv) {
 		return -1;
 	}
 #endif
+	init_db();
+	init_config();
 	if (init_render() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to init renderer\n");
 		return -1;
 	}
-	init_db();
 	init_save();
 	init_input();
 	load_keymap();
+
+	framerate = (Uint32)load_framerate();
 
 	game_init();
 
@@ -103,6 +107,7 @@ main(int argc, char **argv) {
 #else
 	while (main_loop(&e) == 0) {}
 #endif
+	save_config();
 	clean_resources();
 	IMG_Quit();
 #ifndef DISABLE_MIXER
@@ -137,6 +142,7 @@ main_loop(SDL_Event *e) {
 	if (event_loop(e) == SDL_QUIT) quit_requested = true;
 	if (quit_requested) {
 #ifdef __EMSCRIPTEN__
+		save_config();
 		clean_resources();
 		IMG_Quit();
 #ifndef DISABLE_MIXER
@@ -160,10 +166,10 @@ main_loop(SDL_Event *e) {
 	SDL_RenderPresent(get_renderer());
 
 	frame_end = SDL_GetTicks64();
-	if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / FRAMERATE)) {
-		SDL_Delay((1000 / FRAMERATE) - frame_time);
+	if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / framerate)) {
+		SDL_Delay((1000 / framerate) - frame_time);
 #ifdef DEBUG
-	} else if (frame_time > (1000 / FRAMERATE)) {
+	} else if (frame_time > (1000 / framerate)) {
 		SDL_Log("Lag on frame %lld (frame took %lld ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 / FRAMERATE);
 	}
 #else
@@ -171,6 +177,17 @@ main_loop(SDL_Event *e) {
 #endif
 
 	return 0;
+}
+
+void
+save_config(void) {
+	Vector2 win_size = get_resolution();
+	Uint32 win_flags = SDL_GetWindowFlags(get_window());
+
+	save_window_x(win_size.x);
+	save_window_y(win_size.y);
+	save_win_flags(win_flags);
+	save_framerate(framerate);
 }
 
 void
