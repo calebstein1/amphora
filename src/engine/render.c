@@ -245,9 +245,6 @@ draw_render_list_and_gc(void) {
 
 void
 free_render_list(void) {
-	/*
-	 * TODO: Add functionality to free map layers
-	 */
 	struct render_list_node_t **allocated_addrs = SDL_malloc(render_list_node_count * sizeof(struct render_list_node_t *));
 	Uint32 i = 0;
 
