@@ -8,11 +8,16 @@ enum map_orientation_e {
 	isometric
 };
 
+struct amphora_tilemap_layer_t {
+	SDL_Texture *texture;
+	struct render_list_node_t *node;
+};
+
 struct amphora_tilemap_t {
-    SDL_Texture **layers;
-    int num_layers;
-    int scale;
-    enum map_orientation_e orientation;
+	struct amphora_tilemap_layer_t *layers;
+	int num_layers;
+	int scale;
+	enum map_orientation_e orientation;
 };
 
 int init_maps(void);

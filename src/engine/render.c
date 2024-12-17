@@ -263,6 +263,9 @@ free_render_list(void) {
 			case STRING:
 				free_string((AmphoraString **)&allocated_addrs[i]->data);
 				break;
+			case MAP:
+				SDL_DestroyTexture((SDL_Texture *)allocated_addrs[i]->data);
+				break;
 			default:
 				break;
 		}
