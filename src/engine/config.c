@@ -4,6 +4,10 @@
 #include "config.h"
 
 /*
+ * TODO: Save preferences with a specific system ID so save files can be shared
+ */
+
+/*
  * Internal functions
  */
 
