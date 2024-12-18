@@ -1,11 +1,16 @@
+#ifdef WIN32
+#include <objbase.h>
+#elif __APPLE__
+#else
+#endif
+
 #include "engine/internal/config.h"
 #include "engine/internal/db.h"
 
 #include "config.h"
 
-/*
- * TODO: Save preferences with a specific system ID so save files can be shared
- */
+/* Prototypes for private functions */
+SDL_GUID get_uuid(void);
 
 /*
  * Internal functions
@@ -161,4 +166,71 @@ load_framerate(void) {
 	sqlite3_finalize(stmt);
 
 	return val;
+}
+
+/*
+ * Private functions
+ */
+
+SDL_GUID
+get_uuid(void) {
+	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
+	const char *filename = "uuid";
+	SDL_RWops *rw;
+	char *file_contents;
+	size_t new_len = SDL_strlen(path) + SDL_strlen(filename) + 1;
+	SDL_GUID guid;
+	char guid_str[33];
+
+	path = SDL_realloc(path, new_len);
+	SDL_strlcat(path, filename, new_len);
+
+	if ((rw = SDL_RWFromFile(path, "rb"))) {
+#ifdef DEBUG
+		SDL_Log("Loading UUID from file...\n");
+#endif
+		if (!((file_contents = SDL_malloc(SDL_RWsize(rw))))) {
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for UUID!\n");
+			SDL_memset(&guid, 0, sizeof(guid));
+
+			return guid;
+		}
+		SDL_RWread(rw, file_contents, SDL_RWsize(rw), 1);
+		SDL_memcpy(&guid.data, file_contents, sizeof(guid.data));
+		SDL_free(file_contents);
+		SDL_RWclose(rw);
+
+#ifdef DEBUG
+		SDL_GUIDToString(guid, guid_str, sizeof(guid_str));
+		SDL_Log("UUID: %s\n", guid_str);
+#endif
+
+		return guid;
+	}
+
+#ifdef DEBUG
+	SDL_Log("Generating new UUID...\n");
+#endif
+#ifdef WIN32
+	GUID uuid;
+
+	CoCreateGuid(&uuid);
+	SDL_memcpy(&guid.data[0], &uuid.Data1, sizeof(uuid.Data1));
+	SDL_memcpy(&guid.data[4], &uuid.Data2, sizeof(uuid.Data2));
+	SDL_memcpy(&guid.data[6], &uuid.Data3, sizeof(uuid.Data3));
+	SDL_memcpy(&guid.data[8], &uuid.Data4, sizeof(uuid.Data4));
+#elif __APPLE__
+#else
+#endif
+
+	rw = SDL_RWFromFile(path, "w+b");
+	SDL_RWwrite(rw, &guid.data, sizeof(guid.data), 1);
+	SDL_RWclose(rw);
+
+#ifdef DEBUG
+	SDL_GUIDToString(guid, guid_str, sizeof(guid_str));
+	SDL_Log("UUID: %s\n", guid_str);
+#endif
+
+	return guid;
 }
