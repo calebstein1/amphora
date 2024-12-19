@@ -70,9 +70,9 @@ game_init() {
 	}
 
 	add_frameset(player, "Idle", 0, 17, 32, 48, 0, 0, 1, 0);
-	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 15);
-	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 15);
-	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 30);
+	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 250);
+	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 250);
+	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 500);
 
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
 
@@ -99,7 +99,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		play_oneshot(player, "KO", nullptr);
 	}
 
-	set_frameset_delay(player, "Walk", key_actions->dash ? 10 : 15);
+	set_frameset_delay(player, "Walk", key_actions->dash ? 166 : 250);
 	if (key_actions->left && player_state != atk && player_state != ko) {
 		player_state = walk;
 		set_frameset(player, "Walk");
@@ -175,7 +175,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		reorder_sprite(player, 101);
 	}
 
-	if (frame % 60 == 0) {
+	if (frame % get_framerate() == 0) {
 		timer_stream << frame / FRAMERATE;
 		update_string_text(&timer, timer_stream.str().c_str());
 	}

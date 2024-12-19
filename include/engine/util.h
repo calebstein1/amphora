@@ -1,6 +1,8 @@
 #ifndef UNTITLED_PLATFORMER_UTIL_H
 #define UNTITLED_PLATFORMER_UTIL_H
 
+#include "SDL.h"
+
 #define MAX_OF(a,b) (a > b ? a : b)
 #define MIN_OF(a,b) (a < b ? a : b)
 #define IS_ODD(a) (a & 1)
@@ -27,6 +29,7 @@
 extern "C" {
 #endif
 void quit_game(void); /* Request to quit the game */
+Uint32 get_framerate(void); /* Get the current running framerate */
 #ifdef __cplusplus
 }
 #endif

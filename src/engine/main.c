@@ -127,6 +127,11 @@ quit_game(void) {
 	quit_requested = true;
 }
 
+Uint32
+get_framerate(void) {
+	return framerate;
+}
+
 /*
  * Private functions
  */

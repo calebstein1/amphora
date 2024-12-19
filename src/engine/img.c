@@ -110,7 +110,7 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 		.h = h,
 		.current_frame = -1,
 		.num_frames = num_frames,
-		.delay = delay,
+		.delay = (get_framerate() * delay) / 1000,
 		.position_offset = (Vector2){ off_x, off_y }
 	};
 	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
@@ -156,7 +156,7 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
-	spr->framesets[frameset].delay = delay;
+	spr->framesets[frameset].delay = (get_framerate() * delay) / 1000;
 }
 
 AmphoraImage *
