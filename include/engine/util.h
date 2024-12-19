@@ -11,9 +11,15 @@
 #define resizable SDL_WINDOW_RESIZABLE
 
 #ifndef __cplusplus
+#ifndef bool
 #define bool SDL_bool
+#endif
+#ifndef true
 #define true SDL_TRUE
+#endif
+#ifndef false
 #define false SDL_FALSE
+#endif
 #endif
 
 #ifndef BIN_LOADER
