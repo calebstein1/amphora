@@ -9,5 +9,5 @@ add_library(amphora_engine
 	db.c
 	save_data.c
 	mixer.c
-	config.c
+	prefs.c
 )

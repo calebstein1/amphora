@@ -1,5 +1,5 @@
-#include "engine/internal/config.h"
 #include "engine/internal/img.h"
+#include "engine/internal/prefs.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"

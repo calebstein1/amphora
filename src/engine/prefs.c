@@ -5,8 +5,8 @@
 #else
 #endif
 
-#include "engine/internal/config.h"
 #include "engine/internal/db.h"
+#include "engine/internal/prefs.h"
 
 #include "config.h"
 
