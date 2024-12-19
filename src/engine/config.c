@@ -1,6 +1,7 @@
 #ifdef WIN32
 #include <objbase.h>
 #elif __APPLE__
+#include <CoreFoundation/CFUUID.h>
 #else
 #endif
 
@@ -28,6 +29,8 @@ init_config(void) {
 		SDL_Log("%s\n", err_msg);
 		return -1;
 	}
+
+	get_uuid();
 
 	return 0;
 }
@@ -220,6 +223,11 @@ get_uuid(void) {
 	SDL_memcpy(&guid.data[6], &uuid.Data3, sizeof(uuid.Data3));
 	SDL_memcpy(&guid.data[8], &uuid.Data4, sizeof(uuid.Data4));
 #elif __APPLE__
+	CFUUIDRef uuid_ref = CFUUIDCreate(NULL);
+	CFUUIDBytes uuid_bytes = CFUUIDGetUUIDBytes(uuid_ref);
+	CFRelease(uuid_ref);
+
+	SDL_memcpy(&guid.data, &uuid_bytes, sizeof(guid.data));
 #else
 #endif
 
