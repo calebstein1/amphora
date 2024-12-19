@@ -30,8 +30,6 @@ init_config(void) {
 		return -1;
 	}
 
-	get_uuid();
-
 	return 0;
 }
 
