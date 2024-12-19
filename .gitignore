@@ -4,6 +4,5 @@
 build
 build.*
 out
-cmake-build-debug
-cmake-build-release
-cmake-build-debug-visual-studio
+cmake-build-debug*
+cmake-build-release*

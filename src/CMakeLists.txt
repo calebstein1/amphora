@@ -34,4 +34,7 @@ else()
 		$<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
 		unofficial::sqlite3::sqlite3
 	)
+	if(LINUX)
+		target_link_libraries(amphora PRIVATE unofficial::UUID::uuid)
+	endif()
 endif()

@@ -32,6 +32,9 @@ else()
 	find_package(SDL2_mixer CONFIG REQUIRED)
 	find_package(SDL2_ttf CONFIG REQUIRED)
 	find_package(unofficial-sqlite3 CONFIG REQUIRED)
+	if(LINUX)
+		find_package(unofficial-libuuid CONFIG REQUIRED)
+	endif()
 endif()
 
 include_directories(

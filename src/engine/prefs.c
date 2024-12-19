@@ -3,6 +3,7 @@
 #elif __APPLE__
 #include <CoreFoundation/CFUUID.h>
 #else
+#include "uuid/uuid.h"
 #endif
 
 #include "engine/internal/db.h"
@@ -241,6 +242,7 @@ get_uuid(void) {
 
 	SDL_memcpy(&guid.data, &uuid_bytes, sizeof(guid.data));
 #else
+	uuid_generate(guid.data);
 #endif
 
 	rw = SDL_RWFromFile(path, "w+b");
