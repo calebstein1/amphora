@@ -170,7 +170,7 @@ main_loop(SDL_Event *e) {
 		SDL_Delay((1000 / framerate) - frame_time);
 #ifdef DEBUG
 	} else if (frame_time > (1000 / framerate)) {
-		SDL_Log("Lag on frame %lu (frame took %lu ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 / FRAMERATE);
+		SDL_Log("Lag on frame %llu (frame took %llu ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 / FRAMERATE);
 	}
 #else
 	}
