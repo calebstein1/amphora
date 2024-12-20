@@ -74,7 +74,7 @@ game_init() {
 	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 250);
 	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 500);
 
-	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 15);
+	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 250);
 
 	create_string(&hello, "Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, 1000, black, "0", true);
@@ -86,6 +86,7 @@ game_init() {
 
 void
 game_loop(Uint64 frame, const input_state_t *key_actions) {
+	static bool f_down = false;
 	static Uint8 hello_ticker = 0;
 	static Uint64 damage_cooldown = 0;
 	std::stringstream timer_stream;
@@ -97,6 +98,13 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	if (health_bar.get_health() <= 0 && player_state != ko) {
 		player_state = ko;
 		play_oneshot(player, "KO", nullptr);
+	}
+
+	if (key_actions->toggle_fullscreen && !f_down) {
+		f_down = true;
+		is_window_fullscreen() ? set_window_windowed() : set_window_fullscreen();
+	} else if (!key_actions->toggle_fullscreen && f_down) {
+		f_down = false;
 	}
 
 	set_frameset_delay(player, "Walk", key_actions->dash ? 166 : 250);

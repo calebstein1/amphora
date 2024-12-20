@@ -29,7 +29,8 @@
 	KMAP(damage, x, INVALID)       \
 	KMAP(heal, c, INVALID)                                \
 	KMAP(zoom, m, LEFTSHOULDER)              \
-	KMAP(expand, n, RIGHTSHOULDER)                         \
+	KMAP(expand, n, RIGHTSHOULDER) \
+	KMAP(toggle_fullscreen, f, INVALID)                                \
 	KMAP(quit, ESCAPE, INVALID)
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */

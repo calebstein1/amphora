@@ -112,6 +112,21 @@ set_bg(SDL_Color color) {
 	bg = color;
 }
 
+void
+set_window_fullscreen(void) {
+	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+}
+
+void
+set_window_windowed(void) {
+	SDL_SetWindowFullscreen(window, 0);
+}
+
+bool
+is_window_fullscreen(void) {
+	return SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
+}
+
 /*
  * Internal functions
  */

@@ -35,6 +35,12 @@ void reset_camera_zoom(Uint16 delay);
 SDL_Color get_bg(void);
 /* Sets the background color */
 void set_bg(SDL_Color color);
+/* Sets the game window to fullscreen */
+void set_window_fullscreen(void);
+/* Sets the game window to windowed */
+void set_window_windowed(void);
+/* Returns true if the game window is fullscreen, false if windowed */
+bool is_window_fullscreen(void);
 #ifdef __cplusplus
 }
 #endif
