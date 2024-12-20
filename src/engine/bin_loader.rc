@@ -1,5 +1,3 @@
-#define BIN_LOADER
-#include "config.h"
 #include "resources.h"
 
 #define LOADIMG(name, path) name PNG_IMG path
@@ -23,5 +21,3 @@ SFX
 MUSIC
 #undef LOADMUSIC
 #endif
-
-#undef BIN_LOADER
