@@ -1,5 +1,3 @@
-#define BIN_LOADER
-#include "config.h"
 #include "resources.h"
 
 define(`_incbin',dnl
@@ -62,5 +60,3 @@ $1_size:
 #undef LOADMUSIC
 #endif
 #endif
-
-#undef BIN_LOADER
