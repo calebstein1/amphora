@@ -176,7 +176,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 
 	if (frame % get_framerate() == 0) {
-		timer_stream << frame / FRAMERATE;
+		timer_stream << frame / get_framerate();
 		update_string_text(&timer, timer_stream.str().c_str());
 	}
 
