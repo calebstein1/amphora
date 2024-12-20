@@ -8,7 +8,7 @@ struct frameset_t {
 	Sint32 sx, sy, w, h;
 	Sint16 current_frame;
 	Uint16 num_frames;
-	Uint16 delay;
+	Uint32 delay;
 	Uint64 last_change;
 	Vector2 position_offset;
 	void (*callback)(void);
