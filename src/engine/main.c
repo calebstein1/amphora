@@ -189,8 +189,10 @@ save_config(void) {
 	Vector2 win_size = get_resolution();
 	Uint32 win_flags = SDL_GetWindowFlags(get_window());
 
-	save_window_x(win_size.x);
-	save_window_y(win_size.y);
+	if (!is_window_fullscreen()) {
+        save_window_x(win_size.x);
+        save_window_y(win_size.y);
+	}
 	save_win_flags(win_flags);
 	save_framerate(framerate);
 }
