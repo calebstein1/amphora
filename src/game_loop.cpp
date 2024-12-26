@@ -188,7 +188,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		update_string_text(&timer, timer_stream.str().c_str());
 	}
 
-	if (IS_EVEN(frame) && hello_ticker < get_string_length(hello)) {
+	if (hello && IS_EVEN(frame) && hello_ticker < get_string_length(hello)) {
 		update_string_n(&hello, ++hello_ticker);
 	}
 }

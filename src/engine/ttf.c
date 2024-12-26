@@ -52,8 +52,6 @@ create_string(AmphoraString **msg, const char *name, const int pt, const int x, 
 	render_list_node->type = STRING;
 	render_list_node->data = *msg;
 	render_list_node->stationary = stationary;
-	render_list_node->display = true;
-	render_list_node->garbage = false;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
 
 	(*msg)->texture = render_string_to_texture(*msg);

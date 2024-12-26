@@ -143,7 +143,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 		current_map.num_layers++;
 		layer = layer->next;
 	}
-	if (!(current_map.layers = SDL_malloc(current_map.num_layers * sizeof(struct amphora_tilemap_layer_t)))) {
+	if (!((current_map.layers = SDL_malloc(current_map.num_layers * sizeof(struct amphora_tilemap_layer_t))))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate map layers\n");
 		return -1;
 	}

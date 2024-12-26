@@ -75,8 +75,6 @@ create_sprite(AmphoraImage **spr, const char *image_name, const Sint32 x, const 
 	render_list_node->type = SPRITE;
 	render_list_node->data = *spr;
 	render_list_node->stationary = stationary;
-	render_list_node->display = true;
-	render_list_node->garbage = false;
 
 	return *spr;
 }

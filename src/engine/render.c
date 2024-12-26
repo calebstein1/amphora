@@ -217,6 +217,7 @@ add_render_list_node(int order) {
 		render_list = render_list->next;
 	}
 	new_render_list_node->order = order;
+	new_render_list_node->display = true;
 	render_list = render_list_head;
 	render_list_node_count++;
 
