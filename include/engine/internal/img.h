@@ -17,7 +17,7 @@ struct frameset_t {
 
 struct sprite_t {
 	ImageName image;
-	Sint32 dx, dy;
+	SDL_Rect rectangle;
 	Uint8 scale;
 	bool flip : 1;
 	Sint32 current_frameset;

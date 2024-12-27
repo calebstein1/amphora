@@ -23,14 +23,14 @@ static const char *img_names[] = {
 
 Vector2
 get_sprite_position(const AmphoraImage *spr) {
-	return (Vector2){ spr->dx, spr->dy };
+	return (Vector2){ spr->rectangle.x, spr->rectangle.y };
 }
 
 Vector2
 get_sprite_center(const AmphoraImage *spr) {
 	return (Vector2){
-		.x = spr->dx + (spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
-		.y = spr->dy + (spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
+		.x = spr->rectangle.x + (spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
+		.y = spr->rectangle.y + (spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
 	};
 }
 
@@ -67,8 +67,8 @@ create_sprite(AmphoraImage **spr, const char *image_name, const Sint32 x, const 
 	*spr = new_sprite;
 
 	(*spr)->image = idx;
-	(*spr)->dx = x;
-	(*spr)->dy = y;
+	(*spr)->rectangle.x = x;
+	(*spr)->rectangle.y = y;
 	(*spr)->scale = scale;
 	(*spr)->render_list_node = render_list_node;
 	(*spr)->flip = flip;
@@ -116,7 +116,10 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 		return;
 	}
 	SDL_strlcpy(spr->frameset_labels[spr->num_framesets], name, strlen(name) + 1);
-	spr->num_framesets++;
+	if (++spr->num_framesets == 1) {
+		spr->rectangle.w = spr->framesets[0].w;
+		spr->rectangle.h = spr->framesets[0].h;
+	}
 }
 
 void
@@ -129,6 +132,8 @@ set_frameset(AmphoraImage *spr, const char *name) {
 	}
 	spr->framesets[frameset].playing_oneshot = false;
 	spr->current_frameset = frameset;
+	spr->rectangle.w = spr->framesets[frameset].w;
+	spr->rectangle.h = spr->framesets[frameset].h;
 }
 
 void
@@ -141,6 +146,8 @@ play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	}
 	spr->framesets[frameset].playing_oneshot = true;
 	spr->current_frameset = frameset;
+	spr->rectangle.w = spr->framesets[frameset].w;
+	spr->rectangle.h = spr->framesets[frameset].h;
 	spr->framesets[frameset].current_frame = -1;
 	spr->framesets[frameset].last_change = frame_count;
 	spr->framesets[frameset].callback = callback;
@@ -174,14 +181,14 @@ reorder_sprite(AmphoraImage *spr, const Sint32 order) {
 
 void
 set_sprite_location(AmphoraImage *spr, Sint32 x, Sint32 y) {
-	spr->dx = x;
-	spr->dy = y;
+	spr->rectangle.x = x;
+	spr->rectangle.y = y;
 }
 
 void
 move_sprite(AmphoraImage *spr, const Sint32 delta_x, const Sint32 delta_y) {
-	spr->dx += delta_x;
-	spr->dy += delta_y;
+	spr->rectangle.x += delta_x;
+	spr->rectangle.y += delta_y;
 }
 
 void
@@ -320,15 +327,15 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	};
 	if (spr->render_list_node->stationary) {
 		dst = (SDL_Rect){
-			.x = spr->dx > 0 ? spr->dx : get_resolution().x + spr->dx - frameset->w,
-			.y = spr->dy > 0 ? spr->dy : get_resolution().y + spr->dy - frameset->h,
+			.x = spr->rectangle.x > 0 ? spr->rectangle.x : get_resolution().x + spr->rectangle.x - frameset->w,
+			.y = spr->rectangle.y > 0 ? spr->rectangle.y : get_resolution().y + spr->rectangle.y - frameset->h,
 			.w = frameset->w * spr->scale,
 			.h = frameset->h * spr->scale
 		};
 	} else {
 		dst = (SDL_Rect){
-			.x = spr->dx - frameset->position_offset.x - camera.x,
-			.y = spr->dy - frameset->position_offset.y - camera.y,
+			.x = spr->rectangle.x - frameset->position_offset.x - camera.x,
+			.y = spr->rectangle.y - frameset->position_offset.y - camera.y,
 			.w = frameset->w * spr->scale,
 			.h = frameset->h * spr->scale
 		};

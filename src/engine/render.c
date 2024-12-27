@@ -127,6 +127,11 @@ is_window_fullscreen(void) {
 	return SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
 }
 
+bool
+check_collision(const AmphoraImage *obj_a, const AmphoraImage *obj_b) {
+	return SDL_HasIntersection(&obj_a->rectangle, &obj_b->rectangle);
+}
+
 /*
  * Internal functions
  */
