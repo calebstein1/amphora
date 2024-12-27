@@ -3,11 +3,7 @@
 
 #include "SDL.h"
 
-typedef struct vector2_t {
-    Sint32 x;
-    Sint32 y;
-} Vector2;
-
+typedef SDL_Point Vector2;
 typedef Vector2 Camera;
 typedef struct sprite_t AmphoraImage;
 typedef struct amphora_message_t AmphoraString;
