@@ -43,6 +43,13 @@ enum player_state_e {
 	ko
 };
 
+enum player_directions_e {
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN
+};
+
 /* Game globals */
 AmphoraImage *player;
 AmphoraImage *rotating_heart;
@@ -52,6 +59,7 @@ AmphoraString *timer;
 AmphoraString *stationary;
 AmphoraString *coords;
 enum player_state_e player_state = idle;
+enum player_directions_e player_direction = LEFT;
 
 void
 game_init() {
@@ -60,11 +68,11 @@ game_init() {
 	const std::string message = "I'm going to be fixed right here in place!";
 
 	set_bg(sky);
-	set_map("Grassland", 2);
+	set_map("Overworld", 2);
 	set_music("forest");
 
 	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 101);
-	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, -1);
+	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, 1000);
 	for (i = 0; i < (int)get_number_value("health", DEFAULT_HEALTH); i++) {
 		health_bar.increase_health();
 	}
@@ -78,7 +86,7 @@ game_init() {
 
 	create_string(&hello, "Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, 1000, black, "0", true);
-	create_string(&stationary, "Merriweather", 16, 76, 132, -1, black, message.c_str(), false);
+	create_string(&stationary, "Merriweather", 16, 76, 132, 1000, black, message.c_str(), false);
 	create_string(&coords, "Roboto", 32, 16, -16, 1000, black, "0, 0", true);
 
 	set_camera_target(player);
@@ -91,7 +99,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	static Uint64 damage_cooldown = 0;
 	std::stringstream timer_stream;
 	std::stringstream coords_stream;
-	Uint8 player_speed;
+	Uint8 player_speed = 1;
 
 	play_music(500);
 
@@ -110,6 +118,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	set_frameset_delay(player, "Walk", key_actions->dash ? 166 : 250);
 	if (key_actions->left && player_state != atk && player_state != ko) {
 		player_state = walk;
+		player_direction = LEFT;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		flip_sprite(player);
@@ -118,6 +127,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 	if (key_actions->right && player_state != atk && player_state != ko) {
 		player_state = walk;
+		player_direction = RIGHT;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
@@ -126,6 +136,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 	if (key_actions->up && player_state != atk && player_state != ko) {
 		player_state = walk;
+		player_direction = UP;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		move_sprite(player, 0, -player_speed);
@@ -133,6 +144,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 	if (key_actions->down && player_state != atk && player_state != ko) {
 		player_state = walk;
+		player_direction = DOWN;
 		set_frameset(player, "Walk");
 		player_speed = key_actions->dash ? 2 : 1;
 		move_sprite(player, 0, player_speed);
@@ -175,14 +187,6 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	coords_stream << get_sprite_position(player).x << ", " << get_sprite_position(player).y;
 	update_string_text(&coords, coords_stream.str().c_str());
 
-	if (get_sprite_position(player).y > 730) {
-		reorder_sprite(player, 301);
-	} else if (get_sprite_position(player).y > 200) {
-		reorder_sprite(player, 201);
-	} else {
-		reorder_sprite(player, 101);
-	}
-
 	if (frame % get_framerate() == 0) {
 		timer_stream << frame / get_framerate();
 		update_string_text(&timer, timer_stream.str().c_str());
@@ -190,6 +194,23 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 
 	if (hello && IS_EVEN(frame) && hello_ticker < get_string_length(hello)) {
 		update_string_n(&hello, ++hello_ticker);
+	}
+
+	if (check_object_group_collision(player, "Collision")) {
+		switch (player_direction) {
+			case LEFT:
+				move_sprite(player, player_speed, 0);
+				break;
+			case RIGHT:
+				move_sprite(player, -player_speed, 0);
+				break;
+			case UP:
+				move_sprite(player, 0, player_speed);
+				break;
+			case DOWN:
+				move_sprite(player, 0, -player_speed);
+				break;
+		}
 	}
 }
 

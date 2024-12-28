@@ -117,8 +117,8 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 	}
 	SDL_strlcpy(spr->frameset_labels[spr->num_framesets], name, strlen(name) + 1);
 	if (++spr->num_framesets == 1) {
-		spr->rectangle.w = spr->framesets[0].w;
-		spr->rectangle.h = spr->framesets[0].h;
+		spr->rectangle.w = spr->framesets[0].w * spr->scale;
+		spr->rectangle.h = spr->framesets[0].h * spr->scale;
 	}
 }
 
@@ -132,8 +132,8 @@ set_frameset(AmphoraImage *spr, const char *name) {
 	}
 	spr->framesets[frameset].playing_oneshot = false;
 	spr->current_frameset = frameset;
-	spr->rectangle.w = spr->framesets[frameset].w;
-	spr->rectangle.h = spr->framesets[frameset].h;
+	spr->rectangle.w = spr->framesets[frameset].w * spr->scale;
+	spr->rectangle.h = spr->framesets[frameset].h * spr->scale;
 }
 
 void
@@ -146,8 +146,8 @@ play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	}
 	spr->framesets[frameset].playing_oneshot = true;
 	spr->current_frameset = frameset;
-	spr->rectangle.w = spr->framesets[frameset].w;
-	spr->rectangle.h = spr->framesets[frameset].h;
+	spr->rectangle.w = spr->framesets[frameset].w * spr->scale;
+	spr->rectangle.h = spr->framesets[frameset].h * spr->scale;
 	spr->framesets[frameset].current_frame = -1;
 	spr->framesets[frameset].last_change = frame_count;
 	spr->framesets[frameset].callback = callback;

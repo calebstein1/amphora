@@ -206,6 +206,7 @@ clean_resources(void) {
 #endif
 #ifndef DISABLE_TILEMAP
 	destroy_current_map();
+	free_object_groups();
 #endif
 #ifndef DISABLE_MIXER
 	cleanup_sfx();

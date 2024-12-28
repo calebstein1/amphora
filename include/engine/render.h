@@ -39,6 +39,8 @@ void set_window_windowed(void);
 bool is_window_fullscreen(void);
 /* Returns true if two objects have collided */
 bool check_collision(const AmphoraImage *obj_a, const AmphoraImage *obj_b);
+/* Returns true if the object has collided with any rectangle in the object group */
+bool check_object_group_collision(const AmphoraImage *obj, const char *name);
 #ifdef __cplusplus
 }
 #endif
