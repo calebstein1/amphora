@@ -23,7 +23,7 @@ static const char *font_names[] = {
 };
 
 AmphoraString *
-create_string(AmphoraString **msg, const char *name, const int pt, const int x, const int y, const int order, const SDL_Color color, const char *text, const bool stationary) {
+create_string(AmphoraString **msg, const char *name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
 	struct render_list_node_t *render_list_node = add_render_list_node(order);
 	int idx;
 
@@ -101,19 +101,19 @@ free_string(AmphoraString **msg) {
 
 void
 render_string(const AmphoraString *msg) {
-	SDL_Rect pos_adj;
-	const Vector2 camera = get_camera();
+	SDL_FRect pos_adj;
+	const Vector2f camera = get_camera();
 	Vector2 logical_size = get_render_logical_size();
 
 	if (msg->render_list_node->stationary) {
-		pos_adj = (SDL_Rect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x : get_resolution().x + msg->rectangle.x - msg->rectangle.w,
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y : get_resolution().y + msg->rectangle.y - msg->rectangle.h,
+		pos_adj = (SDL_FRect){
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x : (float)get_resolution().x + msg->rectangle.x - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y : (float)get_resolution().y + msg->rectangle.y - msg->rectangle.h,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
 	} else {
-		pos_adj = (SDL_Rect){
+		pos_adj = (SDL_FRect){
 			.x = msg->rectangle.x - camera.x,
 			.y = msg->rectangle.y - camera.y,
 			.w = msg->rectangle.w,
@@ -198,6 +198,7 @@ SDL_Texture *
 render_string_to_texture(AmphoraString *msg) {
 	enum fonts_e font_name = msg->font;
 	int pt = msg->pt;
+	int msg_rect_w, msg_rect_h;
 	size_t n = msg->n;
 	const char *text = msg->text;
 	const SDL_Color text_color = msg->color;
@@ -224,7 +225,9 @@ render_string_to_texture(AmphoraString *msg) {
 	font = open_fonts[font_name].font;
 	surface = TTF_RenderUTF8_Blended(font, n ? n_buff : text, text_color);
 	texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
-	TTF_SizeUTF8(font, n ? n_buff : text, &msg->rectangle.w, &msg->rectangle.h);
+	TTF_SizeUTF8(font, n ? n_buff : text, &msg_rect_w, &msg_rect_h);
+	msg->rectangle.w = (float)msg_rect_w;
+	msg->rectangle.h = (float)msg_rect_h;
 	SDL_FreeSurface(surface);
 	if (n_buff) SDL_free(n_buff);
 

@@ -21,16 +21,16 @@ static const char *img_names[] = {
 #undef LOADIMG
 };
 
-Vector2
+Vector2f
 get_sprite_position(const AmphoraImage *spr) {
-	return (Vector2){ spr->rectangle.x, spr->rectangle.y };
+	return (Vector2f){spr->rectangle.x, spr->rectangle.y };
 }
 
-Vector2
+Vector2f
 get_sprite_center(const AmphoraImage *spr) {
-	return (Vector2){
-		.x = spr->rectangle.x + (spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
-		.y = spr->rectangle.y + (spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
+	return (Vector2f){
+		.x = spr->rectangle.x + ((float)spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
+		.y = spr->rectangle.y + ((float)spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
 	};
 }
 
@@ -40,7 +40,7 @@ is_flipped(const AmphoraImage *spr) {
 }
 
 AmphoraImage *
-create_sprite(AmphoraImage **spr, const char *image_name, const Sint32 x, const Sint32 y, const Uint8 scale, const bool flip, const bool stationary, const Sint32 order) {
+create_sprite(AmphoraImage **spr, const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *new_sprite = NULL;
 	struct render_list_node_t *render_list_node = NULL;
 	int idx;
@@ -80,7 +80,7 @@ create_sprite(AmphoraImage **spr, const char *image_name, const Sint32 x, const 
 }
 
 void
-add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const Sint32 off_x, const Sint32 off_y, const Uint16 num_frames, const Uint16 delay) {
+add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const float off_x, const float off_y, const Uint16 num_frames, const Uint16 delay) {
 	/* TODO: Cascade error cases and free */
 	if (spr->framesets) {
 		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
@@ -109,7 +109,7 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 		.current_frame = -1,
 		.num_frames = num_frames,
 		.delay = (get_framerate() * delay) / 1000,
-		.position_offset = (Vector2){ off_x, off_y }
+		.position_offset = (Vector2f){off_x, off_y }
 	};
 	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate frameset label\n");
@@ -117,8 +117,8 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 	}
 	SDL_strlcpy(spr->frameset_labels[spr->num_framesets], name, strlen(name) + 1);
 	if (++spr->num_framesets == 1) {
-		spr->rectangle.w = spr->framesets[0].w * spr->scale;
-		spr->rectangle.h = spr->framesets[0].h * spr->scale;
+		spr->rectangle.w = (float)spr->framesets[0].w * spr->scale;
+		spr->rectangle.h = (float)spr->framesets[0].h * spr->scale;
 	}
 }
 
@@ -132,8 +132,8 @@ set_frameset(AmphoraImage *spr, const char *name) {
 	}
 	spr->framesets[frameset].playing_oneshot = false;
 	spr->current_frameset = frameset;
-	spr->rectangle.w = spr->framesets[frameset].w * spr->scale;
-	spr->rectangle.h = spr->framesets[frameset].h * spr->scale;
+	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
+	spr->rectangle.h = (float)spr->framesets[frameset].h * spr->scale;
 }
 
 void
@@ -146,8 +146,8 @@ play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	}
 	spr->framesets[frameset].playing_oneshot = true;
 	spr->current_frameset = frameset;
-	spr->rectangle.w = spr->framesets[frameset].w * spr->scale;
-	spr->rectangle.h = spr->framesets[frameset].h * spr->scale;
+	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
+	spr->rectangle.h = (float)spr->framesets[frameset].h * spr->scale;
 	spr->framesets[frameset].current_frame = -1;
 	spr->framesets[frameset].last_change = frame_count;
 	spr->framesets[frameset].callback = callback;
@@ -180,13 +180,13 @@ reorder_sprite(AmphoraImage *spr, const Sint32 order) {
 }
 
 void
-set_sprite_location(AmphoraImage *spr, Sint32 x, Sint32 y) {
+set_sprite_location(AmphoraImage *spr, float x, float y) {
 	spr->rectangle.x = x;
 	spr->rectangle.y = y;
 }
 
 void
-move_sprite(AmphoraImage *spr, const Sint32 delta_x, const Sint32 delta_y) {
+move_sprite(AmphoraImage *spr, const float delta_x, const float delta_y) {
 	spr->rectangle.x += delta_x;
 	spr->rectangle.y += delta_y;
 }
@@ -301,8 +301,9 @@ void
 update_and_draw_sprite(const AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
 	int frameset_idx = spr->current_frameset;
-	SDL_Rect src, dst;
-	const Vector2 camera = get_camera();
+	SDL_Rect src;
+	SDL_FRect dst;
+	const Vector2f camera = get_camera();
 	Vector2 logical_size = get_render_logical_size();
 
 	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
@@ -326,18 +327,18 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 		.h = frameset->h
 	};
 	if (spr->render_list_node->stationary) {
-		dst = (SDL_Rect){
-			.x = spr->rectangle.x > 0 ? spr->rectangle.x : get_resolution().x + spr->rectangle.x - frameset->w,
-			.y = spr->rectangle.y > 0 ? spr->rectangle.y : get_resolution().y + spr->rectangle.y - frameset->h,
-			.w = frameset->w * spr->scale,
-			.h = frameset->h * spr->scale
+		dst = (SDL_FRect){
+			.x = spr->rectangle.x > 0 ? spr->rectangle.x : get_resolution().x + spr->rectangle.x - (float)frameset->w,
+			.y = spr->rectangle.y > 0 ? spr->rectangle.y : get_resolution().y + spr->rectangle.y - (float)frameset->h,
+			.w = (float)frameset->w * spr->scale,
+			.h = (float)frameset->h * spr->scale
 		};
 	} else {
-		dst = (SDL_Rect){
+		dst = (SDL_FRect){
 			.x = spr->rectangle.x - frameset->position_offset.x - camera.x,
 			.y = spr->rectangle.y - frameset->position_offset.y - camera.y,
-			.w = frameset->w * spr->scale,
-			.h = frameset->h * spr->scale
+			.w = (float)frameset->w * spr->scale,
+			.h = (float)frameset->h * spr->scale
 		};
 	}
 

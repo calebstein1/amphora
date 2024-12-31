@@ -23,11 +23,11 @@ static char *map_names[] = {
 static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
 static struct amphora_tilemap_t current_map;
-static SDL_Rect map_rect;
+static SDL_FRect map_rect;
 static struct amphora_object_groups_t obj_groups;
 
 void
-set_map(const char *name, const Uint16 scale) {
+set_map(const char *name, const float scale) {
 	int idx, i;
 	struct render_list_node_t *render_list_node;
 
@@ -95,7 +95,7 @@ init_maps(void) {
 	return 0;
 }
 
-SDL_Rect *
+SDL_FRect *
 get_map_rectangle(void) {
 	return &map_rect;
 }
@@ -124,7 +124,7 @@ free_object_groups(void) {
 	SDL_free(obj_groups.c_rects);
 }
 
-SDL_Rect *
+SDL_FRect *
 get_rects_by_group(const char *name, int *c) {
 	int i;
 
@@ -167,6 +167,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int pixel_width = map->width * map->tilewidth;
 	int pixel_height = map->height * map->tileheight;
+	int map_base_w, map_base_h;
 	int tile_idx, i, j, row;
 
 	while (layer) {
@@ -179,14 +180,14 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	}
 	layer = map->layers;
 	if (SDL_strcmp(map->orientation.ptr, "orthogonal") == 0) {
-		current_map.orientation = orthogonal;
+		current_map.orientation = MAP_ORTHOGONAL;
 		for (i = 0; i < current_map.num_layers; i++) {
 			current_map.layers[i].texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
 								  SDL_TEXTUREACCESS_TARGET, pixel_width,
 								  pixel_height);
 		}
 	} else if (SDL_strcmp(map->orientation.ptr, "isometric") == 0) {
-		current_map.orientation = isometric;
+		current_map.orientation = MAP_ISOMETRIC;
 		for (i = 0; i < current_map.num_layers; i++) {
 			current_map.layers[i].texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
 								SDL_TEXTUREACCESS_TARGET,
@@ -207,11 +208,11 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 				tile_s.x = (tile_idx * map->tilesets->tilewidth) % tileset_img_w;
 				tile_s.y = ((tile_idx * map->tilesets->tilewidth) / tileset_img_w) * map->tileheight;
 				switch (current_map.orientation) {
-					case orthogonal:
+					case MAP_ORTHOGONAL:
 						tile_d.x = (j * map->tilewidth) % (map->width * map->tilewidth);
 						tile_d.y = row * map->tileheight;
 						break;
-					case isometric:
+					case MAP_ISOMETRIC:
 						tile_d.x = (j * map->tilewidth) % (map->width * map->tilewidth) +
 							   (((map->width * map->tilewidth) / 2) - ((j % map->width) *
 												   (map->tilewidth /
@@ -257,10 +258,10 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 			obj_groups.c_rects[obj_groups.c - 1] = j;
 			j = 0;
 			while (object) {
-				obj_groups.rects[obj_groups.c - 1][j].x = (int)object->x * current_map.scale;
-				obj_groups.rects[obj_groups.c - 1][j].y = (int)object->y * current_map.scale;
-				obj_groups.rects[obj_groups.c - 1][j].w = (int)object->width * current_map.scale;
-				obj_groups.rects[obj_groups.c - 1][j].h = (int)object->height * current_map.scale;
+				obj_groups.rects[obj_groups.c - 1][j].x = object->x * current_map.scale;
+				obj_groups.rects[obj_groups.c - 1][j].y = object->y * current_map.scale;
+				obj_groups.rects[obj_groups.c - 1][j].w = object->width * current_map.scale;
+				obj_groups.rects[obj_groups.c - 1][j].h = object->height * current_map.scale;
 				j++;
 				object = object->next;
 			}
@@ -269,9 +270,9 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	}
 	SDL_SetRenderTarget(renderer, NULL);
 	cute_tiled_free_map(map);
-	SDL_QueryTexture(current_map.layers[0].texture, NULL, NULL, &map_rect.w, &map_rect.h);
-	map_rect.w *= current_map.scale;
-	map_rect.h *= current_map.scale;
+	SDL_QueryTexture(current_map.layers[0].texture, NULL, NULL, &map_base_w, &map_base_h);
+	map_rect.w = (float)map_base_w * current_map.scale;
+	map_rect.h = (float)map_base_h * current_map.scale;
 
 	return 0;
 }

@@ -3,8 +3,9 @@
 
 #include "SDL.h"
 
+typedef SDL_FPoint Vector2f;
+typedef SDL_FPoint Camera;
 typedef SDL_Point Vector2;
-typedef Vector2 Camera;
 typedef struct sprite_t AmphoraImage;
 typedef struct amphora_message_t AmphoraString;
 
@@ -16,11 +17,11 @@ Vector2 get_resolution(void);
 /* Get the renderer logical size */
 Vector2 get_render_logical_size(void);
 /* Get the current upper-left point of the camera */
-Vector2 get_camera(void);
+Vector2f get_camera(void);
 /* Set the location of the camera's top left point */
-void set_camera(Sint32 x, Sint32 y);
+void set_camera(float x, float y);
 /* Move the camera */
-void move_camera(Sint32 x, Sint32 y);
+void move_camera(float x, float y);
 /* Set the sprite for the camera to follow, NULL to disable tracking */
 void set_camera_target(AmphoraImage *target);
 /* Set the zoom factor for the camera */

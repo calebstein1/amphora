@@ -14,7 +14,7 @@ enum tilemaps_e {
 #ifdef __cplusplus
 extern "C" {
 #endif
-void set_map(const char *name, Uint16 scale);
+void set_map(const char *name, float scale);
 #ifdef __cplusplus
 }
 #endif

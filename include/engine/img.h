@@ -20,16 +20,16 @@ typedef enum images_e {
 extern "C" {
 #endif
 /* Gets the pixel posiiton of the upper left corner of a sprite */
-Vector2 get_sprite_position(const AmphoraImage *spr);
+Vector2f get_sprite_position(const AmphoraImage *spr);
 /* Gets the pixel position of the center of a sprite */
-Vector2 get_sprite_center(const AmphoraImage *spr);
+Vector2f get_sprite_center(const AmphoraImage *spr);
 /* Get whether a sprite is flipped */
 bool is_flipped(const AmphoraImage *spr);
 /* Allocate a sprite slot and initialize it with the supplied values */
-AmphoraImage *create_sprite(AmphoraImage **spr, const char *image_name, Sint32 x, Sint32 y, Uint8 scale,
+AmphoraImage *create_sprite(AmphoraImage **spr, const char *image_name, float x, float y, float scale,
 			    bool flip, bool stationary, Sint32 order);
 /* Add a frameset to a sprite */
-void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, Sint32 off_x, Sint32 off_y, Uint16 num_frames, Uint16 delay);
+void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
 void set_frameset(AmphoraImage *spr, const char *name);
 /* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
@@ -39,9 +39,9 @@ void set_frameset_delay(AmphoraImage *spr, const char *name, Uint16 delay);
 /* Change the draw order of a sprite */
 AmphoraImage *reorder_sprite(AmphoraImage *spr, Sint32 order);
 /* Sets a sprite's absolute location */
-void set_sprite_location(AmphoraImage *spr, Sint32 x, Sint32 y);
+void set_sprite_location(AmphoraImage *spr, float x, float y);
 /* Move a sprite by the supplied delta values */
-void move_sprite(AmphoraImage *spr, Sint32 delta_x, Sint32 delta_y);
+void move_sprite(AmphoraImage *spr, float delta_x, float delta_y);
 /* Flip a sprite */
 void flip_sprite(AmphoraImage *spr);
 /* Unflip a sprite */

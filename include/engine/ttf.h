@@ -21,7 +21,7 @@ enum fonts_e {
 extern "C" {
 #endif
 /* Create a string */
-AmphoraString *create_string(AmphoraString **msg, const char *name, int pt, int x, int y, int order, SDL_Color color, const char *text, bool stationary);
+AmphoraString *create_string(AmphoraString **msg, const char *name, int pt, float x, float y, int order, SDL_Color color, const char *text, bool stationary);
 /* Get the number of characters in a message */
 size_t get_string_length(const AmphoraString *msg);
 /* Update the text in a string */

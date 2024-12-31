@@ -10,9 +10,9 @@
 static SDL_Renderer *renderer;
 static SDL_Window *window;
 static Camera camera = { 0, 0 };
-static enum camera_mode_e camera_mode = manual;
+static enum camera_mode_e camera_mode = CAM_MANUAL;
 static SDL_Color bg = { 0, 0, 0, 0xff };
-static Vector2 render_logical_size = { 0, 0 };
+static Vector2 render_logical_size = {0, 0 };
 static struct render_list_node_t *render_list;
 static struct render_list_node_t *render_list_head;
 static AmphoraImage *camera_target;
@@ -22,7 +22,7 @@ Vector2
 get_resolution(void) {
 	Sint32 rx, ry;
 	SDL_GetWindowSize(window, &rx, &ry);
-	return (Vector2){ rx, ry };
+	return (Vector2){rx, ry };
 }
 
 Vector2
@@ -30,26 +30,26 @@ get_render_logical_size(void) {
 	return render_logical_size;
 }
 
-Vector2
+Vector2f
 get_camera(void) {
 	return camera;
 }
 
 void
-set_camera(Sint32 x, Sint32 y) {
+set_camera(float x, float y) {
 	camera.x = x;
 	camera.y = y;
 }
 
 void
-move_camera(Sint32 x, Sint32 y) {
-	camera.x += x;
-	camera.y += y;
+move_camera(float delta_x, float delta_y) {
+	camera.x += delta_x;
+	camera.y += delta_y;
 }
 
 void
 set_camera_target(AmphoraImage *target) {
-	camera_mode = target ? tracking : manual;
+	camera_mode = target ? CAM_TRACKING : CAM_MANUAL;
 	camera_target = target;
 }
 
@@ -129,18 +129,18 @@ is_window_fullscreen(void) {
 
 bool
 check_collision(const AmphoraImage *obj_a, const AmphoraImage *obj_b) {
-	return SDL_HasIntersection(&obj_a->rectangle, &obj_b->rectangle);
+	return SDL_HasIntersectionF(&obj_a->rectangle, &obj_b->rectangle);
 }
 
 bool
 check_object_group_collision(const AmphoraImage *obj, const char *name) {
 	int c, i;
-	SDL_Rect *rects;
+	SDL_FRect *rects;
 
 	if ((rects = get_rects_by_group(name, &c)) == NULL) return false;
 
 	for (i = 0; i < c; i++) {
-		if (SDL_HasIntersection(&obj->rectangle, &rects[i])) return true;
+		if (SDL_HasIntersectionF(&obj->rectangle, &rects[i])) return true;
 	}
 
 	return false;
@@ -194,7 +194,7 @@ cleanup_render(void) {
 void
 set_render_logical_size(const Vector2 size) {
 	render_logical_size = size;
-	SDL_RenderSetLogicalSize(renderer, render_logical_size.x, render_logical_size.y);
+	SDL_RenderSetLogicalSize(renderer, (int)render_logical_size.x, (int)render_logical_size.y);
 }
 
 void
@@ -246,7 +246,7 @@ add_render_list_node(int order) {
 void
 draw_render_list_and_gc(void) {
 	struct render_list_node_t *garbage;
-	SDL_Rect *map_rect;
+	SDL_FRect *map_rect;
 
 	while(render_list) {
 		if (render_list->next && render_list->next->garbage) {
@@ -309,14 +309,14 @@ free_render_list(void) {
 
 void
 update_camera(void) {
-	if (camera_mode == manual) return;
+	if (camera_mode == CAM_MANUAL) return;
 
 	camera = get_sprite_center(camera_target);
-	camera.x -= (render_logical_size.x / 2);
-	camera.y -= (render_logical_size.y / 2);
+	camera.x -= ((float)render_logical_size.x / 2.0f);
+	camera.y -= ((float)render_logical_size.y / 2.0f);
 }
 
 void
-render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_Rect *dstrect, const double angle, const SDL_RendererFlip flip) {
-	SDL_RenderCopyEx(renderer, texture, srcrect, dstrect, angle, NULL, flip);
+render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, const double angle, const SDL_RendererFlip flip) {
+	SDL_RenderCopyExF(renderer, texture, srcrect, dstrect, angle, NULL, flip);
 }

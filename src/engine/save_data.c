@@ -2,14 +2,14 @@
 #include "engine/internal/save_data.h"
 
 int
-save_number_value(const char *attribute, Sint64 value) {
+save_number_value(const char *attribute, double value) {
 	sqlite3 *db = get_db();
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, value) VALUES (?, ?);";
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
-	sqlite3_bind_int64(stmt, 2, value);
+	sqlite3_bind_double(stmt, 2, value);
 	sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 
@@ -31,12 +31,12 @@ save_string_value(const char *attribute, const char *value) {
 	return 0;
 }
 
-Sint64
-get_number_value(const char *attribute, Sint64 default_value) {
+double
+get_number_value(const char *attribute, double default_value) {
 	sqlite3 *db = get_db();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT value FROM save_data WHERE attribute=?";
-	Sint64 val;
+	double val;
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
@@ -44,7 +44,7 @@ get_number_value(const char *attribute, Sint64 default_value) {
 		sqlite3_finalize(stmt);
 		return default_value;
 	}
-	val = sqlite3_column_int64(stmt, 0);
+	val = sqlite3_column_double(stmt, 0);
 	sqlite3_finalize(stmt);
 
 	return val;

@@ -5,7 +5,7 @@
 
 struct amphora_message_t {
 	SDL_Texture *texture;
-	SDL_Rect rectangle;
+	SDL_FRect rectangle;
 	enum fonts_e font;
 	int pt;
 	size_t len;

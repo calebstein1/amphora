@@ -175,7 +175,7 @@ handle_gamepad_up(const SDL_Event *e) {
 	}
 }
 
-Vector2
+Vector2f
 handle_gamepad_joystick(const SDL_Event *e) {
 	Uint8 axis = e->caxis.axis;
 	Sint16 val = e->caxis.value;
@@ -183,7 +183,7 @@ handle_gamepad_joystick(const SDL_Event *e) {
 	(void)axis;
 	(void)val;
 
-	return (Vector2){ 0, 0 };
+	return (Vector2f){0, 0 };
 }
 
 /*

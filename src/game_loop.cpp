@@ -19,7 +19,7 @@ public:
 	void increase_health() {
 		current_health++;
 		health_bar.push_back(nullptr);
-		create_sprite(&health_bar.back(), "Objects", -96 - (Sint32)(32 * (health_bar.size() - 1)), 24, 2, false, true, 1000);
+		create_sprite(&health_bar.back(), "Objects", -96.0f - (float)(32 * (health_bar.size() - 1)), 24, 2, false, true, 1000);
 		add_frameset(health_bar.back(), "Default", 63, 0, 16, 16, 0, 0, 1, 0);
 	}
 
@@ -71,8 +71,8 @@ game_init() {
 	set_map("Overworld", 2);
 	set_music("forest");
 
-	create_sprite(&player, "Character", (Sint32)get_number_value("x", 96), (Sint32)get_number_value("y", 148), 2, get_number_value("flip", false), false, 101);
-	create_sprite(&rotating_heart, "Objects", 128, 72, 3, false, false, 1000);
+	create_sprite(&player, "Character", (float)get_number_value("x", 96), (float)get_number_value("y", 148), 2.0, (bool)get_number_value("flip", false), false, 101);
+	create_sprite(&rotating_heart, "Objects", 128, 72, 3.0, false, false, 1000);
 	for (i = 0; i < (int)get_number_value("health", DEFAULT_HEALTH); i++) {
 		health_bar.increase_health();
 	}
@@ -99,7 +99,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	static Uint64 damage_cooldown = 0;
 	std::stringstream timer_stream;
 	std::stringstream coords_stream;
-	Uint8 player_speed = 1;
+	float player_speed = 1;
 
 	play_music(500);
 
@@ -120,7 +120,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = LEFT;
 		set_frameset(player, "Walk");
-		player_speed = key_actions->dash ? 2 : 1;
+		player_speed *= key_actions->dash ? 2 : 1;
 		flip_sprite(player);
 		move_sprite(player, -player_speed, 0);
 		play_sfx("leaves01", 1, 0);
@@ -129,7 +129,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = RIGHT;
 		set_frameset(player, "Walk");
-		player_speed = key_actions->dash ? 2 : 1;
+		player_speed *= key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
 		move_sprite(player, player_speed, 0);
 		play_sfx("leaves02", 1, 0);
@@ -138,7 +138,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = UP;
 		set_frameset(player, "Walk");
-		player_speed = key_actions->dash ? 2 : 1;
+		player_speed *= key_actions->dash ? 2 : 1;
 		move_sprite(player, 0, -player_speed);
 		play_sfx("leaves01", 1, 0);
 	}
@@ -146,7 +146,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = DOWN;
 		set_frameset(player, "Walk");
-		player_speed = key_actions->dash ? 2 : 1;
+		player_speed *= key_actions->dash ? 2 : 1;
 		move_sprite(player, 0, player_speed);
 		play_sfx("leaves02", 1, 0);
 	}
@@ -216,7 +216,7 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 
 void
 game_shutdown() {
-	Vector2 player_pos = get_sprite_position(player);
+	Vector2f player_pos = get_sprite_position(player);
 	save_number_value("x", player_pos.x);
 	save_number_value("y", player_pos.y);
 	save_number_value("flip", is_flipped(player));

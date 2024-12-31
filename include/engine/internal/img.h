@@ -10,15 +10,15 @@ struct frameset_t {
 	Uint16 num_frames;
 	Uint32 delay;
 	Uint64 last_change;
-	Vector2 position_offset;
+	Vector2f position_offset;
 	void (*callback)(void);
 	bool playing_oneshot : 1;
 };
 
 struct sprite_t {
 	ImageName image;
-	SDL_Rect rectangle;
-	Uint8 scale;
+	SDL_FRect rectangle;
+	float scale;
 	bool flip : 1;
 	Sint32 current_frameset;
 	Sint32 num_framesets;
