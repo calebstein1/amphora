@@ -116,11 +116,11 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 
 	set_frameset_delay(player, "Walk", key_actions->dash ? 166 : 250);
+	player_speed *= key_actions->dash ? 2 : 1;
 	if (key_actions->left && player_state != atk && player_state != ko) {
 		player_state = walk;
 		player_direction = LEFT;
 		set_frameset(player, "Walk");
-		player_speed *= key_actions->dash ? 2 : 1;
 		flip_sprite(player);
 		move_sprite(player, -player_speed, 0);
 		play_sfx("leaves01", 1, 0);
@@ -129,7 +129,6 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = RIGHT;
 		set_frameset(player, "Walk");
-		player_speed *= key_actions->dash ? 2 : 1;
 		unflip_sprite(player);
 		move_sprite(player, player_speed, 0);
 		play_sfx("leaves02", 1, 0);
@@ -138,7 +137,6 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = UP;
 		set_frameset(player, "Walk");
-		player_speed *= key_actions->dash ? 2 : 1;
 		move_sprite(player, 0, -player_speed);
 		play_sfx("leaves01", 1, 0);
 	}
@@ -146,7 +144,6 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = walk;
 		player_direction = DOWN;
 		set_frameset(player, "Walk");
-		player_speed *= key_actions->dash ? 2 : 1;
 		move_sprite(player, 0, player_speed);
 		play_sfx("leaves02", 1, 0);
 	}
@@ -161,11 +158,11 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 		player_state = idle;
 		set_frameset(player, "Idle");
 	}
-	if (key_actions->damage && frame - damage_cooldown > 30) {
+	if (key_actions->damage && frame - damage_cooldown > (get_framerate() / 2)) {
 		damage_cooldown = frame;
 		health_bar.decrease_health();
 	}
-	if (key_actions->heal && frame - damage_cooldown > 30) {
+	if (key_actions->heal && frame - damage_cooldown > (get_framerate() / 2)) {
 		damage_cooldown = frame;
 		health_bar.increase_health();
 		if (player_state == ko) {

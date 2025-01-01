@@ -108,7 +108,7 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 		.h = h,
 		.current_frame = -1,
 		.num_frames = num_frames,
-		.delay = (get_framerate() * delay) / 1000,
+		.delay = delay,
 		.position_offset = (Vector2f){off_x, off_y }
 	};
 	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
@@ -149,7 +149,7 @@ play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
 	spr->rectangle.h = (float)spr->framesets[frameset].h * spr->scale;
 	spr->framesets[frameset].current_frame = -1;
-	spr->framesets[frameset].last_change = frame_count;
+	spr->framesets[frameset].last_change = SDL_GetTicks64();
 	spr->framesets[frameset].callback = callback;
 }
 
@@ -161,7 +161,7 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
-	spr->framesets[frameset].delay = (get_framerate() * delay) / 1000;
+	spr->framesets[frameset].delay = delay;
 }
 
 AmphoraImage *
@@ -305,10 +305,11 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	SDL_FRect dst;
 	const Vector2f camera = get_camera();
 	Vector2 logical_size = get_render_logical_size();
+	Uint64 cur_ms = SDL_GetTicks64();
 
 	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
 
-	if (frame_count - frameset->last_change > frameset->delay) {
+	if (cur_ms - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) {
 			if (spr->framesets[frameset_idx].playing_oneshot) {
 				frameset->current_frame--;
@@ -317,7 +318,7 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 				frameset->current_frame = 0;
 			}
 		}
-		frameset->last_change = frame_count;
+		frameset->last_change = cur_ms;
 	}
 	if (frameset->current_frame == -1) frameset->current_frame = 0;
 	src = (SDL_Rect){
@@ -328,8 +329,8 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	};
 	if (spr->render_list_node->stationary) {
 		dst = (SDL_FRect){
-			.x = spr->rectangle.x > 0 ? spr->rectangle.x : get_resolution().x + spr->rectangle.x - (float)frameset->w,
-			.y = spr->rectangle.y > 0 ? spr->rectangle.y : get_resolution().y + spr->rectangle.y - (float)frameset->h,
+			.x = spr->rectangle.x > 0 ? spr->rectangle.x : (float)get_resolution().x + spr->rectangle.x - (float)frameset->w,
+			.y = spr->rectangle.y > 0 ? spr->rectangle.y : (float)get_resolution().y + spr->rectangle.y - (float)frameset->h,
 			.w = (float)frameset->w * spr->scale,
 			.h = (float)frameset->h * spr->scale
 		};
