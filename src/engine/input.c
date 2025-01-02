@@ -73,11 +73,11 @@ object_clicked(void *obj, int button, void (*callback)(void)) {
 			rect = &((AmphoraString *)obj)->rectangle;
 			break;
 		default:
-			break;
+			return false;
 	}
 
 	flags = SDL_GetMouseState(&x, &y);
-	if (flags != SDL_BUTTON(button)) return false;
+	if (flags != (Uint32)SDL_BUTTON(button)) return false;
 
 	if (SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect)) {
 		if (callback) callback();
