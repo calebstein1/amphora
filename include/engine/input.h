@@ -19,6 +19,8 @@ extern "C" {
 void load_keymap(void);
 /* Execute a callback function if a specified AmphoraImage or AmphoraString is clicked, button is an SDL_BUTTON_X macro */
 bool object_clicked(void *spr, int button, void (*callback)(void));
+/* Returns true if the mouse is over the provided object, false if not */
+bool object_mouseover(void *obj);
 #ifdef __cplusplus
 }
 #endif

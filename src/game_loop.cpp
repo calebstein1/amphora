@@ -82,6 +82,7 @@ game_init() {
 	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 250);
 	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 500);
 
+	add_frameset(rotating_heart, "Stationary", 64, 129, 16, 16, 0, 0, 1, 0);
 	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 250);
 
 	create_string(&hello, "Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
@@ -179,6 +180,12 @@ game_loop(Uint64 frame, const input_state_t *key_actions) {
 	}
 	if (key_actions->quit) {
 		quit_game();
+	}
+
+	if (object_mouseover(rotating_heart)) {
+		set_frameset(rotating_heart, "Rotate");
+	} else {
+		set_frameset(rotating_heart, "Stationary");
 	}
 
 	coords_stream << get_sprite_position(player).x << ", " << get_sprite_position(player).y;

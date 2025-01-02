@@ -87,6 +87,29 @@ object_clicked(void *obj, int button, void (*callback)(void)) {
 	return false;
 }
 
+bool
+object_mouseover(void *obj) {
+	int x, y;
+	SDL_FRect *rect;
+	struct amphora_object_generic_t *obj_generic = (struct amphora_object_generic_t *)obj;
+	Camera camera = get_camera();
+
+	switch (obj_generic->type) {
+		case AMPH_OBJ_SPR:
+			rect = &((AmphoraImage *)obj)->rectangle;
+			break;
+		case AMPH_OBJ_TXT:
+			rect = &((AmphoraString *)obj)->rectangle;
+			break;
+		default:
+			return false;
+	}
+
+	SDL_GetMouseState(&x, &y);
+
+	return SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect);
+}
+
 /*
  * Internal functions
  */
