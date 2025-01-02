@@ -82,9 +82,9 @@ object_clicked(void *obj, int button, void (*callback)(void)) {
 	if (SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect)) {
 		if (callback) callback();
 		return true;
-	} else {
-		return false;
 	}
+
+	return false;
 }
 
 /*
