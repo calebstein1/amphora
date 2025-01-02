@@ -131,6 +131,8 @@ set_frameset(AmphoraImage *spr, const char *name) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
+	if (frameset == spr->current_frameset) return;
+
 	spr->framesets[frameset].playing_oneshot = false;
 	spr->current_frameset = frameset;
 	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
@@ -145,6 +147,8 @@ play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
 		return;
 	}
+	if (frameset == spr->current_frameset) return;
+
 	spr->framesets[frameset].playing_oneshot = true;
 	spr->current_frameset = frameset;
 	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
