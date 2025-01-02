@@ -77,7 +77,7 @@ object_clicked(void *obj, int button, void (*callback)(void)) {
 	}
 
 	flags = SDL_GetMouseState(&x, &y);
-	if (SDL_BUTTON(flags) != button) return false;
+	if (flags != SDL_BUTTON(button)) return false;
 
 	if (SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect)) {
 		callback();
