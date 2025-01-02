@@ -3,6 +3,8 @@
 
 #include "SDL.h"
 
+#include "engine/img.h"
+
 #include "config.h"
 
 struct input_state_t {
@@ -15,6 +17,8 @@ struct input_state_t {
 extern "C" {
 #endif
 void load_keymap(void);
+/* Execute a callback function if a specified AmphoraImage or AmphoraString is clicked, button is an SDL_BUTTON_X macro */
+bool object_clicked(void *spr, int button, void (*callback)(void));
 #ifdef __cplusplus
 }
 #endif

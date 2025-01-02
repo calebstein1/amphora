@@ -1,6 +1,8 @@
 #include "engine/internal/db.h"
+#include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/ttf.h"
 
 #include "config.h"
 
@@ -53,6 +55,36 @@ load_keymap(void) {
 		controller_buttons[i] = sqlite3_column_int(stmt, 1);
 	}
 	sqlite3_finalize(stmt);
+}
+
+bool
+object_clicked(void *obj, int button, void (*callback)(void)) {
+	int x, y;
+	Uint32 flags;
+	SDL_FRect *rect;
+	struct amphora_object_generic_t *obj_generic = (struct amphora_object_generic_t *)obj;
+	Camera camera = get_camera();
+
+	switch (obj_generic->type) {
+		case AMPH_OBJ_SPR:
+			rect = &((AmphoraImage *)obj)->rectangle;
+			break;
+		case AMPH_OBJ_TXT:
+			rect = &((AmphoraString *)obj)->rectangle;
+			break;
+		default:
+			break;
+	}
+
+	flags = SDL_GetMouseState(&x, &y);
+	if (SDL_BUTTON(flags) != button) return false;
+
+	if (SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect)) {
+		callback();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /*
