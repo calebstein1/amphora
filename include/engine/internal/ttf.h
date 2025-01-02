@@ -2,8 +2,10 @@
 #define TTF_INTERNAL_H
 
 #include "engine/ttf.h"
+#include "engine/internal/render.h"
 
 struct amphora_message_t {
+	enum amphora_object_type_e type;
 	SDL_Texture *texture;
 	SDL_FRect rectangle;
 	enum fonts_e font;

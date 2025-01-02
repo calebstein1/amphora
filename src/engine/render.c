@@ -175,7 +175,7 @@ init_render(void) {
 
 		return -1;
 	}
-	render_list->type = NONE;
+	render_list->type = AMPH_OBJ_NIL;
 	render_list->order = SDL_MIN_SINT32;
 	render_list->garbage = false;
 	render_list->next = NULL;
@@ -257,13 +257,13 @@ draw_render_list_and_gc(void) {
 			render_list_node_count--;
 		}
 		switch (render_list->type) {
-			case SPRITE:
+			case AMPH_OBJ_SPR:
 				update_and_draw_sprite((const AmphoraImage *)render_list->data);
 				break;
-			case STRING:
+			case AMPH_OBJ_TXT:
 				render_string((const AmphoraString *)render_list->data);
 				break;
-			case MAP:
+			case AMPH_OBJ_MAP:
 				map_rect = get_map_rectangle();
 				map_rect->x = -camera.x;
 				map_rect->y = -camera.y;
@@ -290,13 +290,13 @@ free_render_list(void) {
 	}
 	for (i = 0; i < render_list_node_count; i++) {
 		switch(allocated_addrs[i]->type) {
-			case SPRITE:
+			case AMPH_OBJ_SPR:
 				free_sprite((AmphoraImage**)&allocated_addrs[i]->data);
 				break;
-			case STRING:
+			case AMPH_OBJ_TXT:
 				free_string((AmphoraString **)&allocated_addrs[i]->data);
 				break;
-			case MAP:
+			case AMPH_OBJ_MAP:
 				SDL_DestroyTexture((SDL_Texture *)allocated_addrs[i]->data);
 				break;
 			default:

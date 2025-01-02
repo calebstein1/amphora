@@ -45,7 +45,7 @@ set_map(const char *name, const float scale) {
 	}
 	for (i = 0; i < current_map.num_layers; i++) {
 		render_list_node = add_render_list_node(100 * i);
-		render_list_node->type = MAP;
+		render_list_node->type = AMPH_OBJ_MAP;
 		render_list_node->data = current_map.layers[i].texture;
 		current_map.layers[i].node = render_list_node;
 	}

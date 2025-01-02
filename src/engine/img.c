@@ -66,13 +66,14 @@ create_sprite(AmphoraImage **spr, const char *image_name, const float x, const f
 
 	*spr = new_sprite;
 
+	(*spr)->type = AMPH_OBJ_SPR;
 	(*spr)->image = idx;
 	(*spr)->rectangle.x = x;
 	(*spr)->rectangle.y = y;
 	(*spr)->scale = scale;
 	(*spr)->render_list_node = render_list_node;
 	(*spr)->flip = flip;
-	render_list_node->type = SPRITE;
+	render_list_node->type = AMPH_OBJ_SPR;
 	render_list_node->data = *spr;
 	render_list_node->stationary = stationary;
 
@@ -169,7 +170,7 @@ reorder_sprite(AmphoraImage *spr, const Sint32 order) {
 	struct render_list_node_t *new_node = add_render_list_node(order);
 	struct render_list_node_t *old_node = spr->render_list_node;
 
-	new_node->type = SPRITE;
+	new_node->type = AMPH_OBJ_SPR;
 	new_node->data = spr;
 	new_node->display = old_node->display;
 	new_node->stationary = old_node->stationary;

@@ -16,6 +16,7 @@ struct frameset_t {
 };
 
 struct sprite_t {
+	enum amphora_object_type_e type;
 	ImageName image;
 	SDL_FRect rectangle;
 	float scale;

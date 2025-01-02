@@ -9,21 +9,25 @@ enum camera_mode_e {
 	CAM_TRACKING
 };
 
-enum render_list_node_type_e {
-	SPRITE,
-	STRING,
-	MAP,
-	NONE
+enum amphora_object_type_e {
+	AMPH_OBJ_SPR,
+	AMPH_OBJ_TXT,
+	AMPH_OBJ_MAP,
+	AMPH_OBJ_NIL
 };
 
 struct render_list_node_t {
-	enum render_list_node_type_e type;
+	enum amphora_object_type_e type;
 	void *data;
 	int order;
 	bool garbage : 1;
 	bool display : 1;
 	bool stationary : 1;
 	struct render_list_node_t *next;
+};
+
+struct amphora_object_generic_t {
+	enum amphora_object_type_e type;
 };
 
 int init_render(void);

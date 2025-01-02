@@ -41,6 +41,7 @@ create_string(AmphoraString **msg, const char *name, const int pt, const float x
 		return NULL;
 	}
 
+	(*msg)->type = AMPH_OBJ_TXT;
 	(*msg)->font = idx;
 	(*msg)->pt = pt;
 	(*msg)->len = SDL_strlen(text);
@@ -49,7 +50,7 @@ create_string(AmphoraString **msg, const char *name, const int pt, const float x
 	(*msg)->rectangle.x = x;
 	(*msg)->rectangle.y = y;
 	(*msg)->render_list_node = render_list_node;
-	render_list_node->type = STRING;
+	render_list_node->type = AMPH_OBJ_TXT;
 	render_list_node->data = *msg;
 	render_list_node->stationary = stationary;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
