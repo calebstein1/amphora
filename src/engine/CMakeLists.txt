@@ -10,4 +10,5 @@ add_library(amphora_engine
 	save_data.c
 	mixer.c
 	prefs.c
+	random.c
 )

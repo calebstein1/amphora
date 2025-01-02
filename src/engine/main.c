@@ -6,6 +6,7 @@
 #include "engine/internal/input.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/prefs.h"
+#include "engine/internal/random.h"
 #include "engine/internal/render.h"
 #include "engine/internal/save_data.h"
 #include "engine/internal/tilemap.h"
@@ -88,6 +89,7 @@ main(int argc, char **argv) {
 		return -1;
 	}
 #endif
+	init_rand();
 	init_db();
 	init_config();
 	if (init_render() == -1) {
