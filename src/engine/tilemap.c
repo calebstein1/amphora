@@ -13,6 +13,8 @@
 /* Prototypes for private functions */
 int get_map_by_name(const char *name);
 int parse_map_to_texture(enum tilemaps_e map_idx);
+int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, int tileset_img_h, SDL_Texture *tileset_img, int n);
+int parse_object_group(const cute_tiled_layer_t *layer);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -173,16 +175,13 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Renderer *renderer = get_renderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
 	cute_tiled_layer_t *layer = map->layers;
-	cute_tiled_object_t *object;
 	cute_tiled_tileset_t *tileset = map->tilesets;
 	int tileset_img_w, tileset_img_h;
 	SDL_Texture *tileset_img = get_img_texture_by_name(tileset->name.ptr);
-	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
-	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int pixel_width = map->width * map->tilewidth;
 	int pixel_height = map->height * map->tileheight;
 	int map_base_w, map_base_h;
-	int tile_idx, i, j, row;
+	int i;
 
 	while (layer) {
 		if (SDL_strcmp(layer->type.ptr, "tilelayer") == 0) current_map.num_layers++;
@@ -214,80 +213,9 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	i = 0;
 	while (layer) {
 		if (SDL_strcmp(layer->type.ptr, "tilelayer") == 0) {
-			SDL_SetTextureBlendMode(current_map.layers[i].texture, SDL_BLENDMODE_BLEND);
-			SDL_SetRenderTarget(renderer, current_map.layers[i].texture);
-			for (j = 0; j < layer->data_count; j++) {
-				tile_idx = layer->data[j] - 1;
-				row = ((j * map->tilewidth) / (map->width * map->tilewidth));
-				tile_s.x = (tile_idx * map->tilesets->tilewidth) % tileset_img_w;
-				tile_s.y = ((tile_idx * map->tilesets->tilewidth) / tileset_img_w) * map->tileheight;
-				switch (current_map.orientation) {
-					case MAP_ORTHOGONAL:
-						tile_d.x = (j * map->tilewidth) % (map->width * map->tilewidth);
-						tile_d.y = row * map->tileheight;
-						break;
-					case MAP_ISOMETRIC:
-						tile_d.x = (j * map->tilewidth) % (map->width * map->tilewidth) +
-							   (((map->width * map->tilewidth) / 2) - ((j % map->width) *
-												   (map->tilewidth /
-												    2)) -
-							    (row * (map->tilewidth / 2)));
-						tile_d.y = row * map->tileheight +
-							   ((j % map->width) * (map->tileheight / 2)) -
-							   (row * (map->tileheight / 2));
-						break;
-				}
-				SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
-			}
-			i++;
+			parse_tile_layer(map, layer, tileset_img_w, tileset_img_h, tileset_img, i++);
 		} else if (SDL_strcmp(layer->type.ptr, "objectgroup") == 0) {
-			if (++obj_groups.c > obj_groups.max_c) {
-				obj_groups.max_c += OBJ_GRP_BATCH_SIZE;
-				if (!((obj_groups.labels = SDL_realloc(obj_groups.labels,
-								       obj_groups.max_c * sizeof(char *))))) {
-					SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-						     "Failed to reallocate object group labels\n");
-					return -1;
-				}
-				if (!((obj_groups.c_rects = SDL_realloc(obj_groups.c_rects,
-									obj_groups.max_c * sizeof(int))))) {
-					SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-						     "Failed to reallocate object group rectangle count\n");
-					return -1;
-				}
-				if (!((obj_groups.rects = SDL_realloc(obj_groups.rects,
-								      obj_groups.max_c * sizeof(SDL_FRect *))))) {
-					SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-						     "Failed to reallocate object group rectangle list\n");
-					return -1;
-				}
-			}
-			object = layer->objects;
-			j = 0;
-			while (object) {
-				j++;
-				object = object->next;
-			}
-			object = layer->objects;
-			if (!((obj_groups.labels[obj_groups.c - 1] = SDL_malloc(SDL_strlen(layer->name.ptr) + 1)))) {
-				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for label\n");
-				return -1;
-			}
-			if (!((obj_groups.rects[obj_groups.c - 1] = SDL_malloc(j * sizeof(SDL_FRect))))) {
-				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangles\n");
-				return -1;
-			}
-			SDL_strlcpy(obj_groups.labels[obj_groups.c - 1], layer->name.ptr, SDL_strlen(layer->name.ptr) + 1);
-			obj_groups.c_rects[obj_groups.c - 1] = j;
-			j = 0;
-			while (object) {
-				obj_groups.rects[obj_groups.c - 1][j].x = object->x * current_map.scale;
-				obj_groups.rects[obj_groups.c - 1][j].y = object->y * current_map.scale;
-				obj_groups.rects[obj_groups.c - 1][j].w = object->width * current_map.scale;
-				obj_groups.rects[obj_groups.c - 1][j].h = object->height * current_map.scale;
-				j++;
-				object = object->next;
-			}
+			parse_object_group(layer);
 		}
 		layer = layer->next;
 	}
@@ -296,6 +224,98 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_QueryTexture(current_map.layers[0].texture, NULL, NULL, &map_base_w, &map_base_h);
 	map_rect.w = (float)map_base_w * current_map.scale;
 	map_rect.h = (float)map_base_h * current_map.scale;
+
+	return 0;
+}
+
+int
+parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, int tileset_img_h, SDL_Texture *tileset_img, int n) {
+	SDL_Renderer *renderer = get_renderer();
+	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
+	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
+	int i, tile_idx, row;
+
+	SDL_SetTextureBlendMode(current_map.layers[n].texture, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderTarget(renderer, current_map.layers[n].texture);
+	for (i = 0; i < layer->data_count; i++) {
+		tile_idx = layer->data[i] - 1;
+		row = ((i * map->tilewidth) / (map->width * map->tilewidth));
+		tile_s.x = (tile_idx * map->tilesets->tilewidth) % tileset_img_w;
+		tile_s.y = ((tile_idx * map->tilesets->tilewidth) / tileset_img_w) * map->tileheight;
+		switch (current_map.orientation) {
+			case MAP_ORTHOGONAL:
+				tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth);
+				tile_d.y = row * map->tileheight;
+				break;
+			case MAP_ISOMETRIC:
+				tile_d.x = (i * map->tilewidth) % (map->width * map->tilewidth) +
+					   (((map->width * map->tilewidth) / 2) - ((i % map->width) *
+										   (map->tilewidth /
+										    2)) -
+					    (row * (map->tilewidth / 2)));
+				tile_d.y = row * map->tileheight +
+					   ((i % map->width) * (map->tileheight / 2)) -
+					   (row * (map->tileheight / 2));
+				break;
+		}
+		SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
+	}
+
+	return 0;
+}
+
+int
+parse_object_group(const cute_tiled_layer_t *layer) {
+	int i;
+	cute_tiled_object_t *object;
+
+	if (++obj_groups.c > obj_groups.max_c) {
+		obj_groups.max_c += OBJ_GRP_BATCH_SIZE;
+		if (!((obj_groups.labels = SDL_realloc(obj_groups.labels,
+						       obj_groups.max_c * sizeof(char *))))) {
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+				     "Failed to reallocate object group labels\n");
+			return -1;
+		}
+		if (!((obj_groups.c_rects = SDL_realloc(obj_groups.c_rects,
+							obj_groups.max_c * sizeof(int))))) {
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+				     "Failed to reallocate object group rectangle count\n");
+			return -1;
+		}
+		if (!((obj_groups.rects = SDL_realloc(obj_groups.rects,
+						      obj_groups.max_c * sizeof(SDL_FRect *))))) {
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+				     "Failed to reallocate object group rectangle list\n");
+			return -1;
+		}
+	}
+	object = layer->objects;
+	i = 0;
+	while (object) {
+		i++;
+		object = object->next;
+	}
+	object = layer->objects;
+	if (!((obj_groups.labels[obj_groups.c - 1] = SDL_malloc(SDL_strlen(layer->name.ptr) + 1)))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for label\n");
+		return -1;
+	}
+	if (!((obj_groups.rects[obj_groups.c - 1] = SDL_malloc(i * sizeof(SDL_FRect))))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangles\n");
+		return -1;
+	}
+	SDL_strlcpy(obj_groups.labels[obj_groups.c - 1], layer->name.ptr, SDL_strlen(layer->name.ptr) + 1);
+	obj_groups.c_rects[obj_groups.c - 1] = i;
+	i = 0;
+	while (object) {
+		obj_groups.rects[obj_groups.c - 1][i].x = object->x * current_map.scale;
+		obj_groups.rects[obj_groups.c - 1][i].y = object->y * current_map.scale;
+		obj_groups.rects[obj_groups.c - 1][i].w = object->width * current_map.scale;
+		obj_groups.rects[obj_groups.c - 1][i].h = object->height * current_map.scale;
+		i++;
+		object = object->next;
+	}
 
 	return 0;
 }
