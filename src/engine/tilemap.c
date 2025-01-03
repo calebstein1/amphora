@@ -91,6 +91,19 @@ init_maps(void) {
 		SDL_Log("Found map %s\n", map_names[i]);
 	}
 #endif
+	obj_groups.max_c = OBJ_GRP_BATCH_SIZE;
+	if (!((obj_groups.labels = SDL_malloc(OBJ_GRP_BATCH_SIZE * sizeof(char *))))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group labels\n");
+		return -1;
+	}
+	if (!((obj_groups.c_rects = SDL_malloc(OBJ_GRP_BATCH_SIZE * sizeof(int))))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle count\n");
+		return -1;
+	}
+	if (!((obj_groups.rects = SDL_malloc(OBJ_GRP_BATCH_SIZE * sizeof(SDL_FRect *))))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle list\n");
+		return -1;
+	}
 
 	return 0;
 }
@@ -122,6 +135,7 @@ free_object_groups(void) {
 	}
 	SDL_free(obj_groups.labels);
 	SDL_free(obj_groups.c_rects);
+	SDL_free(obj_groups.rects);
 }
 
 SDL_FRect *
@@ -227,17 +241,26 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 			}
 			i++;
 		} else if (SDL_strcmp(layer->type.ptr, "objectgroup") == 0) {
-			if (!((obj_groups.labels = SDL_realloc(obj_groups.labels, ++obj_groups.c * sizeof(char *))))) {
-				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group labels\n");
-				return -1;
-			}
-			if (!((obj_groups.c_rects = SDL_realloc(obj_groups.c_rects, obj_groups.c * sizeof(int))))) {
-				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle count\n");
-				return -1;
-			}
-			if (!((obj_groups.rects = SDL_realloc(obj_groups.rects, obj_groups.c * sizeof(SDL_Rect *))))) {
-				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle list\n");
-				return -1;
+			if (++obj_groups.c > obj_groups.max_c) {
+				obj_groups.max_c += OBJ_GRP_BATCH_SIZE;
+				if (!((obj_groups.labels = SDL_realloc(obj_groups.labels,
+								       obj_groups.max_c * sizeof(char *))))) {
+					SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+						     "Failed to reallocate object group labels\n");
+					return -1;
+				}
+				if (!((obj_groups.c_rects = SDL_realloc(obj_groups.c_rects,
+									obj_groups.max_c * sizeof(int))))) {
+					SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+						     "Failed to reallocate object group rectangle count\n");
+					return -1;
+				}
+				if (!((obj_groups.rects = SDL_realloc(obj_groups.rects,
+								      obj_groups.max_c * sizeof(SDL_FRect *))))) {
+					SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+						     "Failed to reallocate object group rectangle list\n");
+					return -1;
+				}
 			}
 			object = layer->objects;
 			j = 0;
@@ -250,7 +273,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for label\n");
 				return -1;
 			}
-			if (!((obj_groups.rects[obj_groups.c - 1] = SDL_malloc(j * sizeof(SDL_Rect))))) {
+			if (!((obj_groups.rects[obj_groups.c - 1] = SDL_malloc(j * sizeof(SDL_FRect))))) {
 				SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangles\n");
 				return -1;
 			}

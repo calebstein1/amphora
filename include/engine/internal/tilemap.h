@@ -3,6 +3,8 @@
 
 #include "engine/tilemap.h"
 
+#define OBJ_GRP_BATCH_SIZE 4
+
 enum map_orientation_e {
 	MAP_ORTHOGONAL,
 	MAP_ISOMETRIC
@@ -25,6 +27,7 @@ struct amphora_object_groups_t {
 	SDL_FRect **rects;
 	int *c_rects;
 	int c;
+	int max_c;
 };
 
 int init_maps(void);
