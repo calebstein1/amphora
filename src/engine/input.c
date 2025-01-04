@@ -19,6 +19,7 @@ static const char *action_names[] = {
 };
 static SDL_Keycode keys[ACTION_COUNT];
 static SDL_GameControllerButton controller_buttons[ACTION_COUNT];
+static SDL_Keycode pressed_key;
 
 void
 load_keymap(void) {
@@ -110,6 +111,11 @@ object_mouseover(void *obj) {
 	return SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect);
 }
 
+SDL_Keycode
+get_pressed_key(void) {
+	return pressed_key;
+}
+
 /*
  * Internal functions
  */
@@ -186,6 +192,7 @@ void
 handle_keydown(const SDL_Event *e) {
 	Uint32 i;
 
+	pressed_key = e->key.keysym.sym;
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == keys[i]) {
 			key_actions.bits |= (1LL << i);
@@ -198,6 +205,7 @@ void
 handle_keyup(const SDL_Event *e) {
 	Uint32 i;
 
+	if (pressed_key == e->key.keysym.sym) pressed_key = 0;
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == keys[i]) {
 			key_actions.bits &= (rotate_left(MASK, i));

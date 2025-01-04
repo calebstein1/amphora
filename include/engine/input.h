@@ -21,6 +21,8 @@ void load_keymap(void);
 bool object_clicked(void *spr, int button, void (*callback)(void));
 /* Returns true if the mouse is over the provided object, false if not */
 bool object_mouseover(void *obj);
+/* Gets the currently pressed key */
+SDL_Keycode get_pressed_key(void);
 #ifdef __cplusplus
 }
 #endif
