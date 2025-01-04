@@ -37,7 +37,7 @@ load_keymap(void) {
         sqlite3_bind_int(stmt, 1, ACTION_##action);				\
 	sqlite3_bind_text(stmt, 2, #action, -1, NULL);				\
 	sqlite3_bind_int(stmt, 3, SDLK_##key);					\
-	sqlite3_bind_text(stmt, 4, #key, -1, NULL);				\
+	sqlite3_bind_text(stmt, 4, SDL_GetKeyName(SDLK_##key), -1, NULL);	\
 	sqlite3_bind_int(stmt, 5, SDL_CONTROLLER_BUTTON_##gamepad);		\
 	sqlite3_bind_text(stmt, 6, #gamepad, -1, NULL);				\
 	sqlite3_step(stmt);							\
@@ -55,6 +55,21 @@ load_keymap(void) {
 		keys[i] = sqlite3_column_int(stmt, 0);
 		controller_buttons[i] = sqlite3_column_int(stmt, 1);
 	}
+	sqlite3_finalize(stmt);
+}
+
+void
+update_keymap(const char *action, SDL_Keycode keycode) {
+	sqlite3 *db = get_db();
+	sqlite3_stmt *stmt;
+	const char *sql = "UPDATE key_map SET key=?, key_name=? WHERE action=?;";
+	const char *keyname = SDL_GetKeyName(keycode);
+
+	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, keycode);
+	sqlite3_bind_text(stmt, 2, keyname, -1, NULL);
+	sqlite3_bind_text(stmt, 3, action, -1, NULL);
+	sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 }
 
@@ -114,6 +129,41 @@ object_mouseover(void *obj) {
 SDL_Keycode
 get_pressed_key(void) {
 	return pressed_key;
+}
+
+char *
+get_action_key_name(const char *action) {
+	sqlite3 *db = get_db();
+	sqlite3_stmt *stmt;
+	const char *sql = "SELECT key_name FROM key_map WHERE action=?;";
+	const char *key_name;
+	char *key_name_r;
+
+	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
+	sqlite3_bind_text(stmt, 1, action, -1, NULL);
+	if (sqlite3_step(stmt) != SQLITE_ROW) {
+		sqlite3_finalize(stmt);
+		return NULL;
+	}
+	key_name = (const char *)sqlite3_column_text(stmt, 0);
+	if (!((key_name_r = SDL_malloc(SDL_strlen(key_name) + 1)))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for string\n");
+		return NULL;
+	}
+	SDL_strlcpy(key_name_r, key_name, SDL_strlen(key_name) + 1);
+	sqlite3_finalize(stmt);
+
+	return key_name_r;
+}
+
+void
+for_each_action(void (*callback)(const char *)) {
+	int i;
+
+	if (!callback) return;
+	for (i = 0; i < ACTION_COUNT; i++) {
+		callback(action_names[i]);
+	}
 }
 
 /*
