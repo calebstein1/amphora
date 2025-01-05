@@ -28,7 +28,7 @@ SDL_Keycode get_pressed_key(void);
 /* Get the name of the key associated with an action */
 char *get_action_key_name(const char *action);
 /* Run a callback function for each defined action name */
-void for_each_action(void (*callback)(const char *));
+void for_each_action(void (*callback)(const char *, int));
 #ifdef __cplusplus
 }
 #endif

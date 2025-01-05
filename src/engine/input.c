@@ -157,12 +157,12 @@ get_action_key_name(const char *action) {
 }
 
 void
-for_each_action(void (*callback)(const char *)) {
+for_each_action(void (*callback)(const char *, int)) {
 	int i;
 
 	if (!callback) return;
 	for (i = 0; i < ACTION_COUNT; i++) {
-		callback(action_names[i]);
+		callback(action_names[i], i);
 	}
 }
 
