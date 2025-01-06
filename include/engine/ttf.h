@@ -24,6 +24,8 @@ extern "C" {
 AmphoraString *create_string(AmphoraString **msg, const char *name, int pt, float x, float y, int order, SDL_Color color, const char *text, bool stationary);
 /* Get the number of characters in a message */
 size_t get_string_length(const AmphoraString *msg);
+/* Get the text of an AmphoraString */
+const char *get_string_text(AmphoraString *msg);
 /* Update the text in a string */
 AmphoraString *update_string_text(AmphoraString **msg, const char *text);
 /* Change the number of characters displayed in a string, 0 displays all characters */

@@ -65,6 +65,11 @@ get_string_length(const AmphoraString *msg) {
 	return msg->len;
 }
 
+const char *
+get_string_text(AmphoraString *msg) {
+	return msg->text;
+}
+
 AmphoraString *
 update_string_text(AmphoraString **msg, const char *text) {
 	(*msg)->len = SDL_strlen(text);
