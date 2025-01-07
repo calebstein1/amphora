@@ -13,7 +13,7 @@
 /* Prototypes for private functions */
 int get_map_by_name(const char *name);
 int parse_map_to_texture(enum tilemaps_e map_idx);
-int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, int tileset_img_h, SDL_Texture *tileset_img, int n);
+int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
 int parse_object_group(const cute_tiled_layer_t *layer);
 
 /* File-scoped variables */
@@ -213,7 +213,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	i = 0;
 	while (layer) {
 		if (SDL_strcmp(layer->type.ptr, "tilelayer") == 0) {
-			parse_tile_layer(map, layer, tileset_img_w, tileset_img_h, tileset_img, i++);
+			parse_tile_layer(map, layer, tileset_img_w, tileset_img, i++);
 		} else if (SDL_strcmp(layer->type.ptr, "objectgroup") == 0) {
 			parse_object_group(layer);
 		}
@@ -229,7 +229,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 }
 
 int
-parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, int tileset_img_h, SDL_Texture *tileset_img, int n) {
+parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n) {
 	SDL_Renderer *renderer = get_renderer();
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
