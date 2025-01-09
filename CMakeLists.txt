@@ -1,15 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 
+project(amphora LANGUAGES C CXX ASM)
+
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 	file(TO_CMAKE_PATH $ENV{VCPKG_ROOT} VCPKG_ROOT)
 	set(CMAKE_TOOLCHAIN_FILE ${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 	set(VCPKG_LIBRARY_LINKAGE static)
-endif()
-
-if(EMSCRIPTEN)
-	project(amphora LANGUAGES C CXX)
-else()
-	project(amphora LANGUAGES C CXX ASM)
 endif()
 
 set(CMAKE_C_STANDARD 17)
