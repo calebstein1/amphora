@@ -10,8 +10,8 @@
 #ifndef DISABLE_FONTS
 
 /* Prototypes for private functions */
-int get_font_by_name(const char *name);
-SDL_Texture *render_string_to_texture(AmphoraString *msg);
+static int get_font_by_name(const char *name);
+static SDL_Texture *render_string_to_texture(AmphoraString *msg);
 
 /* File-scoped variables */
 static SDL_RWops *fonts[FONTS_COUNT];
@@ -190,7 +190,7 @@ free_fonts(void) {
  * Private functions
  */
 
-int
+static int
 get_font_by_name(const char *name) {
 	int i;
 
@@ -200,7 +200,7 @@ get_font_by_name(const char *name) {
 	return -1;
 }
 
-SDL_Texture *
+static SDL_Texture *
 render_string_to_texture(AmphoraString *msg) {
 	enum fonts_e font_name = msg->font;
 	int pt = msg->pt;

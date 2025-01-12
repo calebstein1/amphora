@@ -6,9 +6,9 @@
 #include "engine/internal/mixer.h"
 
 /* Prototypes for private functions */
-int get_sfx_by_name(const char *name);
-int get_music_by_name(const char *name);
-void free_music(void);
+static int get_sfx_by_name(const char *name);
+static int get_music_by_name(const char *name);
+static void free_music(void);
 
 /* File-scoped variables */
 static SDL_RWops *sfx[SFX_COUNT];
@@ -217,7 +217,7 @@ cleanup_music(void) {
  * Private functions
  */
 
-int
+static int
 get_sfx_by_name(const char *name) {
 	int i;
 
@@ -227,7 +227,7 @@ get_sfx_by_name(const char *name) {
 	return -1;
 }
 
-int
+static int
 get_music_by_name(const char *name) {
 	int i;
 
@@ -237,7 +237,7 @@ get_music_by_name(const char *name) {
 	return -1;
 }
 
-void
+static void
 free_music(void) {
 	Mix_FreeMusic(current_music);
 	current_music = NULL;

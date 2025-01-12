@@ -11,10 +11,10 @@
 #include "vendor/cute_tiled.h"
 
 /* Prototypes for private functions */
-int get_map_by_name(const char *name);
-int parse_map_to_texture(enum tilemaps_e map_idx);
-int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
-int parse_object_group(const cute_tiled_layer_t *layer);
+static int get_map_by_name(const char *name);
+static int parse_map_to_texture(enum tilemaps_e map_idx);
+static int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
+static int parse_object_group(const cute_tiled_layer_t *layer);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -160,7 +160,7 @@ get_rects_by_group(const char *name, int *c) {
  * Private functions
  */
 
-int
+static int
 get_map_by_name(const char *name) {
 	int i;
 
@@ -170,7 +170,7 @@ get_map_by_name(const char *name) {
 	return -1;
 }
 
-int
+static int
 parse_map_to_texture(const enum tilemaps_e map_idx) {
 	SDL_Renderer *renderer = get_renderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
@@ -228,7 +228,7 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	return 0;
 }
 
-int
+static int
 parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n) {
 	SDL_Renderer *renderer = get_renderer();
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
@@ -264,7 +264,7 @@ parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, i
 	return 0;
 }
 
-int
+static int
 parse_object_group(const cute_tiled_layer_t *layer) {
 	int i;
 	cute_tiled_object_t *object;

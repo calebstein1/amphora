@@ -18,9 +18,9 @@
 #endif
 
 /* Prototypes for private functions */
-int main_loop(SDL_Event *e);
-void save_config(void);
-void clean_resources(void);
+static int main_loop(SDL_Event *e);
+static void save_config(void);
+static void clean_resources(void);
 
 /* Globals */
 Uint64 frame_count = 0;
@@ -138,7 +138,7 @@ get_framerate(void) {
  * Private functions
  */
 
-int
+static int
 main_loop(SDL_Event *e) {
 	static Uint64 frame_start, frame_end;
 	static Uint32 frame_time;
@@ -186,7 +186,7 @@ main_loop(SDL_Event *e) {
 	return 0;
 }
 
-void
+static void
 save_config(void) {
 	Vector2 win_size = get_resolution();
 	Uint32 win_flags = SDL_GetWindowFlags(get_window());
@@ -199,7 +199,7 @@ save_config(void) {
 	save_framerate(framerate);
 }
 
-void
+static void
 clean_resources(void) {
 	game_shutdown();
 	cleanup_img();

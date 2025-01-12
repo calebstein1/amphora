@@ -7,7 +7,7 @@
 #include "config.h"
 
 /* Private function prototypes */
-Uint64 rotate_left(Uint64 n, Uint32 c); /* Rotate the bits of n to the left by c bits (MSB becomes LSB) */
+static Uint64 rotate_mask_left(Uint32 c);
 
 /* File-scoped variables */
 static union input_state_u key_actions;
@@ -258,7 +258,7 @@ handle_keyup(const SDL_Event *e) {
 	if (pressed_key == e->key.keysym.sym) pressed_key = 0;
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == keys[i]) {
-			key_actions.bits &= (rotate_left(MASK, i));
+			key_actions.bits &= (rotate_mask_left(i));
 			return;
 		}
 	}
@@ -282,7 +282,7 @@ handle_gamepad_up(const SDL_Event *e) {
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions.bits &= (rotate_left(MASK, i));
+			key_actions.bits &= (rotate_mask_left(i));
 			return;
 		}
 	}
@@ -303,9 +303,9 @@ handle_gamepad_joystick(const SDL_Event *e) {
  * Private functions
  */
 
-Uint64
-rotate_left(Uint64 n, Uint32 c) {
-	if (c == 0) return n;
+static Uint64
+rotate_mask_left(Uint32 c) {
+	if (c == 0) return MASK;
 
-	return (n << c) | (n >> (64 - c));
+	return (MASK << c) | (MASK >> (64 - c));
 }

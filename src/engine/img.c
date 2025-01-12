@@ -9,8 +9,8 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-int get_img_by_name(const char *name);
-int find_frameset(const AmphoraImage *spr, const char *name);
+static int get_img_by_name(const char *name);
+static int find_frameset(const AmphoraImage *spr, const char *name);
 
 /* File-scoped variables */
 static SDL_RWops *images[IMAGES_COUNT];
@@ -357,7 +357,7 @@ update_and_draw_sprite(const AmphoraImage *spr) {
  * Private functions
  */
 
-int
+static int
 get_img_by_name(const char *name) {
 	int i;
 
@@ -367,7 +367,7 @@ get_img_by_name(const char *name) {
 	return -1;
 }
 
-int
+static int
 find_frameset(const AmphoraImage *spr, const char *name) {
 	int i;
 

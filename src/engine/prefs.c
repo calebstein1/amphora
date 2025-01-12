@@ -12,7 +12,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-SDL_GUID get_uuid(void);
+static SDL_GUID get_uuid(void);
 
 /* File-scoped variables */
 static char uuid[33];
@@ -188,7 +188,7 @@ load_framerate(void) {
  * Private functions
  */
 
-SDL_GUID
+static SDL_GUID
 get_uuid(void) {
 	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
 	const char *filename = "uuid";
