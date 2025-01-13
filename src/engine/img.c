@@ -222,6 +222,7 @@ free_sprite(AmphoraImage **spr) {
 
 	if (!*spr) return;
 
+	if (*spr == get_camera_target()) set_camera_target(NULL);
 	for (i = 0; i < (*spr)->num_framesets; i++) {
 		SDL_free((*spr)->frameset_labels[i]);
 	}

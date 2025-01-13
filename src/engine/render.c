@@ -213,6 +213,11 @@ get_renderer(void) {
 	return renderer;
 }
 
+AmphoraImage *
+get_camera_target(void) {
+	return camera_target;
+}
+
 struct render_list_node_t *
 add_render_list_node(int order) {
 	struct render_list_node_t *new_render_list_node = NULL;

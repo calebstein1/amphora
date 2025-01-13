@@ -36,6 +36,7 @@ void set_render_logical_size(Vector2 size);
 void clear_bg(void);
 SDL_Window *get_window(void);
 SDL_Renderer *get_renderer(void);
+AmphoraImage *get_camera_target(void);
 struct render_list_node_t *add_render_list_node(int order);
 void draw_render_list_and_gc(void);
 void free_render_list(void);
