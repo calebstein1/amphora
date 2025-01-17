@@ -26,6 +26,7 @@ static char *map_names[] = {
 static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
 static struct amphora_tilemap_t current_map;
+static struct amphora_tilemap_layer_t *deferred_transition;
 static SDL_FRect map_rect;
 static struct amphora_object_groups_t obj_groups;
 
@@ -55,21 +56,34 @@ set_map(const char *name, const float scale) {
 }
 
 void
-hide_map_layer(const char *name) {
+hide_map_layer(const char *name, int t) {
 	int n = get_map_layer_by_name(name);
 
 	if (n == -1) return;
 
-	current_map.layers[n].node->display = false;
+	if (t < 1) {
+		current_map.layers[n].node->display = false;
+		return;
+	}
+	deferred_transition = &current_map.layers[n];
+	deferred_transition->a_stp = 0xff / (((float)t / 1000) * (float)get_framerate());
+	deferred_transition->hiding = true;
 }
 
 void
-show_map_layer(const char *name) {
+show_map_layer(const char *name, int t) {
 	int n = get_map_layer_by_name(name);
 
 	if (n == -1) return;
 
 	current_map.layers[n].node->display = true;
+	if (t < 1) {
+		current_map.layers[n].a = 0xff;
+		return;
+	}
+	deferred_transition = &current_map.layers[n];
+	deferred_transition->a_stp = 0xff / (((float)t / 1000) * (float)get_framerate());
+	deferred_transition->hiding = false;
 }
 
 /*
@@ -181,6 +195,31 @@ get_rects_by_group(const char *name, int *c) {
 	return obj_groups.rects[i];
 }
 
+void
+process_deferred_transition(void) {
+	if (!deferred_transition) return;
+
+	if (deferred_transition->hiding) {
+		deferred_transition->a -= deferred_transition->a_stp;
+		if (deferred_transition->a <= 1) {
+			deferred_transition->node->display = false;
+			deferred_transition->a = 0;
+			SDL_SetTextureAlphaMod(deferred_transition->texture, (Uint8)deferred_transition->a);
+			deferred_transition = NULL;
+			return;
+		}
+	} else {
+		deferred_transition->a += deferred_transition->a_stp;
+		if (deferred_transition->a >= 0xff) {
+			deferred_transition->a = 0xff;
+			SDL_SetTextureAlphaMod(deferred_transition->texture, (Uint8)deferred_transition->a);
+			deferred_transition = NULL;
+			return;
+		}
+	}
+	SDL_SetTextureAlphaMod(deferred_transition->texture, (Uint8)deferred_transition->a);
+}
+
 /*
  * Private functions
  */
@@ -271,6 +310,7 @@ parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, i
 	} else {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate space for layer name!");
 	}
+	current_map.layers[n].a = 0xff;
 	SDL_SetTextureBlendMode(current_map.layers[n].texture, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderTarget(renderer, current_map.layers[n].texture);
 	for (i = 0; i < layer->data_count; i++) {

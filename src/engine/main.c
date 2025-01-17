@@ -167,6 +167,7 @@ main_loop(SDL_Event *e) {
 	}
 	clear_bg();
 	game_loop(frame_count, get_key_actions_state());
+	process_deferred_transition();
 	draw_render_list_and_gc();
 	update_camera();
 
