@@ -15,6 +15,7 @@ static int get_map_by_name(const char *name);
 static int parse_map_to_texture(enum tilemaps_e map_idx);
 static int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
 static int parse_object_group(const cute_tiled_layer_t *layer);
+static int get_map_layer_by_name(const char *name);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -51,6 +52,24 @@ set_map(const char *name, const float scale) {
 		render_list_node->data = current_map.layers[i].texture;
 		current_map.layers[i].node = render_list_node;
 	}
+}
+
+void
+hide_map_layer(const char *name) {
+	int n = get_map_layer_by_name(name);
+
+	if (n == -1) return;
+
+	current_map.layers[n].node->display = false;
+}
+
+void
+show_map_layer(const char *name) {
+	int n = get_map_layer_by_name(name);
+
+	if (n == -1) return;
+
+	current_map.layers[n].node->display = true;
 }
 
 /*
@@ -120,10 +139,16 @@ destroy_current_map(void) {
 	int i;
 
 	for (i = 0; i < current_map.num_layers; i++) {
+		SDL_free(current_map.layer_names[i]);
 		SDL_DestroyTexture(current_map.layers[i].texture);
 		current_map.layers[i].node->garbage = true;
 	}
-	if (current_map.num_layers > 0) SDL_free(current_map.layers);
+	if (current_map.num_layers > 0) {
+		SDL_free(current_map.layers);
+		SDL_free(current_map.layer_names);
+		current_map.layers = NULL;
+		current_map.layer_names = NULL;
+	}
 	current_map.num_layers = 0;
 }
 
@@ -191,6 +216,10 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate map layers\n");
 		return -1;
 	}
+	if (!((current_map.layer_names = SDL_malloc(current_map.num_layers * sizeof(char *))))) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate map layers labels\n");
+		return -1;
+	}
 	layer = map->layers;
 	if (SDL_strcmp(map->orientation.ptr, "orthogonal") == 0) {
 		current_map.orientation = MAP_ORTHOGONAL;
@@ -234,7 +263,14 @@ parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, i
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int i, tile_idx, row;
+	size_t name_len;
 
+	name_len = SDL_strlen(layer->name.ptr);
+	if ((current_map.layer_names[n] = SDL_malloc(name_len + 1))) {
+		SDL_strlcpy(current_map.layer_names[n], layer->name.ptr, name_len + 1);
+	} else {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate space for layer name!");
+	}
 	SDL_SetTextureBlendMode(current_map.layers[n].texture, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderTarget(renderer, current_map.layers[n].texture);
 	for (i = 0; i < layer->data_count; i++) {
@@ -318,6 +354,16 @@ parse_object_group(const cute_tiled_layer_t *layer) {
 	}
 
 	return 0;
+}
+
+static int
+get_map_layer_by_name(const char *name) {
+	int i;
+
+	for (i = 0; i < current_map.num_layers; i++) {
+		if (SDL_strcmp(name, current_map.layer_names[i]) == 0) return i;
+	}
+	return -1;
 }
 
 #endif

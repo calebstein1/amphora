@@ -17,6 +17,7 @@ struct amphora_tilemap_layer_t {
 
 struct amphora_tilemap_t {
 	struct amphora_tilemap_layer_t *layers;
+	char **layer_names;
 	int num_layers;
 	float scale;
 	enum map_orientation_e orientation;
