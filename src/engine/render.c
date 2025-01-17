@@ -261,6 +261,10 @@ draw_render_list_and_gc(void) {
 			garbage = NULL;
 			render_list_node_count--;
 		}
+		if (!render_list->display) {
+			render_list = render_list->next;
+			continue;
+		}
 		switch (render_list->type) {
 			case AMPH_OBJ_SPR:
 				update_and_draw_sprite((const AmphoraImage *)render_list->data);
