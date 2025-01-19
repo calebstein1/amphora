@@ -11,4 +11,5 @@ add_library(amphora_engine
 	mixer.c
 	prefs.c
 	random.c
+	collision.c
 )

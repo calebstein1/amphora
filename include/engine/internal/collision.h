@@ -1,0 +1,6 @@
+#ifndef AMPHORA_COLLISION_INTERNAL_H
+#define AMPHORA_COLLISION_INTERNAL_H
+
+#include "engine/collision.h"
+
+#endif /* AMPHORA_COLLISION_INTERNAL_H */
