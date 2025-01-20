@@ -2,9 +2,6 @@
 #include "engine/internal/img.h"
 #include "engine/internal/tilemap.h"
 
-/* Prototypes for private functions */
-int sort_collisions(const void *a, const void *b);
-
 bool
 check_collision(const AmphoraImage *obj_a, const AmphoraImage *obj_b) {
 	return SDL_HasIntersectionF(&obj_a->rectangle, &obj_b->rectangle);
@@ -12,9 +9,16 @@ check_collision(const AmphoraImage *obj_a, const AmphoraImage *obj_b) {
 
 AmphoraCollision
 check_object_group_collision(const AmphoraImage *obj, const char *name) {
-	int c, i;
+	int c, i, j;
 	float o_sx, o_ex, o_sy, o_ey, r_sx, r_ex, r_sy, r_ey;
-	struct overlaps_t overlaps[4];
+	float overlaps[4];
+	AmphoraCollision dirs[] = {
+		AMPHORA_COLLISION_LEFT,
+		AMPHORA_COLLISION_RIGHT,
+		AMPHORA_COLLISION_TOP,
+		AMPHORA_COLLISION_BOTTOM
+	};
+	int min_overlap = 0;
 	SDL_FRect *rects;
 
 	if ((rects = get_rects_by_group(name, &c)) == NULL) return AMPHORA_COLLISION_NONE;
@@ -30,31 +34,20 @@ check_object_group_collision(const AmphoraImage *obj, const char *name) {
 			r_sy = rects[i].y;
 			r_ey = r_sy + rects[i].h;
 
-			overlaps[0] = (struct overlaps_t){ o_ex - r_sx, AMPHORA_COLLISION_LEFT };
-			overlaps[1] = (struct overlaps_t){ o_sx - r_ex, AMPHORA_COLLISION_RIGHT };
-			overlaps[2] = (struct overlaps_t){ o_ey - r_sy, AMPHORA_COLLISION_TOP };
-			overlaps[3] = (struct overlaps_t){ o_sy - r_ey, AMPHORA_COLLISION_BOTTOM };
+			overlaps[0] = SDL_fabsf(o_ex - r_sx);
+			overlaps[1] = SDL_fabsf(o_sx - r_ex);
+			overlaps[2] = SDL_fabsf(o_ey - r_sy);
+			overlaps[3] = SDL_fabsf(o_sy - r_ey);
 
-			SDL_qsort(overlaps, 4, sizeof(struct overlaps_t), sort_collisions);
+			for (j = 1; j < 4; j++) {
+				if (overlaps[j] < overlaps[min_overlap]) {
+					min_overlap = j;
+				}
+			}
 
-			return overlaps[0].dir;
+			return dirs[min_overlap];
 		}
 	}
 
 	return AMPHORA_COLLISION_NONE;
-}
-
-/*
- * Private functions
- */
-
-int
-sort_collisions(const void *a, const void *b) {
-	float f1 = ((const struct overlaps_t *)a)->diff;
-	float f2 = ((const struct overlaps_t *)b)->diff;
-
-	if (f1 < 0) f1 *= -1;
-	if (f2 < 0) f2 *= -1;
-
-	return f1 - f2 > 0 ? 1 : -1;
 }
