@@ -21,15 +21,15 @@ enum input_actions {
 
 _Static_assert(ACTION_COUNT <= 64, "Cannot define more than 64 actions");
 
-int init_input(void);
-struct input_state_t *get_key_actions_state(void);
-void add_controller(Sint32 idx);
-void remove_controller(SDL_JoystickID id);
-void cleanup_controllers(void);
-void handle_keydown(const SDL_Event *e);
-void handle_keyup(const SDL_Event *e);
-void handle_gamepad_down(const SDL_Event *e);
-void handle_gamepad_up(const SDL_Event *e);
-Vector2f handle_gamepad_joystick(const SDL_Event *e);
+int Amphora_InitInput(void);
+struct input_state_t *Amphora_GetKeyActionState(void);
+void Amphora_AddController(Sint32 idx);
+void Amphora_RemoveController(SDL_JoystickID id);
+void Amphora_ReleaseControllers(void);
+void Amphora_HandleKeyDown(const SDL_Event *e);
+void Amphora_HandleKeyUp(const SDL_Event *e);
+void Amphora_HandleGamepadDown(const SDL_Event *e);
+void Amphora_HandleGamepadUp(const SDL_Event *e);
+Vector2f Amphora_HandleJoystick(const SDL_Event *e);
 
 #endif /* INPUT_INTERNAL_H */

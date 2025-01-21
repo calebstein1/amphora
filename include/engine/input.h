@@ -16,19 +16,19 @@ struct input_state_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
-void load_keymap(void);
+void Amphora_LoadKeymap(void);
 /* Change the keymap for an action */
-void update_keymap(const char *action, SDL_Keycode keycode);
+void Amphora_UpdateKeymap(const char *action, SDL_Keycode keycode);
 /* Execute a callback function if a specified AmphoraImage or AmphoraString is clicked, button is an SDL_BUTTON_X macro */
-bool object_clicked(void *spr, int button, void (*callback)(void));
+bool Amphora_ObjectClicked(void *spr, int button, void (*callback)(void));
 /* Returns true if the mouse is over the provided object, false if not */
-bool object_mouseover(void *obj);
+bool Amphora_ObjectHover(void *obj);
 /* Gets the currently pressed key */
-SDL_Keycode get_pressed_key(void);
+SDL_Keycode Amphora_GetPressedKey(void);
 /* Get the name of the key associated with an action */
-char *get_action_key_name(const char *action);
+char *Amphora_GetActionKeyName(const char *action);
 /* Run a callback function for each defined action name */
-void for_each_action(void (*callback)(const char *, int));
+void Amphora_ForEachAction(void (*callback)(const char *, int));
 #ifdef __cplusplus
 }
 #endif

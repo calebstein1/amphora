@@ -12,7 +12,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-static SDL_GUID get_uuid(void);
+static SDL_GUID Amphora_GetUUID(void);
 
 /* File-scoped variables */
 static char uuid[33];
@@ -22,8 +22,8 @@ static char uuid[33];
  */
 
 int
-init_config(void) {
-	sqlite3 *db = get_db();
+Amphora_InitConfig(void) {
+	sqlite3 *db = Amphora_GetDB();
 	const char *sql = "CREATE TABLE IF NOT EXISTS prefs("
 			  "uuid TEXT PRIMARY KEY NOT NULL,"
 			  "win_x INT,"
@@ -39,7 +39,7 @@ init_config(void) {
 		SDL_Log("%s\n", err_msg);
 		return -1;
 	}
-	SDL_GUIDToString(get_uuid(), uuid, sizeof(uuid));
+	SDL_GUIDToString(Amphora_GetUUID(), uuid, sizeof(uuid));
 	sqlite3_prepare_v2(db, sql_create_row, (int)SDL_strlen(sql_create_row), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
 	sqlite3_step(stmt);
@@ -49,8 +49,8 @@ init_config(void) {
 }
 
 int
-save_window_x(int win_x) {
-	sqlite3 *db = get_db();
+Amphora_SaveWinX(int win_x) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE prefs SET win_x=? WHERE uuid=?;";
 
@@ -64,8 +64,8 @@ save_window_x(int win_x) {
 }
 
 int
-save_window_y(int win_y) {
-	sqlite3 *db = get_db();
+Amphora_SaveWinY(int win_y) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE prefs SET win_y=? WHERE uuid=?;";
 
@@ -79,8 +79,8 @@ save_window_y(int win_y) {
 }
 
 int
-save_win_flags(Uint64 win_flags) {
-	sqlite3 *db = get_db();
+Amphora_SaveWinFlags(Uint64 win_flags) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE prefs SET win_flags=? WHERE uuid=?;";
 
@@ -94,8 +94,8 @@ save_win_flags(Uint64 win_flags) {
 }
 
 int
-save_framerate(Uint32 framerate) {
-	sqlite3 *db = get_db();
+Amphora_SaveFPS(Uint32 framerate) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE prefs SET framerate=? WHERE uuid=?;";
 
@@ -109,8 +109,8 @@ save_framerate(Uint32 framerate) {
 }
 
 Sint64
-load_window_x(void) {
-	sqlite3 *db = get_db();
+Amphora_LoadWinX(void) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT win_x FROM prefs WHERE uuid=?";
 	Sint64 val;
@@ -128,8 +128,8 @@ load_window_x(void) {
 }
 
 Sint64
-load_window_y(void) {
-	sqlite3 *db = get_db();
+Amphora_LoadWinY(void) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT win_y FROM prefs WHERE uuid=?";
 	Sint64 val;
@@ -147,8 +147,8 @@ load_window_y(void) {
 }
 
 Uint64
-load_win_flags(void) {
-	sqlite3 *db = get_db();
+Amphora_LoadWinFlags(void) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT win_flags FROM prefs WHERE uuid=?";
 	Sint64 val;
@@ -166,8 +166,8 @@ load_win_flags(void) {
 }
 
 Sint64
-load_framerate(void) {
-	sqlite3 *db = get_db();
+Amphora_LoadFPS(void) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT framerate FROM prefs WHERE uuid=?";
 	Sint64 val;
@@ -189,7 +189,7 @@ load_framerate(void) {
  */
 
 static SDL_GUID
-get_uuid(void) {
+Amphora_GetUUID(void) {
 	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
 	const char *filename = "uuid";
 	SDL_RWops *rw;

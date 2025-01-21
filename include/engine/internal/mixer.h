@@ -3,9 +3,9 @@
 
 #include "engine/mixer.h"
 
-int init_sfx(void);
-int init_music(void);
-void cleanup_sfx(void);
-void cleanup_music(void);
+int Amphora_InitSFX(void);
+int Amphora_InitMusic(void);
+void Amphora_CloseSFX(void);
+void Amphora_CloseMusic(void);
 
 #endif /* AMPHORA_MIXER_INTERNAL_H */

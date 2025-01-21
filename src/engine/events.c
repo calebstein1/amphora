@@ -7,36 +7,36 @@
  */
 
 Uint32
-event_loop(SDL_Event *e) {
+Amphora_ProcessEventLoop(SDL_Event *e) {
 	while (SDL_PollEvent(e)) {
 		switch (e->type) {
 			case SDL_QUIT:
 				return e->type;
 			case SDL_KEYDOWN:
-				handle_keydown(e);
+				Amphora_HandleKeyDown(e);
 				break;
 			case SDL_KEYUP:
-				handle_keyup(e);
+				Amphora_HandleKeyUp(e);
 				break;
 			case SDL_CONTROLLERBUTTONDOWN:
-				handle_gamepad_down(e);
+				Amphora_HandleGamepadDown(e);
 				break;
 			case SDL_CONTROLLERBUTTONUP:
-				handle_gamepad_up(e);
+				Amphora_HandleGamepadUp(e);
 				break;
 			case SDL_CONTROLLERAXISMOTION:
-				handle_gamepad_joystick(e);
+				Amphora_HandleJoystick(e);
 				break;
 			case SDL_CONTROLLERDEVICEADDED:
-				add_controller(e->cdevice.which);
+				Amphora_AddController(e->cdevice.which);
 				break;
 			case SDL_CONTROLLERDEVICEREMOVED:
-				remove_controller(e->cdevice.which);
+				Amphora_RemoveController(e->cdevice.which);
 				break;
 			case SDL_WINDOWEVENT:
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 
-				set_render_logical_size(get_resolution());
+				Amphora_SetRenderLogicalSize(Amphora_GetResolution());
 		}
 	}
 

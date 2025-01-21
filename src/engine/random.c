@@ -10,7 +10,7 @@
 static Uint64 rand_state;
 
 Uint32
-get_random(int n) {
+Amphora_GetRandom(int n) {
 	Uint64 val;
 
 	rand_state = rand_state * 0xff1cd035ul + 0x05;
@@ -24,7 +24,7 @@ get_random(int n) {
  */
 
 void
-init_rand(void) {
+Amphora_InitRand(void) {
 #ifdef RNG_SEED
 	rand_state = RNG_SEED;
 #else

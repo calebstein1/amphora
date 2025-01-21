@@ -24,21 +24,21 @@ typedef enum music_e {
 extern "C" {
 #endif
 /* Play a sound effect */
-void play_sfx(const char *name, int channel, int repeat);
+void Amphora_PlaySFX(const char *name, int channel, int repeat);
 /* Sets the current music track */
-void set_music(const char *name);
+void Amphora_SetMusic(const char *name);
 /* Play the current set music track with a fade-in, looping infinitely */
-void play_music(int ms);
+void Amphora_PlayMusic(int ms);
 /* Play the current set music track with a fade-in, looping n times */
-void play_music_n(int n, int ms);
+void Amphora_PlayMusicN(int n, int ms);
 /* Pause the currently playing music track */
-void pause_music(void);
+void Amphora_PauseMusic(void);
 /* Unpause the currently playing music track if paused */
-void unpause_music(void);
+void Amphora_UnpauseMusic(void);
 /* Stop the currently playing music track and free its resources immediately */
-void stop_music(void);
+void Amphora_StopMusic(void);
 /* Stop the currently playing music track and free its resources after a fade-out */
-void fade_music(int ms);
+void Amphora_FadeOutMusic(int ms);
 #ifdef __cplusplus
 };
 #endif

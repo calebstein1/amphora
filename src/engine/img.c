@@ -22,12 +22,12 @@ static const char *img_names[] = {
 };
 
 Vector2f
-get_sprite_position(const AmphoraImage *spr) {
+Amphora_GetSpritePosition(const AmphoraImage *spr) {
 	return (Vector2f){spr->rectangle.x, spr->rectangle.y };
 }
 
 Vector2f
-get_sprite_center(const AmphoraImage *spr) {
+Amphora_GetSpriteCenter(const AmphoraImage *spr) {
 	return (Vector2f){
 		.x = spr->rectangle.x + ((float)spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
 		.y = spr->rectangle.y + ((float)spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
@@ -35,12 +35,12 @@ get_sprite_center(const AmphoraImage *spr) {
 }
 
 bool
-is_flipped(const AmphoraImage *spr) {
+Amphora_IsSpriteFlipped(const AmphoraImage *spr) {
 	return spr->flip;
 }
 
 AmphoraImage *
-create_sprite(AmphoraImage **spr, const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
+Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *new_sprite = NULL;
 	struct render_list_node_t *render_list_node = NULL;
 	int idx;
@@ -53,7 +53,7 @@ create_sprite(AmphoraImage **spr, const char *image_name, const float x, const f
 	}
 
 	if (!open_images[idx]) {
-		open_images[idx] = IMG_LoadTexture_RW(get_renderer(), images[idx], 0);
+		open_images[idx] = IMG_LoadTexture_RW(Amphora_GetRenderer(), images[idx], 0);
 	}
 
 	if ((new_sprite = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
@@ -62,7 +62,7 @@ create_sprite(AmphoraImage **spr, const char *image_name, const float x, const f
 
 		return NULL;
 	}
-	render_list_node = add_render_list_node(order);
+	render_list_node = Amphora_AddRenderListNode(order);
 
 	*spr = new_sprite;
 
@@ -81,7 +81,7 @@ create_sprite(AmphoraImage **spr, const char *image_name, const float x, const f
 }
 
 void
-add_frameset(AmphoraImage *spr, const char *name, const char *override_img, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const float off_x, const float off_y, const Uint16 num_frames, const Uint16 delay) {
+Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay) {
 	int override = -1;
 
 	/* TODO: Cascade error cases and free */
@@ -108,7 +108,7 @@ add_frameset(AmphoraImage *spr, const char *name, const char *override_img, cons
 	if (override_img) {
 		override = get_img_by_name(override_img);
 		if (override > -1 && !open_images[override]) {
-			open_images[override] = IMG_LoadTexture_RW(get_renderer(), images[override], 0);
+			open_images[override] = IMG_LoadTexture_RW(Amphora_GetRenderer(), images[override], 0);
 		}
 	}
 
@@ -135,7 +135,7 @@ add_frameset(AmphoraImage *spr, const char *name, const char *override_img, cons
 }
 
 void
-set_frameset(AmphoraImage *spr, const char *name) {
+Amphora_SetFrameset(AmphoraImage *spr, const char *name) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
@@ -151,7 +151,7 @@ set_frameset(AmphoraImage *spr, const char *name) {
 }
 
 void
-play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
+Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
@@ -170,7 +170,7 @@ play_oneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 }
 
 void
-set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
+Amphora_SetFramesetAnimationTime(AmphoraImage *spr, const char *name, Uint16 delay) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
@@ -181,8 +181,8 @@ set_frameset_delay(AmphoraImage *spr, const char *name, const Uint16 delay) {
 }
 
 AmphoraImage *
-reorder_sprite(AmphoraImage *spr, const Sint32 order) {
-	struct render_list_node_t *new_node = add_render_list_node(order);
+Amphora_ReorderSprite(AmphoraImage *spr, Sint32 order) {
+	struct render_list_node_t *new_node = Amphora_AddRenderListNode(order);
 	struct render_list_node_t *old_node = spr->render_list_node;
 
 	new_node->type = AMPH_OBJ_SPR;
@@ -196,44 +196,44 @@ reorder_sprite(AmphoraImage *spr, const Sint32 order) {
 }
 
 void
-set_sprite_location(AmphoraImage *spr, float x, float y) {
+Amphora_SetSpriteLocation(AmphoraImage *spr, float x, float y) {
 	spr->rectangle.x = x;
 	spr->rectangle.y = y;
 }
 
 void
-move_sprite(AmphoraImage *spr, const float delta_x, const float delta_y) {
+Amphora_MoveSprite(AmphoraImage *spr, float delta_x, float delta_y) {
 	spr->rectangle.x += delta_x;
 	spr->rectangle.y += delta_y;
 }
 
 void
-flip_sprite(AmphoraImage *spr) {
+Amphora_FlipSprite(AmphoraImage *spr) {
 	spr->flip = true;
 }
 
 void
-unflip_sprite(AmphoraImage *spr) {
+Amphora_UnflipSprite(AmphoraImage *spr) {
 	spr->flip = false;
 }
 
 void
-show_sprite(AmphoraImage *spr) {
+Amphora_ShowSprite(AmphoraImage *spr) {
 	spr->render_list_node->display = true;
 }
 
 void
-hide_sprite(AmphoraImage *spr) {
+Amphora_HideSprite(AmphoraImage *spr) {
 	spr->render_list_node->display = false;
 }
 
 void
-free_sprite(AmphoraImage **spr) {
+Amphora_FreeSprite(AmphoraImage **spr) {
 	int i;
 
 	if (!*spr) return;
 
-	if (*spr == get_camera_target()) set_camera_target(NULL);
+	if (*spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
 	for (i = 0; i < (*spr)->num_framesets; i++) {
 		SDL_free((*spr)->frameset_labels[i]);
 	}
@@ -249,7 +249,7 @@ free_sprite(AmphoraImage **spr) {
  */
 
 int
-init_img(void) {
+Amphora_InitIMG(void) {
 	int i;
 #ifdef WIN32
 	HRSRC img_info;
@@ -289,7 +289,7 @@ init_img(void) {
 }
 
 void
-cleanup_img(void) {
+Amphora_CloseIMG(void) {
 	int i;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
@@ -299,7 +299,7 @@ cleanup_img(void) {
 }
 
 SDL_Texture *
-get_img_texture_by_name(const char *name) {
+Amphora_GetIMGTextureByName(const char *name) {
 	int idx;
 
 	if ((idx = get_img_by_name(name)) == -1) {
@@ -308,20 +308,20 @@ get_img_texture_by_name(const char *name) {
 	}
 
 	if (!open_images[idx]) {
-		open_images[idx] = IMG_LoadTexture_RW(get_renderer(), images[idx], 0);
+		open_images[idx] = IMG_LoadTexture_RW(Amphora_GetRenderer(), images[idx], 0);
 	}
 
 	return open_images[idx];
 }
 
 void
-update_and_draw_sprite(const AmphoraImage *spr) {
+Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
 	int frameset_idx = spr->current_frameset;
 	SDL_Rect src;
 	SDL_FRect dst;
-	const Vector2f camera = get_camera();
-	Vector2 logical_size = get_render_logical_size();
+	const Vector2f camera = Ampohra_GetCamera();
+	Vector2 logical_size = Amphora_GetRenderLogicalSize();
 	Uint64 cur_ms = SDL_GetTicks64();
 
 	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
@@ -346,8 +346,8 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	};
 	if (spr->render_list_node->stationary) {
 		dst = (SDL_FRect){
-			.x = spr->rectangle.x > 0 ? spr->rectangle.x : (float)get_resolution().x + spr->rectangle.x - (float)frameset->w,
-			.y = spr->rectangle.y > 0 ? spr->rectangle.y : (float)get_resolution().y + spr->rectangle.y - (float)frameset->h,
+			.x = spr->rectangle.x > 0 ? spr->rectangle.x : (float) Amphora_GetResolution().x + spr->rectangle.x - (float)frameset->w,
+			.y = spr->rectangle.y > 0 ? spr->rectangle.y : (float) Amphora_GetResolution().y + spr->rectangle.y - (float)frameset->h,
 			.w = (float)frameset->w * spr->scale,
 			.h = (float)frameset->h * spr->scale
 		};
@@ -360,9 +360,10 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 		};
 	}
 
-	if (spr->render_list_node->stationary) set_render_logical_size(get_resolution());
-	render_texture(open_images[(int)frameset->override_img > -1 ? frameset->override_img : spr->image], &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-	if (spr->render_list_node->stationary) set_render_logical_size(logical_size);
+	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(Amphora_GetResolution());
+	Amphora_RenderTexture(open_images[(int) frameset->override_img > -1 ? frameset->override_img : spr->image],
+			      &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(logical_size);
 }
 
 /*

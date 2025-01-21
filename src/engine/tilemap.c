@@ -11,11 +11,11 @@
 #include "vendor/cute_tiled.h"
 
 /* Prototypes for private functions */
-static int get_map_by_name(const char *name);
-static int parse_map_to_texture(enum tilemaps_e map_idx);
-static int parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
-static int parse_object_group(const cute_tiled_layer_t *layer);
-static int get_map_layer_by_name(const char *name);
+static int Amphora_GetMapByName(const char *name);
+static int Amphora_ParseMapToTexture(enum tilemaps_e map_idx);
+static int Amphora_ParseTileLayer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
+static int Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer);
+static int Amphora_GetMapLayerByName(const char *name);
 
 /* File-scoped variables */
 static char *map_names[] = {
@@ -31,24 +31,24 @@ static SDL_FRect map_rect;
 static struct amphora_object_groups_t obj_groups;
 
 void
-set_map(const char *name, const float scale) {
+Amphora_SetMap(const char *name, const float scale) {
 	int idx, i;
 	struct render_list_node_t *render_list_node;
 
-	destroy_current_map();
+	Amphora_DestroyCurrentMap();
 	if (!name) return;
 
-	if ((idx = get_map_by_name(name)) == -1) {
+	if ((idx = Amphora_GetMapByName(name)) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
 		return;
 	}
 	current_map.scale = scale ? scale : 1;
-	if (parse_map_to_texture(idx) == -1) {
+	if (Amphora_ParseMapToTexture(idx) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create texture from map: %s\n", name);
 		return;
 	}
 	for (i = 0; i < current_map.num_layers; i++) {
-		render_list_node = add_render_list_node(100 * i);
+		render_list_node = Amphora_AddRenderListNode(100 * i);
 		render_list_node->type = AMPH_OBJ_MAP;
 		render_list_node->data = current_map.layers[i].texture;
 		current_map.layers[i].node = render_list_node;
@@ -56,8 +56,8 @@ set_map(const char *name, const float scale) {
 }
 
 void
-hide_map_layer(const char *name, int t) {
-	int n = get_map_layer_by_name(name);
+Amphora_HideMapLayer(const char *name, int t) {
+	int n = Amphora_GetMapLayerByName(name);
 
 	if (n == -1) return;
 
@@ -66,13 +66,13 @@ hide_map_layer(const char *name, int t) {
 		return;
 	}
 	deferred_transition = &current_map.layers[n];
-	deferred_transition->a_stp = 0xff / (((float)t / 1000) * (float)get_framerate());
+	deferred_transition->a_stp = 0xff / (((float)t / 1000) * (float) Amphora_GetFPS());
 	deferred_transition->hiding = true;
 }
 
 void
-show_map_layer(const char *name, int t) {
-	int n = get_map_layer_by_name(name);
+Amphora_ShowMapLayer(const char *name, int t) {
+	int n = Amphora_GetMapLayerByName(name);
 
 	if (n == -1) return;
 
@@ -82,7 +82,7 @@ show_map_layer(const char *name, int t) {
 		return;
 	}
 	deferred_transition = &current_map.layers[n];
-	deferred_transition->a_stp = 0xff / (((float)t / 1000) * (float)get_framerate());
+	deferred_transition->a_stp = 0xff / (((float)t / 1000) * (float) Amphora_GetFPS());
 	deferred_transition->hiding = false;
 }
 
@@ -91,7 +91,7 @@ show_map_layer(const char *name, int t) {
  */
 
 int
-init_maps(void) {
+Amphora_InitMaps(void) {
 	int i;
 #ifdef WIN32
 	HRSRC map_info;
@@ -144,12 +144,12 @@ init_maps(void) {
 }
 
 SDL_FRect *
-get_map_rectangle(void) {
+Amphora_GetMapRectangle(void) {
 	return &map_rect;
 }
 
 void
-destroy_current_map(void) {
+Amphora_DestroyCurrentMap(void) {
 	int i;
 
 	for (i = 0; i < current_map.num_layers; i++) {
@@ -167,7 +167,7 @@ destroy_current_map(void) {
 }
 
 void
-free_object_groups(void) {
+Amphora_FreeObjectGroup(void) {
 	int i;
 
 	for (i = 0; i < obj_groups.c; i++) {
@@ -180,7 +180,7 @@ free_object_groups(void) {
 }
 
 SDL_FRect *
-get_rects_by_group(const char *name, int *c) {
+Amphora_GetRectsByGroup(const char *name, int *c) {
 	int i;
 
 	for (i = 0; i < obj_groups.c; i++) {
@@ -196,7 +196,7 @@ get_rects_by_group(const char *name, int *c) {
 }
 
 void
-process_deferred_transition(void) {
+Amphora_ProcessDeferredTransition(void) {
 	if (!deferred_transition) return;
 
 	if (deferred_transition->hiding) {
@@ -225,7 +225,7 @@ process_deferred_transition(void) {
  */
 
 static int
-get_map_by_name(const char *name) {
+Amphora_GetMapByName(const char *name) {
 	int i;
 
 	for (i = 0; i < MAPS_COUNT; i++) {
@@ -235,13 +235,13 @@ get_map_by_name(const char *name) {
 }
 
 static int
-parse_map_to_texture(const enum tilemaps_e map_idx) {
-	SDL_Renderer *renderer = get_renderer();
+Amphora_ParseMapToTexture(enum tilemaps_e map_idx) {
+	SDL_Renderer *renderer = Amphora_GetRenderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
 	int tileset_img_w, tileset_img_h;
-	SDL_Texture *tileset_img = get_img_texture_by_name(tileset->name.ptr);
+	SDL_Texture *tileset_img = Amphora_GetIMGTextureByName(tileset->name.ptr);
 	int pixel_width = map->width * map->tilewidth;
 	int pixel_height = map->height * map->tileheight;
 	int map_base_w, map_base_h;
@@ -281,9 +281,9 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 	i = 0;
 	while (layer) {
 		if (SDL_strcmp(layer->type.ptr, "tilelayer") == 0) {
-			parse_tile_layer(map, layer, tileset_img_w, tileset_img, i++);
+			Amphora_ParseTileLayer(map, layer, tileset_img_w, tileset_img, i++);
 		} else if (SDL_strcmp(layer->type.ptr, "objectgroup") == 0) {
-			parse_object_group(layer);
+			Amphora_ParseObjectGroup(layer);
 		}
 		layer = layer->next;
 	}
@@ -297,8 +297,8 @@ parse_map_to_texture(const enum tilemaps_e map_idx) {
 }
 
 static int
-parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n) {
-	SDL_Renderer *renderer = get_renderer();
+Amphora_ParseTileLayer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n) {
+	SDL_Renderer *renderer = Amphora_GetRenderer();
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int i, tile_idx, row;
@@ -341,7 +341,7 @@ parse_tile_layer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, i
 }
 
 static int
-parse_object_group(const cute_tiled_layer_t *layer) {
+Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 	int i;
 	cute_tiled_object_t *object;
 
@@ -397,7 +397,7 @@ parse_object_group(const cute_tiled_layer_t *layer) {
 }
 
 static int
-get_map_layer_by_name(const char *name) {
+Amphora_GetMapLayerByName(const char *name) {
 	int i;
 
 	for (i = 0; i < current_map.num_layers; i++) {

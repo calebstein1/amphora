@@ -19,48 +19,48 @@ static AmphoraImage *camera_target;
 static Uint32 render_list_node_count;
 
 Vector2
-get_resolution(void) {
+Amphora_GetResolution(void) {
 	Sint32 rx, ry;
 	SDL_GetWindowSize(window, &rx, &ry);
 	return (Vector2){rx, ry };
 }
 
 Vector2
-get_render_logical_size(void) {
+Amphora_GetRenderLogicalSize(void) {
 	return render_logical_size;
 }
 
 Vector2f
-get_camera(void) {
+Ampohra_GetCamera(void) {
 	return camera;
 }
 
 void
-set_camera(float x, float y) {
+Amphora_SetCamera(float x, float y) {
 	camera.x = x;
 	camera.y = y;
 }
 
 void
-move_camera(float delta_x, float delta_y) {
+Amphora_MoveCamera(float delta_x, float delta_y) {
 	camera.x += delta_x;
 	camera.y += delta_y;
 }
 
 void
-set_camera_target(AmphoraImage *target) {
+Amphora_SetCameraTarget(AmphoraImage *target) {
 	camera_mode = target ? CAM_TRACKING : CAM_MANUAL;
 	camera_target = target;
 }
 
 void
-set_camera_zoom(Uint16 factor, Uint16 delay) {
+Amphora_SetCameraZoom(Uint16 factor, Uint16 delay) {
 	static Uint16 current_factor = 100;
 	static Vector2 *scale_steps = NULL;
 	static Uint16 scale_steps_index = 0;
 	static Uint16 scale_steps_count = 0;
-	Vector2 current_resolution = get_resolution();
-	Vector2 current_logical_size = get_render_logical_size();
+	Vector2 current_resolution = Amphora_GetResolution();
+	Vector2 current_logical_size = Amphora_GetRenderLogicalSize();
 	int i;
 	Vector2 step_size = {
 		.x = (current_logical_size.x - ((current_resolution.x * 100) / factor)) / (delay ? delay : 1),
@@ -88,42 +88,42 @@ set_camera_zoom(Uint16 factor, Uint16 delay) {
 		scale_steps = NULL;
 		scale_steps_index = 0;
 		scale_steps_count = 0;
-		if (current_factor == 100) set_render_logical_size(current_resolution);
+		if (current_factor == 100) Amphora_SetRenderLogicalSize(current_resolution);
 #ifdef DEBUG
-		SDL_Log("Finished scaling to %d, %d\n", get_render_logical_size().x, get_render_logical_size().y);
+		SDL_Log("Finished scaling to %d, %d\n", Amphora_GetRenderLogicalSize().x, Amphora_GetRenderLogicalSize().y);
 #endif
 		return;
 	}
-	set_render_logical_size(scale_steps[scale_steps_index++]);
+	Amphora_SetRenderLogicalSize(scale_steps[scale_steps_index++]);
 }
 
 void
-reset_camera_zoom(Uint16 delay) {
-	set_camera_zoom(100, delay);
+Amphora_ResetCameraZoom(Uint16 delay) {
+	Amphora_SetCameraZoom(100, delay);
 }
 
 SDL_Color
-get_bg (void) {
+Amphora_GetBGColor (void) {
 	return bg;
 }
 
 void
-set_bg(SDL_Color color) {
+Amphora_SetBGColor(SDL_Color color) {
 	bg = color;
 }
 
 void
-set_window_fullscreen(void) {
+Amphora_SetWindowFullscreen(void) {
 	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
 void
-set_window_windowed(void) {
+Amphora_SetWindowWindowed(void) {
 	SDL_SetWindowFullscreen(window, 0);
 }
 
 bool
-is_window_fullscreen(void) {
+Ampohra_IsWindowFullscreen(void) {
 	return SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
 }
 
@@ -132,9 +132,9 @@ is_window_fullscreen(void) {
  */
 
 int
-init_render(void) {
+Amphora_InitRender(void) {
 	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-					 (int)load_window_x(), (int)load_window_y(), (Uint32)load_win_flags())))) {
+					 (int) Amphora_LoadWinX(), (int) Amphora_LoadWinY(), (Uint32) Amphora_LoadWinFlags())))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
@@ -144,12 +144,12 @@ init_render(void) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
 		return -1;
 	}
-	if (init_img() == -1) {
+	if (Amphora_InitIMG() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init image system\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init image system", "Failed to initialize image system", 0);
 		return -1;
 	}
-	set_render_logical_size(get_resolution());
+	Amphora_SetRenderLogicalSize(Amphora_GetResolution());
 
 	if ((render_list = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize render list\n");
@@ -167,40 +167,40 @@ init_render(void) {
 }
 
 void
-cleanup_render(void) {
+Amphora_CloseRender(void) {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 }
 
 void
-set_render_logical_size(const Vector2 size) {
+Amphora_SetRenderLogicalSize(Vector2 size) {
 	render_logical_size = size;
 	SDL_RenderSetLogicalSize(renderer, (int)render_logical_size.x, (int)render_logical_size.y);
 }
 
 void
-clear_bg(void) {
+Amphora_ClearBG(void) {
 	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, bg.a);
 	SDL_RenderClear(renderer);
 }
 
 SDL_Window *
-get_window(void) {
+Amphora_GetWindow(void) {
 	return window;
 }
 
 SDL_Renderer *
-get_renderer(void) {
+Amphora_GetRenderer(void) {
 	return renderer;
 }
 
 AmphoraImage *
-get_camera_target(void) {
+Amphora_GetCameraTarget(void) {
 	return camera_target;
 }
 
 struct render_list_node_t *
-add_render_list_node(int order) {
+Amphora_AddRenderListNode(int order) {
 	struct render_list_node_t *new_render_list_node = NULL;
 
 	if ((new_render_list_node = SDL_calloc(1, sizeof(struct render_list_node_t))) == NULL) {
@@ -230,7 +230,7 @@ add_render_list_node(int order) {
 }
 
 void
-draw_render_list_and_gc(void) {
+Amphora_ProcessRenderList(void) {
 	struct render_list_node_t *garbage;
 	SDL_FRect *map_rect;
 
@@ -248,16 +248,17 @@ draw_render_list_and_gc(void) {
 		}
 		switch (render_list->type) {
 			case AMPH_OBJ_SPR:
-				update_and_draw_sprite((const AmphoraImage *)render_list->data);
+				Amphora_UpdateAndDrawSprite((const AmphoraImage *) render_list->data);
 				break;
 			case AMPH_OBJ_TXT:
-				render_string((const AmphoraString *)render_list->data);
+				Amphora_RenderString((const AmphoraString *) render_list->data);
 				break;
 			case AMPH_OBJ_MAP:
-				map_rect = get_map_rectangle();
+				map_rect = Amphora_GetMapRectangle();
 				map_rect->x = -camera.x;
 				map_rect->y = -camera.y;
-				render_texture((SDL_Texture *)render_list->data, NULL, map_rect, 0, SDL_FLIP_NONE);
+				Amphora_RenderTexture((SDL_Texture *) render_list->data, NULL, map_rect, 0,
+						      SDL_FLIP_NONE);
 				break;
 			default:
 				break;
@@ -270,7 +271,7 @@ draw_render_list_and_gc(void) {
 }
 
 void
-free_render_list(void) {
+Amphora_FreeRenderList(void) {
 	struct render_list_node_t **allocated_addrs = SDL_malloc(render_list_node_count * sizeof(struct render_list_node_t *));
 	Uint32 i = 0;
 
@@ -281,10 +282,10 @@ free_render_list(void) {
 	for (i = 0; i < render_list_node_count; i++) {
 		switch(allocated_addrs[i]->type) {
 			case AMPH_OBJ_SPR:
-				free_sprite((AmphoraImage**)&allocated_addrs[i]->data);
+				Amphora_FreeSprite((AmphoraImage **) &allocated_addrs[i]->data);
 				break;
 			case AMPH_OBJ_TXT:
-				free_string((AmphoraString **)&allocated_addrs[i]->data);
+				Amphora_FreeString((AmphoraString **) &allocated_addrs[i]->data);
 				break;
 			case AMPH_OBJ_MAP:
 				SDL_DestroyTexture((SDL_Texture *)allocated_addrs[i]->data);
@@ -298,15 +299,15 @@ free_render_list(void) {
 }
 
 void
-update_camera(void) {
+Amphora_UpdateCamera(void) {
 	if (camera_mode == CAM_MANUAL) return;
 
-	camera = get_sprite_center(camera_target);
+	camera = Amphora_GetSpriteCenter(camera_target);
 	camera.x -= ((float)render_logical_size.x / 2.0f);
 	camera.y -= ((float)render_logical_size.y / 2.0f);
 }
 
 void
-render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, const double angle, const SDL_RendererFlip flip) {
+Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, double angle, SDL_RendererFlip flip) {
 	SDL_RenderCopyExF(renderer, texture, srcrect, dstrect, angle, NULL, flip);
 }

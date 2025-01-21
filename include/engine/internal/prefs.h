@@ -3,14 +3,14 @@
 
 #include "SDL.h"
 
-int init_config(void);
-int save_window_x(int win_x);
-int save_window_y(int win_y);
-int save_win_flags(Uint64 win_flags);
-int save_framerate(Uint32 framerate);
-Sint64 load_window_x(void);
-Sint64 load_window_y(void);
-Uint64 load_win_flags(void);
-Sint64 load_framerate(void);
+int Amphora_InitConfig(void);
+int Amphora_SaveWinX(int win_x);
+int Amphora_SaveWinY(int win_y);
+int Amphora_SaveWinFlags(Uint64 win_flags);
+int Amphora_SaveFPS(Uint32 framerate);
+Sint64 Amphora_LoadWinX(void);
+Sint64 Amphora_LoadWinY(void);
+Uint64 Amphora_LoadWinFlags(void);
+Sint64 Amphora_LoadFPS(void);
 
 #endif /* AMPHORA_INTERNAL_CONFIG_H */

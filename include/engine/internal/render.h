@@ -30,17 +30,17 @@ struct amphora_object_generic_t {
 	enum amphora_object_type_e type;
 };
 
-int init_render(void);
-void cleanup_render(void);
-void set_render_logical_size(Vector2 size);
-void clear_bg(void);
-SDL_Window *get_window(void);
-SDL_Renderer *get_renderer(void);
-AmphoraImage *get_camera_target(void);
-struct render_list_node_t *add_render_list_node(int order);
-void draw_render_list_and_gc(void);
-void free_render_list(void);
-void update_camera(void);
-void render_texture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, double angle, SDL_RendererFlip flip);
+int Amphora_InitRender(void);
+void Amphora_CloseRender(void);
+void Amphora_SetRenderLogicalSize(Vector2 size);
+void Amphora_ClearBG(void);
+SDL_Window *Amphora_GetWindow(void);
+SDL_Renderer *Amphora_GetRenderer(void);
+AmphoraImage *Amphora_GetCameraTarget(void);
+struct render_list_node_t *Amphora_AddRenderListNode(int order);
+void Amphora_ProcessRenderList(void);
+void Amphora_FreeRenderList(void);
+void Amphora_UpdateCamera(void);
+void Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, double angle, SDL_RendererFlip flip);
 
 #endif /* RENDER_INTERNAL_H */

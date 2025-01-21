@@ -33,11 +33,11 @@ struct amphora_object_groups_t {
 	int max_c;
 };
 
-int init_maps(void);
-SDL_FRect *get_map_rectangle(void);
-void destroy_current_map(void);
-void free_object_groups(void);
-SDL_FRect *get_rects_by_group(const char *name, int *c);
-void process_deferred_transition(void);
+int Amphora_InitMaps(void);
+SDL_FRect *Amphora_GetMapRectangle(void);
+void Amphora_DestroyCurrentMap(void);
+void Amphora_FreeObjectGroup(void);
+SDL_FRect *Amphora_GetRectsByGroup(const char *name, int *c);
+void Amphora_ProcessDeferredTransition(void);
 
 #endif /* AMPHORA_TILEMAP_INTERNAL_H */

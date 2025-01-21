@@ -22,8 +22,8 @@ static SDL_GameControllerButton controller_buttons[ACTION_COUNT];
 static SDL_Keycode pressed_key;
 
 void
-load_keymap(void) {
-	sqlite3 *db = get_db();
+Amphora_LoadKeymap(void) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql_write = "INSERT INTO key_map (idx, action, key, key_name, gamepad, gamepad_name)"
 				"VALUES (?, ?, ?, ?, ?, ?)";
@@ -59,8 +59,8 @@ load_keymap(void) {
 }
 
 void
-update_keymap(const char *action, SDL_Keycode keycode) {
-	sqlite3 *db = get_db();
+Amphora_UpdateKeymap(const char *action, SDL_Keycode keycode) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE key_map SET key=?, key_name=? WHERE action=?;";
 	const char *keyname = SDL_GetKeyName(keycode);
@@ -74,12 +74,12 @@ update_keymap(const char *action, SDL_Keycode keycode) {
 }
 
 bool
-object_clicked(void *obj, int button, void (*callback)(void)) {
+Amphora_ObjectClicked(void *obj, int button, void (*callback)(void)) {
 	int x, y;
 	Uint32 flags;
 	SDL_FRect *rect;
 	struct amphora_object_generic_t *obj_generic = (struct amphora_object_generic_t *)obj;
-	Camera camera = get_camera();
+	Camera camera = Ampohra_GetCamera();
 
 	switch (obj_generic->type) {
 		case AMPH_OBJ_SPR:
@@ -104,11 +104,11 @@ object_clicked(void *obj, int button, void (*callback)(void)) {
 }
 
 bool
-object_mouseover(void *obj) {
+Amphora_ObjectHover(void *obj) {
 	int x, y;
 	SDL_FRect *rect;
 	struct amphora_object_generic_t *obj_generic = (struct amphora_object_generic_t *)obj;
-	Camera camera = get_camera();
+	Camera camera = Ampohra_GetCamera();
 
 	switch (obj_generic->type) {
 		case AMPH_OBJ_SPR:
@@ -127,13 +127,13 @@ object_mouseover(void *obj) {
 }
 
 SDL_Keycode
-get_pressed_key(void) {
+Amphora_GetPressedKey(void) {
 	return pressed_key;
 }
 
 char *
-get_action_key_name(const char *action) {
-	sqlite3 *db = get_db();
+Amphora_GetActionKeyName(const char *action) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT key_name FROM key_map WHERE action=?;";
 	const char *key_name;
@@ -157,7 +157,7 @@ get_action_key_name(const char *action) {
 }
 
 void
-for_each_action(void (*callback)(const char *, int)) {
+Amphora_ForEachAction(void (*callback)(const char *, int)) {
 	int i;
 
 	if (!callback) return;
@@ -171,8 +171,8 @@ for_each_action(void (*callback)(const char *, int)) {
  */
 
 int
-init_input(void) {
-	sqlite3 *db = get_db();
+Amphora_InitInput(void) {
+	sqlite3 *db = Amphora_GetDB();
 	const char *sql = "CREATE TABLE IF NOT EXISTS key_map("
 			  "idx INT NOT NULL PRIMARY KEY,"
 			  "action TEXT NOT NULL,"
@@ -192,12 +192,12 @@ init_input(void) {
 }
 
 struct input_state_t *
-get_key_actions_state(void) {
+Amphora_GetKeyActionState(void) {
 	return &key_actions.state;
 }
 
 void
-add_controller(Sint32 idx) {
+Amphora_AddController(Sint32 idx) {
 	Uint8 i;
 
 	for (i = 0; i < MAX_CONTROLLERS; i++) {
@@ -212,7 +212,7 @@ add_controller(Sint32 idx) {
 }
 
 void
-remove_controller(SDL_JoystickID id) {
+Amphora_RemoveController(SDL_JoystickID id) {
 	Uint8 i;
 
 	for (i = 0; i < MAX_CONTROLLERS; i++) {
@@ -228,7 +228,7 @@ remove_controller(SDL_JoystickID id) {
 }
 
 void
-cleanup_controllers(void) {
+Amphora_ReleaseControllers(void) {
 	Uint32 i;
 
 	for (i = 0; i < MAX_CONTROLLERS; i++) {
@@ -239,7 +239,7 @@ cleanup_controllers(void) {
 }
 
 void
-handle_keydown(const SDL_Event *e) {
+Amphora_HandleKeyDown(const SDL_Event *e) {
 	Uint32 i;
 
 	pressed_key = e->key.keysym.sym;
@@ -252,7 +252,7 @@ handle_keydown(const SDL_Event *e) {
 }
 
 void
-handle_keyup(const SDL_Event *e) {
+Amphora_HandleKeyUp(const SDL_Event *e) {
 	Uint32 i;
 
 	if (pressed_key == e->key.keysym.sym) pressed_key = 0;
@@ -265,7 +265,7 @@ handle_keyup(const SDL_Event *e) {
 }
 
 void
-handle_gamepad_down(const SDL_Event *e) {
+Amphora_HandleGamepadDown(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
@@ -277,7 +277,7 @@ handle_gamepad_down(const SDL_Event *e) {
 }
 
 void
-handle_gamepad_up(const SDL_Event *e) {
+Amphora_HandleGamepadUp(const SDL_Event *e) {
 	Uint32 i;
 
 	for (i = 0; i < ACTION_COUNT; i++) {
@@ -289,7 +289,7 @@ handle_gamepad_up(const SDL_Event *e) {
 }
 
 Vector2f
-handle_gamepad_joystick(const SDL_Event *e) {
+Amphora_HandleJoystick(const SDL_Event *e) {
 	Uint8 axis = e->caxis.axis;
 	Sint16 val = e->caxis.value;
 

@@ -5,13 +5,13 @@
 extern "C" {
 #endif
 /* Save an integer with keys attribute */
-int save_number_value(const char *attribute, double value);
+int Amphora_SaveNumber(const char *attribute, double value);
 /* Save a string with keys attribute */
-int save_string_value(const char *attribute, const char *value);
+int Amphora_SaveString(const char *attribute, const char *value);
 /* Get the integer stored with keys attribute, returns default_value if attribute doesn't exist */
-double get_number_value(const char *attribute, double default_value);
+double Amphora_LoadNumber(const char *attribute, double default_value);
 /* Get the string stored with keys attribute and store it in out_string */
-int get_string_value(const char *attribute, char **out_string);
+int Ampohra_LoadString(const char *attribute, char **out_string);
 #ifdef __cplusplus
 }
 #endif

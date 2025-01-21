@@ -2,8 +2,8 @@
 #include "engine/internal/save_data.h"
 
 int
-save_number_value(const char *attribute, double value) {
-	sqlite3 *db = get_db();
+Amphora_SaveNumber(const char *attribute, double value) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, value) VALUES (?, ?);";
 
@@ -17,8 +17,8 @@ save_number_value(const char *attribute, double value) {
 }
 
 int
-save_string_value(const char *attribute, const char *value) {
-	sqlite3 *db = get_db();
+Amphora_SaveString(const char *attribute, const char *value) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "INSERT OR REPLACE INTO save_data (attribute, value) VALUES (?, ?);";
 
@@ -32,8 +32,8 @@ save_string_value(const char *attribute, const char *value) {
 }
 
 double
-get_number_value(const char *attribute, double default_value) {
-	sqlite3 *db = get_db();
+Amphora_LoadNumber(const char *attribute, double default_value) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT value FROM save_data WHERE attribute=?";
 	double val;
@@ -51,8 +51,8 @@ get_number_value(const char *attribute, double default_value) {
 }
 
 int
-get_string_value(const char *attribute, char **out_string) {
-	sqlite3 *db = get_db();
+Ampohra_LoadString(const char *attribute, char **out_string) {
+	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT value FROM save_data WHERE attribute=?";
 	const unsigned char *val;
@@ -80,8 +80,8 @@ get_string_value(const char *attribute, char **out_string) {
  */
 
 int
-init_save(void) {
-	sqlite3 *db = get_db();
+Amphora_InitSave(void) {
+	sqlite3 *db = Amphora_GetDB();
 	const char *sql = "CREATE TABLE IF NOT EXISTS save_data("
 			  "attribute TEXT PRIMARY KEY NOT NULL,"
 			  "value ANY);";

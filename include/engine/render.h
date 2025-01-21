@@ -15,31 +15,31 @@ typedef struct amphora_message_t AmphoraString;
 extern "C" {
 #endif
 /* Get the resolution */
-Vector2 get_resolution(void);
+Vector2 Amphora_GetResolution(void);
 /* Get the renderer logical size */
-Vector2 get_render_logical_size(void);
+Vector2 Amphora_GetRenderLogicalSize(void);
 /* Get the current upper-left point of the camera */
-Vector2f get_camera(void);
+Vector2f Ampohra_GetCamera(void);
 /* Set the location of the camera's top left point */
-void set_camera(float x, float y);
+void Amphora_SetCamera(float x, float y);
 /* Move the camera */
-void move_camera(float x, float y);
+void Amphora_MoveCamera(float delta_x, float delta_y);
 /* Set the sprite for the camera to follow, NULL to disable tracking */
-void set_camera_target(AmphoraImage *target);
+void Amphora_SetCameraTarget(AmphoraImage *target);
 /* Set the zoom factor for the camera */
-void set_camera_zoom(Uint16 factor, Uint16 delay);
+void Amphora_SetCameraZoom(Uint16 factor, Uint16 delay);
 /* Reset the camera zoom */
-void reset_camera_zoom(Uint16 delay);
+void Amphora_ResetCameraZoom(Uint16 delay);
 /* Gets the current background color */
-SDL_Color get_bg(void);
+SDL_Color Amphora_GetBGColor(void);
 /* Sets the background color */
-void set_bg(SDL_Color color);
+void Amphora_SetBGColor(SDL_Color color);
 /* Sets the game window to fullscreen */
-void set_window_fullscreen(void);
+void Amphora_SetWindowFullscreen(void);
 /* Sets the game window to windowed */
-void set_window_windowed(void);
+void Amphora_SetWindowWindowed(void);
 /* Returns true if the game window is fullscreen, false if windowed */
-bool is_window_fullscreen(void);
+bool Ampohra_IsWindowFullscreen(void);
 #ifdef __cplusplus
 }
 #endif

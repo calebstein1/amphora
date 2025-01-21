@@ -29,9 +29,9 @@ struct sprite_t {
 	struct render_list_node_t *render_list_node;
 };
 
-int init_img(void);
-void cleanup_img(void);
-SDL_Texture *get_img_texture_by_name(const char *name);
-void update_and_draw_sprite(const AmphoraImage *spr);
+int Amphora_InitIMG(void);
+void Amphora_CloseIMG(void);
+SDL_Texture *Amphora_GetIMGTextureByName(const char *name);
+void Amphora_UpdateAndDrawSprite(const AmphoraImage *spr);
 
 #endif /* IMG_INTERNAL_H */

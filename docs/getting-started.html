@@ -20,24 +20,24 @@ git clone https://github.com/calebstein1/amphora
 </div><p id="-977hc_14">The <code class="code" id="-977hc_17">src</code> directory is where code files are found, <code class="code" id="-977hc_18">include</code> is for headers, and <code class="code" id="-977hc_19">content</code> is for any assets your game will need. The engine source and header files are located in <code class="code" id="-977hc_20">src/engine</code> and <code class="code" id="-977hc_21">include/engine</code> respectively.</p><p id="-977hc_15">The most basic, barebones project is one file in <code class="code" id="-977hc_22">src</code> containing the following content:</p><div class="tabs" id="-977hc_16" data-anchors="[-977hc_23,-977hc_24]"><div class="tabs__content" data-gtm="tab" id="-977hc_23" data-title="C"><div class="code-block" data-lang="c" data-title="C">
             #include &quot;engine/amphora.h&quot;
 
-            void game_init(void) {
+            void Amphora_GameInit(void) {
             }
 
             void game_loop(Uint64 frame, const struct input_state_t *key_actions) {
             }
 
-            void game_shutdown(void) {
+            void Amphora_GameShutdown(void) {
             }
         </div></div><div class="tabs__content" data-gtm="tab" id="-977hc_24" data-title="C++"><div class="code-block" data-lang="cpp" data-title="C++">
             #include &quot;engine/amphora.h&quot;
 
-            void game_init() {
+            void Amphora_GameInit() {
             }
 
             void game_loop(Uint64 frame, const input_state_t *key_actions) {
             }
 
-            void game_shutdown() {
+            void Amphora_GameShutdown() {
             }
         </div></div></div></section><section class="chapter"><h2 id="building-the-project" data-toc="building-the-project">Building the Project</h2><p id="-977hc_27">Amphora uses CMake for builds. Assuming you have CMake and vcpkg installed, and the VCPKG_ROOT environment variable set, you should be able to build and debug your project easily using Visual Studio or any other CMake-compatible IDE.</p><p id="-977hc_28">On Linux, you can also build from the command-line with the following commands:</p><div class="code-block" data-lang="bash">
 mkdir -p build

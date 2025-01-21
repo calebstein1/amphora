@@ -21,19 +21,19 @@ enum fonts_e {
 extern "C" {
 #endif
 /* Create a string */
-AmphoraString *create_string(AmphoraString **msg, const char *name, int pt, float x, float y, int order, SDL_Color color, const char *text, bool stationary);
+AmphoraString *Amphora_CreateString(AmphoraString **msg, const char *name, int pt, float x, float y, int order, SDL_Color color, const char *text, bool stationary);
 /* Get the number of characters in a message */
-size_t get_string_length(const AmphoraString *msg);
+size_t Amphora_GetStringLength(const AmphoraString *msg);
 /* Get the text of an AmphoraString */
-const char *get_string_text(AmphoraString *msg);
+const char *Ampohra_GetStringText(AmphoraString *msg);
 /* Update the text in a string */
-AmphoraString *update_string_text(AmphoraString **msg, const char *text);
+AmphoraString *Amphora_UpdateStringText(AmphoraString **msg, const char *text);
 /* Change the number of characters displayed in a string, 0 displays all characters */
-AmphoraString *update_string_n(AmphoraString **msg, size_t n);
+AmphoraString *Amphora_UpdateStringCharsDisplayed(AmphoraString **msg, size_t n);
 /* Free a string */
-void free_string(AmphoraString **msg);
+void Amphora_FreeString(AmphoraString **msg);
 /* Display an AmphoraString on the screen */
-void render_string(const AmphoraString *msg);
+void Amphora_RenderString(const AmphoraString *msg);
 #ifdef __cplusplus
 }
 #endif

@@ -3,7 +3,7 @@
 
 #include "engine/db.h"
 
-void init_db(void);
-void cleanup_db(void);
+void Amphora_InitDB(void);
+void Amphora_CloseDB(void);
 
 #endif /* AMPHORA_DB_INTERNAL_H */

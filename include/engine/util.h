@@ -3,10 +3,10 @@
 
 #include "SDL.h"
 
-#define MAX_OF(a,b) (a > b ? a : b)
-#define MIN_OF(a,b) (a < b ? a : b)
-#define IS_ODD(a) (a & 1)
-#define IS_EVEN(a) (!IS_ODD(a))
+#define Ampohra_Max(a,b) ((a) > (b) ? (a) : (b))
+#define Ampohra_Min(a,b) ((a) < (b) ? (a) : (b))
+#define Amphora_IsOdd(a) ((a) & 1)
+#define Amphora_IsEven(a) (!Amphora_IsOdd((a)))
 
 #define fullscreen SDL_WINDOW_FULLSCREEN_DESKTOP
 #define fixed SDL_WINDOW_SHOWN
@@ -28,8 +28,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void quit_game(void); /* Request to quit the game */
-Uint32 get_framerate(void); /* Get the current running framerate */
+void Amphora_QuitGame(void); /* Request to quit the game */
+Uint32 Amphora_GetFPS(void); /* Get the current running framerate */
 #ifdef __cplusplus
 }
 #endif

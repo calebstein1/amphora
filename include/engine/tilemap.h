@@ -14,9 +14,9 @@ enum tilemaps_e {
 #ifdef __cplusplus
 extern "C" {
 #endif
-void set_map(const char *name, float scale);
-void hide_map_layer(const char *name, int t);
-void show_map_layer(const char *name, int t);
+void Amphora_SetMap(const char *name, float scale);
+void Amphora_HideMapLayer(const char *name, int t);
+void Amphora_ShowMapLayer(const char *name, int t);
 #ifdef __cplusplus
 }
 #endif

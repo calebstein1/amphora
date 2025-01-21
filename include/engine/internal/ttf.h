@@ -22,7 +22,7 @@ struct open_font_t {
 	int pt;
 };
 
-int init_fonts(void);
-void free_fonts(void);
+int Amphora_InitFonts(void);
+void Amphora_FreeFonts(void);
 
 #endif /* TTF_INTERNAL_H */

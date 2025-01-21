@@ -3,6 +3,6 @@
 
 #include "engine/random.h"
 
-void init_rand(void);
+void Amphora_InitRand(void);
 
 #endif /* AMPHORA_INTERNAL_RANDOM_H */

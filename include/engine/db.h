@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 /* Get the open database */
-sqlite3 *get_db(void);
+sqlite3 *Amphora_GetDB(void);
 #ifdef __cplusplus
 }
 #endif

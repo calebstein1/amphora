@@ -18,9 +18,9 @@ typedef enum {
 extern "C" {
 #endif
 /* Returns true if two objects have collided */
-bool check_collision(const AmphoraImage *obj_a, const AmphoraImage *obj_b);
+bool Amphora_CheckCollision(const AmphoraImage *obj_a, const AmphoraImage *obj_b);
 /* Returns the direction of collision if the object has collided with any rectangle in the object group */
-AmphoraCollision check_object_group_collision(const AmphoraImage *obj, const char *name);
+AmphoraCollision Amphora_CheckObjectGroupCollision(const AmphoraImage *obj, const char *name);
 #ifdef __cplusplus
 }
 #endif

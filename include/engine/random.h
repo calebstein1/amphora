@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 /* Get a random number less than n */
-Uint32 get_random(int n);
+Uint32 Amphora_GetRandom(int n);
 #ifdef __cplusplus
 }
 #endif

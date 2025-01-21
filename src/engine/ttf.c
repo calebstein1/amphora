@@ -10,8 +10,8 @@
 #ifndef DISABLE_FONTS
 
 /* Prototypes for private functions */
-static int get_font_by_name(const char *name);
-static SDL_Texture *render_string_to_texture(AmphoraString *msg);
+static int Amphora_GetFontByName(const char *name);
+static SDL_Texture *Amphora_RenderStringToTexture(AmphoraString *msg);
 
 /* File-scoped variables */
 static SDL_RWops *fonts[FONTS_COUNT];
@@ -23,13 +23,13 @@ static const char *font_names[] = {
 };
 
 AmphoraString *
-create_string(AmphoraString **msg, const char *name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
-	struct render_list_node_t *render_list_node = add_render_list_node(order);
+Amphora_CreateString(AmphoraString **msg, const char *name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
+	struct render_list_node_t *render_list_node = Amphora_AddRenderListNode(order);
 	int idx;
 
 	if (*msg) return *msg;
 
-	if ((idx = get_font_by_name(name)) == -1) {
+	if ((idx = Amphora_GetFontByName(name)) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", name);
 		return NULL;
 	}
@@ -55,23 +55,23 @@ create_string(AmphoraString **msg, const char *name, const int pt, const float x
 	render_list_node->stationary = stationary;
 	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
 
-	(*msg)->texture = render_string_to_texture(*msg);
+	(*msg)->texture = Amphora_RenderStringToTexture(*msg);
 
 	return *msg;
 }
 
 size_t
-get_string_length(const AmphoraString *msg) {
+Amphora_GetStringLength(const AmphoraString *msg) {
 	return msg->len;
 }
 
 const char *
-get_string_text(AmphoraString *msg) {
+Ampohra_GetStringText(AmphoraString *msg) {
 	return msg->text;
 }
 
 AmphoraString *
-update_string_text(AmphoraString **msg, const char *text) {
+Amphora_UpdateStringText(AmphoraString **msg, const char *text) {
 	(*msg)->len = SDL_strlen(text);
 	SDL_free((*msg)->text);
 	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
@@ -79,23 +79,23 @@ update_string_text(AmphoraString **msg, const char *text) {
 	}
 	SDL_strlcpy((*msg)->text, text, (*msg)->len + 1);
 	SDL_DestroyTexture((*msg)->texture);
-	(*msg)->texture = render_string_to_texture(*msg);
+	(*msg)->texture = Amphora_RenderStringToTexture(*msg);
 
 	return *msg;
 }
 
 AmphoraString *
-update_string_n(AmphoraString **msg, size_t n) {
+Amphora_UpdateStringCharsDisplayed(AmphoraString **msg, size_t n) {
 	if (n >= (*msg)->len) n = 0;
 	(*msg)->n = n;
 	SDL_DestroyTexture((*msg)->texture);
-	(*msg)->texture = render_string_to_texture(*msg);
+	(*msg)->texture = Amphora_RenderStringToTexture(*msg);
 
 	return *msg;
 }
 
 void
-free_string(AmphoraString **msg) {
+Amphora_FreeString(AmphoraString **msg) {
 	if (!*msg) return;
 
 	SDL_DestroyTexture((*msg)->texture);
@@ -106,15 +106,15 @@ free_string(AmphoraString **msg) {
 }
 
 void
-render_string(const AmphoraString *msg) {
+Amphora_RenderString(const AmphoraString *msg) {
 	SDL_FRect pos_adj;
-	const Vector2f camera = get_camera();
-	Vector2 logical_size = get_render_logical_size();
+	const Vector2f camera = Ampohra_GetCamera();
+	Vector2 logical_size = Amphora_GetRenderLogicalSize();
 
 	if (msg->render_list_node->stationary) {
 		pos_adj = (SDL_FRect){
-			.x = msg->rectangle.x > 0 ? msg->rectangle.x : (float)get_resolution().x + msg->rectangle.x - msg->rectangle.w,
-			.y = msg->rectangle.y > 0 ? msg->rectangle.y : (float)get_resolution().y + msg->rectangle.y - msg->rectangle.h,
+			.x = msg->rectangle.x > 0 ? msg->rectangle.x : (float) Amphora_GetResolution().x + msg->rectangle.x - msg->rectangle.w,
+			.y = msg->rectangle.y > 0 ? msg->rectangle.y : (float) Amphora_GetResolution().y + msg->rectangle.y - msg->rectangle.h,
 			.w = msg->rectangle.w,
 			.h = msg->rectangle.h
 		};
@@ -127,9 +127,9 @@ render_string(const AmphoraString *msg) {
 		};
 	}
 
-	if (msg->render_list_node->stationary) set_render_logical_size(get_resolution());
-	render_texture(msg->texture, NULL, &pos_adj, 0, 0);
-	if (msg->render_list_node->stationary) set_render_logical_size(logical_size);
+	if (msg->render_list_node->stationary) Amphora_SetRenderLogicalSize(Amphora_GetResolution());
+	Amphora_RenderTexture(msg->texture, NULL, &pos_adj, 0, 0);
+	if (msg->render_list_node->stationary) Amphora_SetRenderLogicalSize(logical_size);
 }
 
 /*
@@ -137,7 +137,7 @@ render_string(const AmphoraString *msg) {
  */
 
 int
-init_fonts(void) {
+Amphora_InitFonts(void) {
 	int i;
 #ifdef WIN32
 	HRSRC ttf_info;
@@ -177,7 +177,7 @@ init_fonts(void) {
 }
 
 void
-free_fonts(void) {
+Amphora_FreeFonts(void) {
 	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
@@ -191,7 +191,7 @@ free_fonts(void) {
  */
 
 static int
-get_font_by_name(const char *name) {
+Amphora_GetFontByName(const char *name) {
 	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
@@ -201,7 +201,7 @@ get_font_by_name(const char *name) {
 }
 
 static SDL_Texture *
-render_string_to_texture(AmphoraString *msg) {
+Amphora_RenderStringToTexture(AmphoraString *msg) {
 	enum fonts_e font_name = msg->font;
 	int pt = msg->pt;
 	int msg_rect_w, msg_rect_h;
@@ -230,7 +230,7 @@ render_string_to_texture(AmphoraString *msg) {
 
 	font = open_fonts[font_name].font;
 	surface = TTF_RenderUTF8_Blended(font, n ? n_buff : text, text_color);
-	texture = SDL_CreateTextureFromSurface(get_renderer(), surface);
+	texture = SDL_CreateTextureFromSurface(Amphora_GetRenderer(), surface);
 	TTF_SizeUTF8(font, n ? n_buff : text, &msg_rect_w, &msg_rect_h);
 	msg->rectangle.w = (float)msg_rect_w;
 	msg->rectangle.h = (float)msg_rect_h;

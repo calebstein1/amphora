@@ -18,9 +18,9 @@
 #endif
 
 /* Prototypes for private functions */
-static int main_loop(SDL_Event *e);
-static void save_config(void);
-static void clean_resources(void);
+static int Amphora_MainLoop(SDL_Event *e);
+static void Amphora_SaveConfig(void);
+static void Amphora_CleanResources(void);
 
 /* Globals */
 Uint64 frame_count = 0;
@@ -59,12 +59,12 @@ main(int argc, char **argv) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to open audio device: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to open audio device", SDL_GetError(), 0);
 	}
-	if (init_sfx() == -1) {
+	if (Amphora_InitSFX() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load sfx data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load sfx data", "Failed to load sfx data", 0);
 		return -1;
 	}
-	if (init_music() == -1) {
+	if (Amphora_InitMusic() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load music data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load music data", "Failed to load sfx data", 0);
 		return -1;
@@ -76,41 +76,41 @@ main(int argc, char **argv) {
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
 		return -1;
 	}
-	if (init_fonts() == -1) {
+	if (Amphora_InitFonts() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load TTF font data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
 		return -1;
 	}
 #endif
 #ifndef DISABLE_TILEMAP
-	if (init_maps() == -1) {
+	if (Amphora_InitMaps() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load tilemap data\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load tilemap data", "Failed to load tilemap data", 0);
 		return -1;
 	}
 #endif
-	init_rand();
-	init_db();
-	init_config();
-	if (init_render() == -1) {
+	Amphora_InitRand();
+	Amphora_InitDB();
+	Amphora_InitConfig();
+	if (Amphora_InitRender() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to init renderer\n");
 		return -1;
 	}
-	init_save();
-	init_input();
-	load_keymap();
+	Amphora_InitSave();
+	Amphora_InitInput();
+	Amphora_LoadKeymap();
 
-	framerate = (Uint32)load_framerate();
+	framerate = (Uint32) Amphora_LoadFPS();
 
-	game_init();
+	Amphora_GameInit();
 
 #ifdef __EMSCRIPTEN__
 	emscripten_set_main_loop(main_loop, 0, 1);
 #else
-	while (main_loop(&e) == 0) {}
+	while (Amphora_MainLoop(&e) == 0) {}
 #endif
-	save_config();
-	clean_resources();
+	Amphora_SaveConfig();
+	Amphora_CleanResources();
 	IMG_Quit();
 #ifndef DISABLE_MIXER
 	Mix_CloseAudio();
@@ -125,12 +125,12 @@ main(int argc, char **argv) {
 }
 
 void
-quit_game(void) {
+Amphora_QuitGame(void) {
 	quit_requested = true;
 }
 
 Uint32
-get_framerate(void) {
+Amphora_GetFPS(void) {
 	return framerate;
 }
 
@@ -139,18 +139,18 @@ get_framerate(void) {
  */
 
 static int
-main_loop(SDL_Event *e) {
+Amphora_MainLoop(SDL_Event *e) {
 	static Uint64 frame_start, frame_end;
 	static Uint32 frame_time;
 
 	frame_start = SDL_GetTicks64();
 	frame_count++;
 
-	if (event_loop(e) == SDL_QUIT) quit_requested = true;
+	if (Amphora_ProcessEventLoop(e) == SDL_QUIT) quit_requested = true;
 	if (quit_requested) {
 #ifdef __EMSCRIPTEN__
-		save_config();
-		clean_resources();
+		Amphora_SaveConfig();
+		Amphora_CleanResources();
 		IMG_Quit();
 #ifndef DISABLE_MIXER
 		Mix_CloseAudio();
@@ -165,20 +165,21 @@ main_loop(SDL_Event *e) {
 		return 1;
 #endif
 	}
-	clear_bg();
-	game_loop(frame_count, get_key_actions_state());
-	process_deferred_transition();
-	draw_render_list_and_gc();
-	update_camera();
+	Amphora_ClearBG();
+	Amphora_GameLoop(frame_count, Amphora_GetKeyActionState());
+	Amphora_ProcessDeferredTransition();
+	Amphora_ProcessRenderList();
+	Amphora_UpdateCamera();
 
-	SDL_RenderPresent(get_renderer());
+	SDL_RenderPresent(Amphora_GetRenderer());
 
 	frame_end = SDL_GetTicks64();
 	if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / framerate)) {
 		SDL_Delay((1000 / framerate) - frame_time);
 #ifdef DEBUG
 	} else if (frame_time > (1000 / framerate)) {
-		SDL_Log("Lag on frame %llu (frame took %llu ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 / get_framerate());
+		SDL_Log("Lag on frame %llu (frame took %llu ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 /
+			Amphora_GetFPS());
 	}
 #else
 	}
@@ -188,35 +189,35 @@ main_loop(SDL_Event *e) {
 }
 
 static void
-save_config(void) {
-	Vector2 win_size = get_resolution();
-	Uint32 win_flags = SDL_GetWindowFlags(get_window());
+Amphora_SaveConfig(void) {
+	Vector2 win_size = Amphora_GetResolution();
+	Uint32 win_flags = SDL_GetWindowFlags(Amphora_GetWindow());
 
-	if (!is_window_fullscreen()) {
-        save_window_x(win_size.x);
-        save_window_y(win_size.y);
+	if (!Ampohra_IsWindowFullscreen()) {
+		Amphora_SaveWinX(win_size.x);
+		Amphora_SaveWinY(win_size.y);
 	}
-	save_win_flags(win_flags);
-	save_framerate(framerate);
+	Amphora_SaveWinFlags(win_flags);
+	Amphora_SaveFPS(framerate);
 }
 
 static void
-clean_resources(void) {
-	game_shutdown();
-	cleanup_img();
+Amphora_CleanResources(void) {
+	Amphora_GameShutdown();
+	Amphora_CloseIMG();
 #ifndef DISABLE_FONTS
-	free_fonts();
+	Amphora_FreeFonts();
 #endif
 #ifndef DISABLE_TILEMAP
-	destroy_current_map();
-	free_object_groups();
+	Amphora_DestroyCurrentMap();
+	Amphora_FreeObjectGroup();
 #endif
 #ifndef DISABLE_MIXER
-	cleanup_sfx();
-	cleanup_music();
+	Amphora_CloseSFX();
+	Amphora_CloseMusic();
 #endif
-	free_render_list();
-	cleanup_render();
-	cleanup_controllers();
-	cleanup_db();
+	Amphora_FreeRenderList();
+	Amphora_CloseRender();
+	Amphora_ReleaseControllers();
+	Amphora_CloseDB();
 }
