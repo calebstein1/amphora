@@ -81,7 +81,9 @@ create_sprite(AmphoraImage **spr, const char *image_name, const float x, const f
 }
 
 void
-add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const float off_x, const float off_y, const Uint16 num_frames, const Uint16 delay) {
+add_frameset(AmphoraImage *spr, const char *name, const char *override_img, const Sint32 sx, const Sint32 sy, const Sint32 w, const Sint32 h, const float off_x, const float off_y, const Uint16 num_frames, const Uint16 delay) {
+	int override = -1;
+
 	/* TODO: Cascade error cases and free */
 	if (spr->framesets) {
 		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
@@ -102,7 +104,16 @@ add_frameset(AmphoraImage *spr, const char *name, const Sint32 sx, const Sint32 
 			return;
 		}
 	}
+
+	if (override_img) {
+		override = get_img_by_name(override_img);
+		if (override > -1 && !open_images[override]) {
+			open_images[override] = IMG_LoadTexture_RW(get_renderer(), images[override], 0);
+		}
+	}
+
 	spr->framesets[spr->num_framesets] = (struct frameset_t){
+		.override_img = override,
 		.sx = sx,
 		.sy = sy,
 		.w = w,
@@ -350,7 +361,7 @@ update_and_draw_sprite(const AmphoraImage *spr) {
 	}
 
 	if (spr->render_list_node->stationary) set_render_logical_size(get_resolution());
-	render_texture(open_images[spr->image], &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+	render_texture(open_images[(int)frameset->override_img > -1 ? frameset->override_img : spr->image], &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	if (spr->render_list_node->stationary) set_render_logical_size(logical_size);
 }
 

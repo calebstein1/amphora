@@ -20,7 +20,7 @@ public:
 		current_health++;
 		health_bar.push_back(nullptr);
 		create_sprite(&health_bar.back(), "Objects", -96.0f - (float)(32 * (health_bar.size() - 1)), 24, 2, false, true, 1000);
-		add_frameset(health_bar.back(), "Default", 63, 0, 16, 16, 0, 0, 1, 0);
+		add_frameset(health_bar.back(), "Default", nullptr, 63, 0, 16, 16, 0, 0, 1, 0);
 	}
 
 	void decrease_health() {
@@ -77,13 +77,13 @@ game_init() {
 		health_bar.increase_health();
 	}
 
-	add_frameset(player, "Idle", 0, 17, 32, 48, 0, 0, 1, 0);
-	add_frameset(player, "Walk", 32, 17, 32, 48, 0, 0, 6, 250);
-	add_frameset(player, "Attack", 223, 145, 32, 48, 0, 0, 2, 250);
-	add_frameset(player, "KO", 81, 355, 48, 32, 8, -8, 2, 500);
+	add_frameset(player, "Idle", nullptr, 0, 17, 32, 48, 0, 0, 1, 0);
+	add_frameset(player, "Walk", nullptr, 32, 17, 32, 48, 0, 0, 6, 250);
+	add_frameset(player, "Attack", nullptr, 223, 145, 32, 48, 0, 0, 2, 250);
+	add_frameset(player, "KO", nullptr, 81, 355, 48, 32, 8, -8, 2, 500);
 
-	add_frameset(rotating_heart, "Stationary", 64, 129, 16, 16, 0, 0, 1, 0);
-	add_frameset(rotating_heart, "Rotate", 64, 129, 16, 16, 0, 0, 4, 250);
+	add_frameset(rotating_heart, "Stationary", nullptr, 64, 129, 16, 16, 0, 0, 1, 0);
+	add_frameset(rotating_heart, "Rotate", nullptr, 64, 129, 16, 16, 0, 0, 4, 250);
 
 	create_string(&hello, "Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
 	create_string(&timer, "Merriweather", 32, -16, 16, 1000, black, "0", true);

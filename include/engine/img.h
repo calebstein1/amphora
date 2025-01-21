@@ -29,7 +29,8 @@ bool is_flipped(const AmphoraImage *spr);
 AmphoraImage *create_sprite(AmphoraImage **spr, const char *image_name, float x, float y, float scale,
 			    bool flip, bool stationary, Sint32 order);
 /* Add a frameset to a sprite */
-void add_frameset(AmphoraImage *spr, const char *name, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay);
+void add_frameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy,
+		  Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
 void set_frameset(AmphoraImage *spr, const char *name);
 /* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
