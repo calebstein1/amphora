@@ -6,6 +6,7 @@
 #ifdef EXPOSE_INTERNAL_DEFINITIONS_AND_FUNCTIONS
 #include "engine/internal/collision.h"
 #include "engine/internal/db.h"
+#include "engine/internal/error.h"
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
@@ -21,6 +22,7 @@
 #else
 #include "engine/collision.h"
 #include "engine/db.h"
+#include "engine/error.h"
 #include "engine/events.h"
 #include "engine/game_loop.h"
 #include "engine/img.h"

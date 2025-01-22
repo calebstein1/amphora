@@ -12,4 +12,5 @@ add_library(amphora_engine
 	prefs.c
 	random.c
 	collision.c
+	error.c
 )
