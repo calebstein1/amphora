@@ -5,6 +5,6 @@
 
 #define AMPHORA_MSG_BUFF_SIZE 256
 
-void Amphora_SetError(const char *fmt, ...);
+void Amphora_SetError(AmphoraStatusCode status_code, const char *fmt, ...);
 
 #endif /* AMPHORA_ERROR_INTERNAL_H */
