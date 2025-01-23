@@ -2,9 +2,11 @@
 #include <windows.h>
 #endif
 
+#include "engine/internal/error.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
 #include "engine/internal/timer.h"
+#include "engine/internal/tools.h"
 
 #include "config.h"
 
@@ -23,11 +25,15 @@ static const char *img_names[] = {
 
 Vector2f
 Amphora_GetSpritePosition(const AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, ((Vector2f){0, 0 }))
+
 	return (Vector2f){spr->rectangle.x, spr->rectangle.y };
 }
 
 Vector2f
 Amphora_GetSpriteCenter(const AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, ((Vector2f){0, 0 }))
+
 	return (Vector2f){
 		.x = spr->rectangle.x + ((float)spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
 		.y = spr->rectangle.y + ((float)spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
@@ -36,6 +42,8 @@ Amphora_GetSpriteCenter(const AmphoraImage *spr) {
 
 bool
 Amphora_IsSpriteFlipped(const AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, false)
+
 	return spr->flip;
 }
 
@@ -48,7 +56,7 @@ Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, 
 	if (*spr) return *spr;
 
 	if ((idx = get_img_by_name(image_name)) == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate image %s\n", image_name);
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Unable to locate image %s\n", image_name);
 		return NULL;
 	}
 
@@ -57,7 +65,7 @@ Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, 
 	}
 
 	if ((new_sprite = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
-		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to initialize sprite\n");
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize sprite\n");
 		*spr = NULL;
 
 		return NULL;
@@ -80,28 +88,29 @@ Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, 
 	return *spr;
 }
 
-void
+int
 Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay) {
 	int override = -1;
 
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 	/* TODO: Cascade error cases and free */
 	if (spr->framesets) {
 		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
-			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to reallocate framesets\n");
-			return;
+			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
+			return AMPHORA_STATUS_ALLOC_FAIL;
 		}
 		if (!((spr->frameset_labels = SDL_realloc(spr->frameset_labels, (spr->num_framesets + 1) * sizeof(char *))))) {
-			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to reallocate frameset labels\n");
-			return;
+			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate frameset labels\n");
+			return AMPHORA_STATUS_ALLOC_FAIL;
 		}
 	} else {
 		if (!((spr->framesets = SDL_malloc(sizeof(struct frameset_t))))) {
-			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate framesets\n");
-			return;
+			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate framesets\n");
+			return AMPHORA_STATUS_ALLOC_FAIL;
 		}
 		if (!((spr->frameset_labels = SDL_malloc(sizeof(char *))))) {
-			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate frameset labels\n");
-			return;
+			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate frameset labels\n");
+			return AMPHORA_STATUS_ALLOC_FAIL;
 		}
 	}
 
@@ -124,41 +133,45 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 		.position_offset = (Vector2f){off_x, off_y }
 	};
 	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to allocate frameset label\n");
-		return;
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate frameset label\n");
+		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
 	SDL_strlcpy(spr->frameset_labels[spr->num_framesets], name, strlen(name) + 1);
 	if (++spr->num_framesets == 1) {
 		spr->rectangle.w = (float)spr->framesets[0].w * spr->scale;
 		spr->rectangle.h = (float)spr->framesets[0].h * spr->scale;
 	}
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_SetFrameset(AmphoraImage *spr, const char *name) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
-		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
-		return;
+		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to locate frameset: %s\n", name);
+		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
-	if (frameset == spr->current_frameset) return;
+	if (frameset == spr->current_frameset) return AMPHORA_STATUS_OK;
 
 	spr->framesets[frameset].playing_oneshot = false;
 	spr->current_frameset = frameset;
 	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
 	spr->rectangle.h = (float)spr->framesets[frameset].h * spr->scale;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
-		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
-		return;
+		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to locate frameset: %s\n", name);
+		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
-	if (frameset == spr->current_frameset) return;
+	if (frameset == spr->current_frameset) return AMPHORA_STATUS_OK;
 
 	spr->framesets[frameset].playing_oneshot = true;
 	spr->current_frameset = frameset;
@@ -167,23 +180,29 @@ Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void))
 	spr->framesets[frameset].current_frame = -1;
 	spr->framesets[frameset].last_change = SDL_GetTicks64();
 	spr->framesets[frameset].callback = callback;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_SetFramesetAnimationTime(AmphoraImage *spr, const char *name, Uint16 delay) {
 	int frameset;
 
 	if ((frameset = find_frameset(spr, name)) == -1) {
-		SDL_LogError(SDL_LOG_PRIORITY_WARN, "Failed to locate frameset: %s\n", name);
-		return;
+		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to locate frameset: %s\n", name);
+		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
 	spr->framesets[frameset].delay = delay;
+
+	return AMPHORA_STATUS_OK;
 }
 
 AmphoraImage *
 Amphora_ReorderSprite(AmphoraImage *spr, Sint32 order) {
 	struct render_list_node_t *new_node = Amphora_AddRenderListNode(order);
 	struct render_list_node_t *old_node = spr->render_list_node;
+
+	Amphora_ValidatePtrNotNull(new_node, NULL)
 
 	new_node->type = AMPH_OBJ_SPR;
 	new_node->data = spr;
@@ -195,43 +214,68 @@ Amphora_ReorderSprite(AmphoraImage *spr, Sint32 order) {
 	return spr;
 }
 
-void
+int
 Amphora_SetSpriteLocation(AmphoraImage *spr, float x, float y) {
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+
 	spr->rectangle.x = x;
 	spr->rectangle.y = y;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_MoveSprite(AmphoraImage *spr, float delta_x, float delta_y) {
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+
 	spr->rectangle.x += delta_x;
 	spr->rectangle.y += delta_y;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_FlipSprite(AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+
 	spr->flip = true;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_UnflipSprite(AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+
 	spr->flip = false;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_ShowSprite(AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+
 	spr->render_list_node->display = true;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_HideSprite(AmphoraImage *spr) {
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+
 	spr->render_list_node->display = false;
+
+	return AMPHORA_STATUS_OK;
 }
 
-void
+int
 Amphora_FreeSprite(AmphoraImage **spr) {
 	int i;
 
-	if (!*spr) return;
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(*spr, AMPHORA_STATUS_FAIL_UNDEFINED);
 
 	if (*spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
 	for (i = 0; i < (*spr)->num_framesets; i++) {
@@ -242,6 +286,8 @@ Amphora_FreeSprite(AmphoraImage **spr) {
 	(*spr)->render_list_node->garbage = true;
 	SDL_free(*spr);
 	*spr = NULL;
+
+	return AMPHORA_STATUS_OK;
 }
 
 /*

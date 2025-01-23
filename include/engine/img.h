@@ -29,30 +29,30 @@ bool Amphora_IsSpriteFlipped(const AmphoraImage *spr);
 AmphoraImage *Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, float x, float y, float scale,
 				   bool flip, bool stationary, Sint32 order);
 /* Add a frameset to a sprite */
-void Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy,
+int Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy,
 			 Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
-void Amphora_SetFrameset(AmphoraImage *spr, const char *name);
+int Amphora_SetFrameset(AmphoraImage *spr, const char *name);
 /* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
-void Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
+int Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
 /* Set the delay between frames of a frameset animation */
-void Amphora_SetFramesetAnimationTime(AmphoraImage *spr, const char *name, Uint16 delay);
+int Amphora_SetFramesetAnimationTime(AmphoraImage *spr, const char *name, Uint16 delay);
 /* Change the draw order of a sprite */
 AmphoraImage *Amphora_ReorderSprite(AmphoraImage *spr, Sint32 order);
 /* Sets a sprite's absolute location */
-void Amphora_SetSpriteLocation(AmphoraImage *spr, float x, float y);
+int Amphora_SetSpriteLocation(AmphoraImage *spr, float x, float y);
 /* Move a sprite by the supplied delta values */
-void Amphora_MoveSprite(AmphoraImage *spr, float delta_x, float delta_y);
+int Amphora_MoveSprite(AmphoraImage *spr, float delta_x, float delta_y);
 /* Flip a sprite */
-void Amphora_FlipSprite(AmphoraImage *spr);
+int Amphora_FlipSprite(AmphoraImage *spr);
 /* Unflip a sprite */
-void Amphora_UnflipSprite(AmphoraImage *spr);
+int Amphora_UnflipSprite(AmphoraImage *spr);
 /* Show the supplied sprite_slot if hidden */
-void Amphora_ShowSprite(AmphoraImage *spr);
+int Amphora_ShowSprite(AmphoraImage *spr);
 /* Hide a sprite without free it */
-void Amphora_HideSprite(AmphoraImage *spr);
+int Amphora_HideSprite(AmphoraImage *spr);
 /* Free a sprite slot */
-void Amphora_FreeSprite(AmphoraImage **spr);
+int Amphora_FreeSprite(AmphoraImage **spr);
 #ifdef __cplusplus
 }
 #endif

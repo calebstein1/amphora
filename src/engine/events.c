@@ -1,3 +1,4 @@
+#include "engine/internal/error.h"
 #include "engine/internal/events.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
@@ -40,5 +41,5 @@ Amphora_ProcessEventLoop(SDL_Event *e) {
 		}
 	}
 
-	return 0;
+	return AMPHORA_STATUS_OK;
 }

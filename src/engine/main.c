@@ -1,6 +1,7 @@
 #include "engine/game_loop.h"
 #include "engine/util.h"
 #include "engine/internal/db.h"
+#include "engine/internal/error.h"
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
@@ -10,7 +11,6 @@
 #include "engine/internal/render.h"
 #include "engine/internal/save_data.h"
 #include "engine/internal/tilemap.h"
-#include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
 
 #ifdef __EMSCRIPTEN__
@@ -38,63 +38,55 @@ main(int argc, char **argv) {
 	(void)argv;
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL", SDL_GetError(), 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to init SDL: %s", SDL_GetError());
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 
 	if (IMG_Init(IMG_INIT_PNG) < 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_image: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_image", SDL_GetError(), 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to init SDL_image: %s", SDL_GetError());
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 
 #ifndef DISABLE_MIXER
 	if (Mix_Init(MIX_INIT_OGG) < 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_mixer: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_mixer", SDL_GetError(), 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to init SDL_mixer: %s", SDL_GetError());
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 	if (Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 2048) < 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to open audio device: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to open audio device", SDL_GetError(), 0);
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to open audio device: %s", SDL_GetError());
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 	if (Amphora_InitSFX() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load sfx data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load sfx data", "Failed to load sfx data", 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to load sfx data");
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 	if (Amphora_InitMusic() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load music data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load music data", "Failed to load sfx data", 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to load music data");
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 #endif
 #ifndef DISABLE_FONTS
 	if (TTF_Init() < 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to init SDL_ttf: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init SDL_ttf", SDL_GetError(), 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to init SDL_ttf: %s", SDL_GetError());
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 	if (Amphora_InitFonts() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load TTF font data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load TTF font data", "Failed to load TTF font data", 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL,"Failed to load TTF font data");
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 #endif
 #ifndef DISABLE_TILEMAP
 	if (Amphora_InitMaps() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to load tilemap data\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to load tilemap data", "Failed to load tilemap data", 0);
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL,"Failed to load tilemap data");
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 #endif
 	Amphora_InitRand();
 	Amphora_InitDB();
 	Amphora_InitConfig();
 	if (Amphora_InitRender() == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR,"Failed to init renderer\n");
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL,"Failed to init renderer");
+		return AMPHORA_STATUS_CORE_FAIL;
 	}
 	Amphora_InitSave();
 	Amphora_InitInput();
@@ -121,7 +113,7 @@ main(int argc, char **argv) {
 #endif
 	SDL_Quit();
 
-	return 0;
+	return AMPHORA_STATUS_OK;
 }
 
 void
