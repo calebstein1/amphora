@@ -1,4 +1,6 @@
+#include "engine/internal/error.h"
 #include "engine/internal/db.h"
+#include "engine/internal/tools.h"
 
 #include "config.h"
 
@@ -13,16 +15,19 @@ Amphora_GetDB(void) {
  * Internal functions
  */
 
-void
+int
 Amphora_InitDB(void) {
 	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
 	const char *filename = "amphora.db";
-	size_t new_len = SDL_strlen(path) + SDL_strlen(filename) + 1;
 
-	path = SDL_realloc(path, new_len);
-	SDL_strlcat(path, filename, new_len);
+	if (!((path = Amphora_strcat(path, filename)))) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to create database path");
+		return AMPHORA_STATUS_ALLOC_FAIL;
+	}
 	sqlite3_open_v2(path, &game_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 	SDL_free(path);
+
+	return AMPHORA_STATUS_OK;
 }
 
 void

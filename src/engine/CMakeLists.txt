@@ -13,4 +13,5 @@ add_library(amphora_engine
 	random.c
 	collision.c
 	error.c
+	tools.c
 )
