@@ -26,9 +26,9 @@ struct render_list_node_t {
 	struct render_list_node_t *next;
 };
 
-struct amphora_object_generic_t {
+typedef struct {
 	enum amphora_object_type_e type;
-};
+} IAmphoraObject;
 
 int Amphora_InitRender(void);
 void Amphora_CloseRender(void);

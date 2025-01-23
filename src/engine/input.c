@@ -78,7 +78,7 @@ Amphora_ObjectClicked(void *obj, int button, void (*callback)(void)) {
 	int x, y;
 	Uint32 flags;
 	SDL_FRect *rect;
-	struct amphora_object_generic_t *obj_generic = (struct amphora_object_generic_t *)obj;
+	IAmphoraObject *obj_generic = (IAmphoraObject *)obj;
 	Camera camera = Ampohra_GetCamera();
 
 	switch (obj_generic->type) {
@@ -107,7 +107,7 @@ bool
 Amphora_ObjectHover(void *obj) {
 	int x, y;
 	SDL_FRect *rect;
-	struct amphora_object_generic_t *obj_generic = (struct amphora_object_generic_t *)obj;
+	IAmphoraObject *obj_generic = (IAmphoraObject *)obj;
 	Camera camera = Ampohra_GetCamera();
 
 	switch (obj_generic->type) {
