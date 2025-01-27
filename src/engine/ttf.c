@@ -71,7 +71,13 @@ Ampohra_GetStringText(AmphoraString *msg) {
 }
 
 AmphoraString *
-Amphora_UpdateStringText(AmphoraString **msg, const char *text) {
+Amphora_UpdateStringText(AmphoraString **msg, const char *fmt, ...) {
+	va_list args;
+	char text[4096];
+
+	va_start(args, fmt);
+	vsnprintf(text, 4096, fmt, args);
+
 	(*msg)->len = SDL_strlen(text);
 	SDL_free((*msg)->text);
 	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {

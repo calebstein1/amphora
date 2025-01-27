@@ -1,7 +1,6 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -101,8 +100,6 @@ Amphora_GameLoop(Uint64 frame, const struct input_state_t *key_actions) {
 	static bool f_down = false;
 	static Uint8 hello_ticker = 0;
 	static Uint64 damage_cooldown = 0;
-	std::stringstream timer_stream;
-	std::stringstream coords_stream;
 	float player_speed = 1;
 
 	Amphora_PlayMusic(500);
@@ -191,12 +188,10 @@ Amphora_GameLoop(Uint64 frame, const struct input_state_t *key_actions) {
 		Amphora_SetFrameset(rotating_heart, "Stationary");
 	}
 
-	coords_stream << Amphora_GetSpritePosition(player).x << ", " << Amphora_GetSpritePosition(player).y;
-	Amphora_UpdateStringText(&coords, coords_stream.str().c_str());
+	Amphora_UpdateStringText(&coords, "%.2f, %.2f", Amphora_GetSpritePosition(player).x, Amphora_GetSpritePosition(player).y);
 
 	if (frame % Amphora_GetFPS() == 0) {
-		timer_stream << frame / Amphora_GetFPS();
-		Amphora_UpdateStringText(&timer, timer_stream.str().c_str());
+		Amphora_UpdateStringText(&timer, "%d", frame / Amphora_GetFPS());
 	}
 
 	if (hello && Amphora_IsEven(frame) && hello_ticker < Amphora_GetStringLength(hello)) {

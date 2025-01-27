@@ -27,7 +27,7 @@ size_t Amphora_GetStringLength(const AmphoraString *msg);
 /* Get the text of an AmphoraString */
 const char *Ampohra_GetStringText(AmphoraString *msg);
 /* Update the text in a string */
-AmphoraString *Amphora_UpdateStringText(AmphoraString **msg, const char *text);
+AmphoraString *Amphora_UpdateStringText(AmphoraString **msg, const char *fmt, ...);
 /* Change the number of characters displayed in a string, 0 displays all characters */
 AmphoraString *Amphora_UpdateStringCharsDisplayed(AmphoraString **msg, size_t n);
 /* Free a string */
