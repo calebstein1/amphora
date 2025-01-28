@@ -76,7 +76,7 @@ Amphora_UpdateStringText(AmphoraString **msg, const char *fmt, ...) {
 	char text[4096];
 
 	va_start(args, fmt);
-	vsnprintf(text, 4096, fmt, args);
+	SDL_vsnprintf(text, 4096, fmt, args);
 
 	(*msg)->len = SDL_strlen(text);
 	SDL_free((*msg)->text);
