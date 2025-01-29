@@ -1,3 +1,4 @@
+#include "engine/internal/error.h"
 #include "engine/internal/img.h"
 #include "engine/internal/prefs.h"
 #include "engine/internal/render.h"
@@ -5,6 +6,9 @@
 #include "engine/internal/ttf.h"
 
 #include "config.h"
+
+/* Prototypes for private functions */
+int Amphora_InitRenderList(void);
 
 /* File-scoped variables */
 static SDL_Renderer *renderer;
@@ -151,18 +155,6 @@ Amphora_InitRender(void) {
 	}
 	Amphora_SetRenderLogicalSize(Amphora_GetResolution());
 
-	if ((render_list = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to initialize render list\n");
-
-		return -1;
-	}
-	render_list->type = AMPH_OBJ_NIL;
-	render_list->order = SDL_MIN_SINT32;
-	render_list->garbage = false;
-	render_list->next = NULL;
-	render_list_head = render_list;
-	render_list_node_count = 1;
-
 	return 0;
 }
 
@@ -202,6 +194,8 @@ Amphora_GetCameraTarget(void) {
 struct render_list_node_t *
 Amphora_AddRenderListNode(int order) {
 	struct render_list_node_t *new_render_list_node = NULL;
+
+	if (!render_list) Amphora_InitRenderList();
 
 	if ((new_render_list_node = SDL_calloc(1, sizeof(struct render_list_node_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to initialize new render list node\n");
@@ -310,4 +304,25 @@ Amphora_UpdateCamera(void) {
 void
 Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, double angle, SDL_RendererFlip flip) {
 	SDL_RenderCopyExF(renderer, texture, srcrect, dstrect, angle, NULL, flip);
+}
+
+/*
+ * Private functions
+ */
+
+int
+Amphora_InitRenderList(void) {
+	if ((render_list = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize render list\n");
+
+		return AMPHORA_STATUS_ALLOC_FAIL;
+	}
+	render_list->type = AMPH_OBJ_NIL;
+	render_list->order = SDL_MIN_SINT32;
+	render_list->garbage = false;
+	render_list->next = NULL;
+	render_list_head = render_list;
+	render_list_node_count = 1;
+
+	return AMPHORA_STATUS_OK;
 }
