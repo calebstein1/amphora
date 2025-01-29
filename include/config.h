@@ -31,6 +31,8 @@
 	KMAP(zoom, m, LEFTSHOULDER)              \
 	KMAP(expand, n, RIGHTSHOULDER) \
 	KMAP(toggle_fullscreen, f, INVALID)                                \
-	KMAP(quit, ESCAPE, INVALID)
+	KMAP(quit, ESCAPE, INVALID)    \
+	KMAP(scene1, 1, INVALID)       \
+	KMAP(scene2, 2, INVALID)
 
 #endif /* UNTITLED_PLATFORMER_CONFIG_H */

@@ -173,7 +173,17 @@ Amphora_FreeObjectGroup(void) {
 	for (i = 0; i < obj_groups.c; i++) {
 		SDL_free(obj_groups.labels[i]);
 		SDL_free(obj_groups.rects[i]);
+		obj_groups.labels[i] = NULL;
+		obj_groups.rects[i] = NULL;
+
 	}
+
+	obj_groups.c = 0;
+}
+
+void
+Amphora_FreeAllObjectGroups (void) {
+	Amphora_FreeObjectGroup();
 	SDL_free(obj_groups.labels);
 	SDL_free(obj_groups.c_rects);
 	SDL_free(obj_groups.rects);

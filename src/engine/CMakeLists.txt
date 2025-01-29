@@ -14,4 +14,5 @@ add_library(amphora_engine
 	collision.c
 	error.c
 	tools.c
+	scenes.c
 )

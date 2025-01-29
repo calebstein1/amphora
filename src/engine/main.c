@@ -1,4 +1,3 @@
-#include "engine/game_loop.h"
 #include "engine/util.h"
 #include "engine/internal/db.h"
 #include "engine/internal/error.h"
@@ -10,6 +9,7 @@
 #include "engine/internal/random.h"
 #include "engine/internal/render.h"
 #include "engine/internal/save_data.h"
+#include "engine/internal/scenes.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"
 
@@ -94,7 +94,7 @@ main(int argc, char **argv) {
 
 	framerate = (Uint32) Amphora_LoadFPS();
 
-	Amphora_GameInit();
+	Amphora_InitScene();
 
 #ifdef __EMSCRIPTEN__
 	emscripten_set_main_loop(main_loop, 0, 1);
@@ -158,7 +158,7 @@ Amphora_MainLoop(SDL_Event *e) {
 #endif
 	}
 	Amphora_ClearBG();
-	Amphora_GameLoop(frame_count, Amphora_GetKeyActionState());
+	Amphora_UpdateScene();
 	Amphora_ProcessDeferredTransition();
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();
@@ -195,20 +195,18 @@ Amphora_SaveConfig(void) {
 
 static void
 Amphora_CleanResources(void) {
-	Amphora_GameShutdown();
+	Amphora_DestroyScene();
 	Amphora_CloseIMG();
 #ifndef DISABLE_FONTS
 	Amphora_FreeFonts();
-#endif
-#ifndef DISABLE_TILEMAP
-	Amphora_DestroyCurrentMap();
-	Amphora_FreeObjectGroup();
 #endif
 #ifndef DISABLE_MIXER
 	Amphora_CloseSFX();
 	Amphora_CloseMusic();
 #endif
-	Amphora_FreeRenderList();
+#ifndef DISABLE_TILEMAP
+	Amphora_FreeAllObjectGroups();
+#endif
 	Amphora_CloseRender();
 	Amphora_ReleaseControllers();
 	Amphora_CloseDB();

@@ -7,11 +7,11 @@
 
 #include "config.h"
 
-struct input_state_t {
+typedef struct input_state_t {
 #define KMAP(action, ...) bool action : 1;
 	DEFAULT_KEYMAP
 #undef KMAP
-};
+} InputState;
 
 #ifdef __cplusplus
 extern "C" {
