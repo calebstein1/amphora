@@ -1,7 +1,7 @@
 #ifndef AMPHORA_SCENES_INTERNAL_H
 #define AMPHORA_SCENES_INTERNAL_H
 
-#include "scenes_list.h"
+#include "scene_list.h"
 
 typedef struct amphora_scene_t {
 	void (*init_func)(void);
