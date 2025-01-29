@@ -1,16 +1,14 @@
 #include "engine/internal/error.h"
-#include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
-#include "engine/internal/ttf.h"
 
 #include "config.h"
 
-#include "scenes_list.h"
+#include "scene_list.h"
 
 #ifdef __cplusplus
 extern "C"
