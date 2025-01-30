@@ -1,0 +1,39 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="en-US" data-preset="contrast" data-primary-color="#307FFF"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="UTF-8"><meta name="built-on" content="2025-01-29T16:10:22.573489"><title>Working with Scenes | Amphora Docs</title><script type="application/json" id="virtual-toc-data">[{"id":"creating-a-scene","level":0,"title":"Creating a Scene","anchor":"#creating-a-scene"},{"id":"loading-scenes","level":0,"title":"Loading Scenes","anchor":"#loading-scenes"}]</script><script type="application/json" id="topic-shortcuts"></script><link href="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b575/app.css" rel="stylesheet"><meta name="msapplication-TileColor" content="#000000"><link rel="apple-touch-icon" sizes="180x180" href="https://jetbrains.com/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="https://jetbrains.com/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="https://jetbrains.com/favicon-16x16.png"><meta name="msapplication-TileImage" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-144x144.png"><meta name="msapplication-square70x70logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-70x70.png"><meta name="msapplication-square150x150logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-310x150.png"><meta name="msapplication-square310x310logo" content="https://resources.jetbrains.com/storage/ui/favicons/mstile-310x310.png"><meta name="image" content=""><!-- Open Graph --><meta property="og:title" content="Working with Scenes | Amphora Docs"><meta property="og:description" content=""><meta property="og:image" content=""><meta property="og:site_name" content="Amphora Docs Help"><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="writerside-documentation/working-with-scenes.html"><!-- End Open Graph --><!-- Twitter Card --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content=""><meta name="twitter:title" content="Working with Scenes | Amphora Docs"><meta name="twitter:description" content=""><meta name="twitter:creator" content=""><meta name="twitter:image:src" content=""><!-- End Twitter Card --><!-- Schema.org WebPage --><script type="application/ld+json">{
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "@id": "writerside-documentation/working-with-scenes.html#webpage",
+    "url": "writerside-documentation/working-with-scenes.html",
+    "name": "Working with Scenes | Amphora Docs",
+    "description": "",
+    "image": "",
+    "inLanguage":"en-US"
+}</script><!-- End Schema.org --><!-- Schema.org WebSite --><script type="application/ld+json">{
+    "@type": "WebSite",
+    "@id": "writerside-documentation/#website",
+    "url": "writerside-documentation/",
+    "name": "Amphora Docs Help"
+}</script><!-- End Schema.org --></head><body data-id="Working-with-Scenes" data-main-title="Working with Scenes" data-article-props="{&quot;seeAlsoStyle&quot;:&quot;links&quot;}" data-template="article" data-breadcrumbs=""><div class="wrapper"><main class="panel _main"><header class="panel__header"><div class="container"><h3>Amphora Docs  Help</h3><div class="panel-trigger"></div></div></header><section class="panel__content"><div class="container"><article class="article" data-shortcut-switcher="inactive"><h1 data-toc="Working-with-Scenes" id="Working-with-Scenes.md">Working with Scenes</h1><p id="-q8dprt_3">Amphora uses the concept of scenes to manage game levels. At its most basic, a scene is simply a collection of three functions: an init function, an update function, and a destroy function. When a scene is loaded, its init function is run once, then its update function is run once per frame, and finally its destroy function is run when it's unloaded.</p><section class="chapter"><h2 id="creating-a-scene" data-toc="creating-a-scene">Creating a Scene</h2><p id="-q8dprt_6">Scenes are managed using the <code class="code" id="-q8dprt_15">scene_list.h</code> file and the same X-macro pattern we've scene before. An example <code class="code" id="-q8dprt_16">scene_list.h</code> file could look as follows:</p><div class="code-block" data-lang="c">
+#define SCENES \
+    SCENE(MainMenu) \
+    SCENE(Level1) \
+    SCENE(Level2) \
+    SCENE(Level3)
+</div><aside class="prompt" data-type="warning" data-title="" id="-q8dprt_8"><p>The first scene in the list will always be loaded first when the game is launched.</p></aside><p id="-q8dprt_9">Typically each scene will have its own file where its functions will reside. The functions require the following prototypes:</p><div class="code-block" data-lang="c">
+void {SceneName}_Init(void);
+void {SceneName}_Update(Uint64, const InputState *);
+void {SceneName}_Destroy(void);
+</div><p id="-q8dprt_11">Somewhere above the functions you will also need to include the following macro:</p><div class="code-block" data-lang="c">
+Amphora_BeginScene(name)
+</div><p id="-q8dprt_13">So a completed scene file for the MainMenu scene could look as so:</p><div class="code-block" data-lang="c">
+#include &quot;engine/amphora.h&quot;
+
+Amphora_BeginScene(MainMenu)
+
+MainMenu_Init(void) {}
+MainMenu_Update(Uint64 frame, const InputState *input_state) {}
+MainMenu_Destroy(void) {}
+
+</div></section><section class="chapter"><h2 id="loading-scenes" data-toc="loading-scenes">Loading Scenes</h2><p id="-q8dprt_17">A scene is loaded using <code class="code" id="-q8dprt_20">Amphora_LoadScene(name)</code>. This will call the current scene's destroy function, free other allocated resources, then call the new scene's init function and begin running its update function.</p><p id="-q8dprt_18">For example, to load level 1, it'd be as simple as:</p><div class="code-block" data-lang="c">
+Amphora_LoadScene(&quot;Level1&quot;);
+</div></section><div class="last-modified">Last modified: 30 January 2025</div><div data-feedback-placeholder="true"></div><div class="navigation-links _bottom"><a href="working-with-binary-resources.html" class="navigation-links__prev">Working with Binary Resources</a><a href="drawing-text.html" class="navigation-links__next">Drawing Text</a></div></article><div id="disqus_thread"></div></div></section></main></div><script src="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b575/app.js"></script></body></html>
