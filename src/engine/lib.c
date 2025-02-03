@@ -26,9 +26,6 @@ Amphora_strcat(char *s1, const char *s2) {
 	return s1;
 }
 
-/*
- * TODO: Test on x86
- */
 Uint32
 Amphora_crc32(const char *data) {
 	Uint32 crc = 0xffffffff;
