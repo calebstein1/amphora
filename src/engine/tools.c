@@ -1,5 +1,5 @@
-#if defined(__SSE4_2__)
-#include <immintrin.h>
+#if defined(__AVX__)
+#include <nmmintrin.h>
 #elif defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32)
 #include <arm_acle.h>
 #endif
@@ -8,7 +8,9 @@
 #include "engine/internal/tools.h"
 
 /* Prototypes for private functions */
+#if defined(__AVX__) || (defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32))
 static Uint32 hw_crc32c_loop(Uint32 crc, const void *data, size_t len);
+#endif
 
 /*
  * Internal functions
@@ -36,7 +38,7 @@ Amphora_crc32c(const char *data) {
 	if (!data || !*data) return 0;
 
 	len = strlen(data);
-#if (defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32)) || defined(__SSE4_2__)
+#if defined (__AVX__) || (defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32))
 #ifdef DEBUG
 	SDL_Log("Using hardware crc32c...\n");
 #endif
@@ -55,6 +57,7 @@ Amphora_crc32c(const char *data) {
  * Private functions
  */
 
+#if defined(__AVX__) || (defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32))
 Uint32
 hw_crc32c_loop(Uint32 crc, const void *data, size_t len) {
 	Uint32 (*crc_u8)(Uint32, Uint8) = NULL;
@@ -62,12 +65,12 @@ hw_crc32c_loop(Uint32 crc, const void *data, size_t len) {
 	char *d = (char *)data;
 	size_t i;
 
-#if defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32)
-	crc_u8 = __crc32cb;
-	crc_u32 = __crc32cw;
-#elif __SSE4_2__
+#if defined(__AVX__)
 	crc_u8 = _mm_crc32_u8;
 	crc_u32 = _mm_crc32_u32;
+#elif defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32)
+	crc_u8 = __crc32cb;
+	crc_u32 = __crc32cw;
 #else
 #ifdef DEBUG
 	SDL_Log("Falling back to software crc32");
@@ -90,3 +93,4 @@ hw_crc32c_loop(Uint32 crc, const void *data, size_t len) {
 
 	return crc;
 }
+#endif
