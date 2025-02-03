@@ -71,14 +71,14 @@ hw_crc32_loop(Uint32 crc, const void *data, size_t len) {
 #endif
 		len--;
 	}
-	len >>= 3;
+	len >>= 2;
 	for(i = 0; i < len; i++) {
 #if defined(__AVX__)
-		crc = _mm_crc32_u64(crc, *(Uint64 *)d);
+		crc = _mm_crc32_u32(crc, *(Uint32 *)d);
 #else
-		crc = __crc32cd(crc, *(Uint64 *)d);
+		crc = __crc32cw(crc, *(Uint32 *)d);
 #endif
-		d += sizeof(Uint64);
+		d += sizeof(Uint32);
 	}
 	while (*d) {
 #if defined(__AVX__)
