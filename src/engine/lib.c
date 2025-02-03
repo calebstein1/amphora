@@ -5,7 +5,7 @@
 #endif
 #include <stdint.h>
 
-#include "engine/internal/tools.h"
+#include "engine/internal/lib.h"
 
 /* Prototypes for private functions */
 #if defined(__AVX__) || (defined(__ARM_ACLE) && defined(__ARM_FEATURE_CRC32))

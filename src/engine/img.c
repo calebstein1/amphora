@@ -3,10 +3,9 @@
 #endif
 
 #include "engine/internal/error.h"
+#include "engine/internal/lib.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
-#include "engine/internal/timer.h"
-#include "engine/internal/tools.h"
 
 #include "config.h"
 
