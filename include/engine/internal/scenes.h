@@ -5,7 +5,7 @@
 
 typedef struct amphora_scene_t {
 	void (*init_func)(void);
-	void (*update_func)(Uint64, InputState *);
+	void (*update_func)(Uint64, const InputState *);
 	void (*destroy_func)(void);
 } AmphoraScene;
 

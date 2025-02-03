@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-#define SCENE(name) extern void name##_Init(void); extern void name##_Update(Uint64, InputState *); extern void name##_Destroy(void);
+#define SCENE(name) extern void name##_Init(void); extern void name##_Update(Uint64, const InputState *); extern void name##_Destroy(void);
 	SCENES
 #undef SCENE
 #ifdef __cplusplus
