@@ -9,6 +9,8 @@ Level2_Init(void) {
 
 void
 Level2_Update(Uint64 frame, const InputState *input) {
+	(void)frame;
+
 	if (input->left) {
 		Amphora_MoveCamera(-1 ,0);
 	}

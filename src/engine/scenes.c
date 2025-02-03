@@ -25,7 +25,7 @@ int Amphora_FindScene(const char *name);
 
 /* File-scoped variables */
 static AmphoraScene scenes[] = {
-#define SCENE(name) (AmphoraScene){ name##_Init, name##_Update, name##_Destroy },
+#define SCENE(name) { .init_func = name##_Init, .update_func = name##_Update, .destroy_func = name##_Destroy },
 	SCENES
 #undef SCENE
 };
