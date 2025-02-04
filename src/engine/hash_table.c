@@ -52,9 +52,8 @@ Amphora_HTProbeForBucket(const HT_HashTable *t, Uint32 hash, int i, int len, boo
 
 	while (t[i].h != hash) {
 		if (set && !t[i].d) break;
-
-		if (++i == len) i = 0;
 		if (i == s) return -1;
+		if (++i == len) i = 0;
 	}
 
 	return i;
