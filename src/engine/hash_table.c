@@ -10,7 +10,7 @@ int Amphora_HTProbeForFreeBucket(const HT_HashTable *t, int i, int len);
  */
 
 void *
-Amphora_HTGetValuePtr(const char *key, const HT_HashTable *t, size_t len) {
+Amphora_HTGetValuePtr(const char *key, const HT_HashTable *t, int len) {
 	Uint32 hash = Amphora_crc32(key);
 	int i = (int)(hash % len);
 	size_t k_len = SDL_strlen(key);
@@ -24,7 +24,7 @@ Amphora_HTGetValuePtr(const char *key, const HT_HashTable *t, size_t len) {
 }
 
 Uint32
-Amphora_HTSetValuePtr(const char *key, Uint64 val, size_t nbytes, HT_HashTable *t, size_t len) {
+Amphora_HTSetValuePtr(const char *key, Uint64 val, size_t nbytes, HT_HashTable *t, int len) {
 	Uint32 hash = Amphora_crc32(key);
 	int i = (int)(hash % len);
 	size_t k_len = SDL_strlen(key);
