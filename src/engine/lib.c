@@ -36,14 +36,8 @@ Amphora_crc32(const char *data) {
 
 	len = strlen(data);
 #if defined (__AVX__) || (__ARM_ARCH >= 8 && defined(__ARM_FEATURE_CRC32))
-#ifdef DEBUG
-	SDL_Log("Using hardware crc32...\n");
-#endif
 	crc_loop_func = hw_crc32_loop;
 #else
-#ifdef DEBUG
-	SDL_Log("Using software crc32...\n");
-#endif
 	crc_loop_func = SDL_crc32;
 #endif
 
