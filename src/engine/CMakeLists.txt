@@ -15,4 +15,5 @@ add_library(amphora_engine
 	error.c
 	lib.c
 	scenes.c
+	hash_table.c
 )
