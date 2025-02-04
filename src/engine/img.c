@@ -15,10 +15,6 @@ static int get_img_by_name(const char *name);
 static int find_frameset(const AmphoraImage *spr, const char *name);
 
 /* File-scoped variables */
-/*
-static SDL_RWops *images[IMAGES_COUNT];
-static SDL_Texture *open_images[IMAGES_COUNT];
- */
 static HT_HashTable images[IMAGES_COUNT * 4 / 2];
 static HT_HashTable open_images[IMAGES_COUNT * 4 / 2];
 static const char *img_names[] = {
