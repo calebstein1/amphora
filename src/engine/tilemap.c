@@ -3,6 +3,7 @@
 #include <windows.h>
 #endif
 
+#include "engine/internal/hash_table.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
@@ -11,8 +12,7 @@
 #include "vendor/cute_tiled.h"
 
 /* Prototypes for private functions */
-static int Amphora_GetMapByName(const char *name);
-static int Amphora_ParseMapToTexture(enum tilemaps_e map_idx);
+static int Amphora_ParseMapToTexture(const char *name);
 static int Amphora_ParseTileLayer(const cute_tiled_map_t *map, const cute_tiled_layer_t *layer, int tileset_img_w, SDL_Texture *tileset_img, int n);
 static int Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer);
 static int Amphora_GetMapLayerByName(const char *name);
@@ -23,8 +23,12 @@ static char *map_names[] = {
 	MAPS
 #undef LOADMAP
 };
+/*
 static Sint32 map_sizes[MAPS_COUNT];
 static char *map_data[MAPS_COUNT];
+*/
+static HT_HashTable map_sizes[MAPS_COUNT * 4 / 2];
+static HT_HashTable map_data[MAPS_COUNT * 4 / 2];
 static struct amphora_tilemap_t current_map;
 static struct amphora_tilemap_layer_t *deferred_transition;
 static SDL_FRect map_rect;
@@ -32,18 +36,14 @@ static struct amphora_object_groups_t obj_groups;
 
 void
 Amphora_SetMap(const char *name, const float scale) {
-	int idx, i;
+	int i;
 	struct render_list_node_t *render_list_node;
 
 	Amphora_DestroyCurrentMap();
 	if (!name) return;
 
-	if ((idx = Amphora_GetMapByName(name)) == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate map %s\n", name);
-		return;
-	}
 	current_map.scale = scale ? scale : 1;
-	if (Amphora_ParseMapToTexture(idx) == -1) {
+	if (Amphora_ParseMapToTexture(name) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create texture from map: %s\n", name);
 		return;
 	}
@@ -115,9 +115,8 @@ Amphora_InitMaps(void) {
 #define LOADMAP(name, path) extern char name##_tm[]; extern int name##_tm_size;
 	MAPS
 #undef LOADMAP
-	Sint32 *map_sizes_ptr = map_sizes;
-	char **map_data_ptr = map_data;
-#define LOADMAP(name, path) *map_sizes_ptr = name##_tm_size; *map_data_ptr = name##_tm; map_sizes_ptr++; map_data_ptr++;
+#define LOADMAP(name, path) Amphora_HTSetValue(#name, char *, name##_tm, map_data); \
+			Amphora_HTSetValue(#name, int, name##_tm_size, map_sizes);
 	MAPS
 #undef LOADMAP
 #endif
@@ -235,19 +234,10 @@ Amphora_ProcessDeferredTransition(void) {
  */
 
 static int
-Amphora_GetMapByName(const char *name) {
-	int i;
-
-	for (i = 0; i < MAPS_COUNT; i++) {
-		if (SDL_strcmp(name, map_names[i]) == 0) return i;
-	}
-	return -1;
-}
-
-static int
-Amphora_ParseMapToTexture(enum tilemaps_e map_idx) {
+Amphora_ParseMapToTexture(const char *name) {
 	SDL_Renderer *renderer = Amphora_GetRenderer();
-	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(map_data[map_idx], map_sizes[map_idx], 0);
+	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(Amphora_HTGetValue(name, char *, map_data),
+								Amphora_HTGetValue(name, int, map_sizes), 0);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
 	int tileset_img_w, tileset_img_h;
