@@ -4,7 +4,7 @@
 #include "SDL.h"
 
 #define Amphora_HTZeroTable(t) SDL_memset((t), 0, sizeof((t)))
-#define Amphora_HTCheckValueExists(k, t) (Amphora_HTGetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t)))) != NULL)
+#define Amphora_HTCheckKeyExists(k, t) (Amphora_HTGetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t)))) != NULL)
 #define Amphora_HTGetRef(k, t) Amphora_HTGetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t))))
 #define Amphora_HTGetValue(k, type, t) *(type *)Amphora_HTGetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t))))
 #define Amphora_HTSetValue(k, type, v, t) Amphora_HTSetValuePtr((k), (Uint64)(v), sizeof(type), (t), (sizeof((t)) / sizeof(*(t))))
