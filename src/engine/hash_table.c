@@ -3,7 +3,7 @@
 
 /* Prototypes for private functions */
 static int Amphora_HTProbeForBucket(const HT_HashTable *t, Uint32 hash, int i, int len);
-static int Amphora_HTProbeForFreeBucket(const HT_HashTable *t, int i, int len);
+static int Amphora_HTProbeForFreeBucket(const HT_HashTable *t, Uint32 hash, int i, int len);
 
 /*
  * Internal functions
@@ -32,7 +32,7 @@ Amphora_HTSetValuePtr(const char *key, Uint64 val, size_t nbytes, HT_HashTable *
 	if (nbytes > sizeof(Uint64)) return 1;
 
 	if (t[i].h && (t[i].h != hash || SDL_memcmp(&t[i].b, key, k_len > sizeof(Uint32) ? sizeof(Uint32) : k_len) != 0))
-		i = Amphora_HTProbeForFreeBucket(t, i, len);
+		i = Amphora_HTProbeForFreeBucket(t, hash, i, len);
 	if (i == -1) return 1;
 
 	t[i].h = hash;
@@ -59,10 +59,10 @@ Amphora_HTProbeForBucket(const HT_HashTable *t, Uint32 hash, int i, int len) {
 }
 
 static int
-Amphora_HTProbeForFreeBucket(const HT_HashTable *t, int i, int len) {
+Amphora_HTProbeForFreeBucket(const HT_HashTable *t, Uint32 hash, int i, int len) {
 	const int s = i ? i - 1 : len - 1;
 
-	while (t[i].h) {
+	while (t[i].h && t[i].h != hash) {
 		if (++i == len) i = 0;
 		if (i == s) return -1;
 	}
