@@ -60,7 +60,7 @@ Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, 
 		return NULL;
 	}
 
-	if (!Amphora_HTCheckValueExists(image_name, SDL_Texture *, open_images)) {
+	if (!Amphora_HTCheckValueExists(image_name, open_images)) {
 		Amphora_HTSetValue(image_name, SDL_Texture *,
 				   IMG_LoadTexture_RW(Amphora_GetRenderer(),
 						      Amphora_HTGetValue(image_name, SDL_RWops *, images), 0),
@@ -343,14 +343,14 @@ Amphora_CloseIMG(void) {
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
 		SDL_RWclose(Amphora_HTGetValue(img_names[i], SDL_RWops *, images));
-		if (Amphora_HTCheckValueExists(img_names[i], SDL_Texture *, open_images))
+		if (Amphora_HTCheckValueExists(img_names[i], open_images))
 			SDL_DestroyTexture(Amphora_HTGetValue(img_names[i], SDL_Texture *, open_images));
 	}
 }
 
 SDL_Texture *
 Amphora_GetIMGTextureByName(const char *name) {
-	if (!Amphora_HTCheckValueExists(name, SDL_Texture *, open_images)) {
+	if (!Amphora_HTCheckValueExists(name, open_images)) {
 		Amphora_HTSetValue(name, SDL_Texture *,
 				   IMG_LoadTexture_RW(Amphora_GetRenderer(),
 						      Amphora_HTGetValue(name, SDL_RWops *, images), 0),
