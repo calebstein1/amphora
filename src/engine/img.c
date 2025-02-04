@@ -3,6 +3,7 @@
 #endif
 
 #include "engine/internal/error.h"
+#include "engine/internal/hash_table.h"
 #include "engine/internal/lib.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
@@ -14,8 +15,12 @@ static int get_img_by_name(const char *name);
 static int find_frameset(const AmphoraImage *spr, const char *name);
 
 /* File-scoped variables */
+/*
 static SDL_RWops *images[IMAGES_COUNT];
 static SDL_Texture *open_images[IMAGES_COUNT];
+ */
+static HT_HashTable images[IMAGES_COUNT * 4 / 2];
+static HT_HashTable open_images[IMAGES_COUNT * 4 / 2];
 static const char *img_names[] = {
 #define LOADIMG(name, path) #name,
 	IMAGES
@@ -59,8 +64,11 @@ Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, 
 		return NULL;
 	}
 
-	if (!open_images[idx]) {
-		open_images[idx] = IMG_LoadTexture_RW(Amphora_GetRenderer(), images[idx], 0);
+	if (!Amphora_HTCheckValueExists(image_name, SDL_Texture *, open_images)) {
+		Amphora_HTSetValue(image_name, SDL_Texture *,
+				   IMG_LoadTexture_RW(Amphora_GetRenderer(),
+						      Amphora_HTGetValue(image_name, SDL_RWops *, images), 0),
+				   open_images);
 	}
 
 	if ((new_sprite = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
@@ -115,8 +123,11 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 
 	if (override_img) {
 		override = get_img_by_name(override_img);
-		if (override > -1 && !open_images[override]) {
-			open_images[override] = IMG_LoadTexture_RW(Amphora_GetRenderer(), images[override], 0);
+		if (override > -1 && !Amphora_HTGetValue(img_names[override], SDL_Texture *, open_images)) {
+			Amphora_HTGetValue(img_names[override], SDL_Texture *, images) =
+				IMG_LoadTexture_RW(Amphora_GetRenderer(),
+						   Amphora_HTGetValue(img_names[override], SDL_RWops *, images),
+						   0);
 		}
 	}
 
@@ -299,7 +310,6 @@ Amphora_InitIMG(void) {
 #ifdef WIN32
 	HRSRC img_info;
 	HGLOBAL img_resource;
-	SDL_RWops *img_rw;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
 		if (!((img_info = FindResourceA(NULL, img_names[i], "PNG_IMG")))) {
@@ -312,15 +322,13 @@ Amphora_InitIMG(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load image resource... Amphora will crash now", 0);
 			return -1;
 		}
-		img_rw = SDL_RWFromConstMem(img_resource, SizeofResource(NULL, img_info));
-		images[i] = img_rw;
+		Amphora_HTSetValue(img_names[i], SDL_RWops *, SDL_RWFromConstMem(img_resource, SizeofResource(NULL, img_info)), images);
 	}
 #else
 #define LOADIMG(name, path) extern char name##_im[]; extern int name##_im_size;
 	IMAGES
 #undef LOADIMG
-	SDL_RWops **img_ptr = images;
-#define LOADIMG(name, path) *img_ptr = SDL_RWFromConstMem(name##_im, name##_im_size); img_ptr++;
+#define LOADIMG(name, path) Amphora_HTSetValue(#name, SDL_RWops *, SDL_RWFromConstMem(name##_im, name##_im_size), images);
 	IMAGES
 #undef LOADIMG
 #endif
@@ -338,25 +346,22 @@ Amphora_CloseIMG(void) {
 	int i;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
-		SDL_RWclose(images[i]);
-		if (open_images[i]) SDL_DestroyTexture(open_images[i]);
+		SDL_RWclose(Amphora_HTGetValue(img_names[i], SDL_RWops *, images));
+		if (Amphora_HTCheckValueExists(img_names[i], SDL_Texture *, open_images))
+			SDL_DestroyTexture(Amphora_HTGetValue(img_names[i], SDL_Texture *, open_images));
 	}
 }
 
 SDL_Texture *
 Amphora_GetIMGTextureByName(const char *name) {
-	int idx;
-
-	if ((idx = get_img_by_name(name)) == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate image %s\n", name);
-		return NULL;
+	if (!Amphora_HTCheckValueExists(name, SDL_Texture *, open_images)) {
+		Amphora_HTSetValue(name, SDL_Texture *,
+				   IMG_LoadTexture_RW(Amphora_GetRenderer(),
+						      Amphora_HTGetValue(name, SDL_RWops *, images), 0),
+						      open_images);
 	}
 
-	if (!open_images[idx]) {
-		open_images[idx] = IMG_LoadTexture_RW(Amphora_GetRenderer(), images[idx], 0);
-	}
-
-	return open_images[idx];
+	return Amphora_HTGetValue(name, SDL_Texture *, open_images);
 }
 
 void
@@ -406,7 +411,8 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 	}
 
 	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(Amphora_GetResolution());
-	Amphora_RenderTexture(open_images[(int) frameset->override_img > -1 ? frameset->override_img : spr->image],
+	Amphora_RenderTexture(Amphora_HTGetValue(img_names[(int)frameset->override_img > -1 ?
+					frameset->override_img : spr->image], SDL_Texture *, open_images),
 			      &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(logical_size);
 }
