@@ -2,7 +2,8 @@
 #include <windows.h>
 #endif
 
-#include <engine/internal/render.h>
+#include "engine/internal/hash_table.h"
+#include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
 
 #include "config.h"
@@ -14,8 +15,8 @@ static int Amphora_GetFontByName(const char *name);
 static SDL_Texture *Amphora_RenderStringToTexture(AmphoraString *msg);
 
 /* File-scoped variables */
-static SDL_RWops *fonts[FONTS_COUNT];
-static struct open_font_t open_fonts[FONTS_COUNT];
+static HT_HashTable fonts[FONTS_COUNT * 3 / 2];
+static HT_HashTable open_fonts[FONTS_COUNT * 3 / 2];
 static const char *font_names[] = {
 #define LOADFONT(name, path) #name,
 	FONTS
@@ -23,15 +24,21 @@ static const char *font_names[] = {
 };
 
 AmphoraString *
-Amphora_CreateString(AmphoraString **msg, const char *name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
+Amphora_CreateString(AmphoraString **msg, const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
 	struct render_list_node_t *render_list_node = Amphora_AddRenderListNode(order);
-	int idx;
-
 	if (*msg) return *msg;
 
-	if ((idx = Amphora_GetFontByName(name)) == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", name);
+	if (Amphora_GetFontByName(font_name) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", font_name);
 		return NULL;
+	}
+
+	if (!Amphora_HTCheckKeyExists(font_name, open_fonts)) {
+		Amphora_HTSetValue(font_name,
+				   TTF_Font *,
+				   TTF_OpenFontRW(Amphora_HTGetValue(font_name, SDL_RWops *, fonts),
+						  0, 16),
+				   open_fonts);
 	}
 
 	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
@@ -42,7 +49,7 @@ Amphora_CreateString(AmphoraString **msg, const char *name, const int pt, const 
 	}
 
 	(*msg)->type = AMPH_OBJ_TXT;
-	(*msg)->font = idx;
+	(*msg)->font_ptr = Amphora_HTGetValue(font_name, TTF_Font *, open_fonts);
 	(*msg)->pt = pt;
 	(*msg)->len = SDL_strlen(text);
 	(*msg)->n = 0;
@@ -161,15 +168,13 @@ Amphora_InitFonts(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
 			return -1;
 		}
-		ttf_rw = SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info));
-		fonts[i] = ttf_rw;
+		Amphora_HTSetValue(font_names[i], SDL_RWops *, SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info)), fonts);
 	}
 #else
 #define LOADFONT(name, path) extern char name##_ft[]; extern int name##_ft_size;
 	FONTS
 #undef LOADFONT
-	SDL_RWops **fonts_ptr = fonts;
-#define LOADFONT(name, path) *fonts_ptr = SDL_RWFromConstMem(name##_ft, name##_ft_size); fonts_ptr++;
+#define LOADFONT(name, path) Amphora_HTSetValue(#name, SDL_RWops *, SDL_RWFromConstMem(name##_ft, name##_ft_size), fonts);
 	FONTS
 #undef LOADFONT
 #endif
@@ -187,8 +192,8 @@ Amphora_FreeFonts(void) {
 	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
-		SDL_RWclose(fonts[i]);
-		TTF_CloseFont(open_fonts[i].font);
+		SDL_RWclose(Amphora_HTGetValue(font_names[i], SDL_RWops *, fonts));
+		TTF_CloseFont(Amphora_HTGetValue(font_names[i], TTF_Font *, open_fonts));
 	}
 }
 
@@ -208,13 +213,12 @@ Amphora_GetFontByName(const char *name) {
 
 static SDL_Texture *
 Amphora_RenderStringToTexture(AmphoraString *msg) {
-	enum fonts_e font_name = msg->font;
 	int pt = msg->pt;
 	int msg_rect_w, msg_rect_h;
 	size_t n = msg->n;
 	const char *text = msg->text;
 	const SDL_Color text_color = msg->color;
-	TTF_Font *font = NULL;
+	TTF_Font *font = msg->font_ptr;
 	SDL_Surface *surface = NULL;
 	SDL_Texture *texture = NULL;
 	char *n_buff = NULL;
@@ -227,14 +231,8 @@ Amphora_RenderStringToTexture(AmphoraString *msg) {
 			n = 0;
 		}
 	}
+	TTF_SetFontSize(font, pt);
 
-	if (open_fonts[font_name].pt != pt) {
-		TTF_CloseFont(open_fonts[font_name].font);
-		SDL_RWseek(fonts[font_name], 0, RW_SEEK_SET);
-		open_fonts[font_name] = (struct open_font_t){ .font = TTF_OpenFontRW(fonts[font_name],0, pt), .pt = pt };
-	}
-
-	font = open_fonts[font_name].font;
 	surface = TTF_RenderUTF8_Blended(font, n ? n_buff : text, text_color);
 	texture = SDL_CreateTextureFromSurface(Amphora_GetRenderer(), surface);
 	TTF_SizeUTF8(font, n ? n_buff : text, &msg_rect_w, &msg_rect_h);
