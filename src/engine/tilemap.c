@@ -23,8 +23,8 @@ static char *map_names[] = {
 	MAPS
 #undef LOADMAP
 };
-static HT_HashTable map_sizes[MAPS_COUNT * 4 / 2];
-static HT_HashTable map_data[MAPS_COUNT * 4 / 2];
+static HT_HashTable map_sizes[MAPS_COUNT * 3 / 2];
+static HT_HashTable map_data[MAPS_COUNT * 3 / 2];
 static struct amphora_tilemap_t current_map;
 static struct amphora_tilemap_layer_t *deferred_transition;
 static SDL_FRect map_rect;
