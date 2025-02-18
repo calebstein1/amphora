@@ -24,9 +24,9 @@ static const char *font_names[] = {
 };
 
 AmphoraString *
-Amphora_CreateString(AmphoraString **msg, const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
+Amphora_CreateString(const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
 	struct render_list_node_t *render_list_node = Amphora_AddRenderListNode(order);
-	if (*msg) return *msg;
+	struct amphora_message_t *msg;
 
 	if (Amphora_GetFontByName(font_name) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", font_name);
@@ -41,30 +41,30 @@ Amphora_CreateString(AmphoraString **msg, const char *font_name, const int pt, c
 				   open_fonts);
 	}
 
-	if (!((*msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
+	if (!((msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
 		return NULL;
 	}
-	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
+	if (!((msg->text = SDL_malloc(SDL_strlen(text) + 1)))) {
 		return NULL;
 	}
 
-	(*msg)->type = AMPH_OBJ_TXT;
-	(*msg)->font_ptr = Amphora_HTGetValue(font_name, TTF_Font *, open_fonts);
-	(*msg)->pt = pt;
-	(*msg)->len = SDL_strlen(text);
-	(*msg)->n = 0;
-	(*msg)->color = color;
-	(*msg)->rectangle.x = x;
-	(*msg)->rectangle.y = y;
-	(*msg)->render_list_node = render_list_node;
+	msg->type = AMPH_OBJ_TXT;
+	msg->font_ptr = Amphora_HTGetValue(font_name, TTF_Font *, open_fonts);
+	msg->pt = pt;
+	msg->len = SDL_strlen(text);
+	msg->n = 0;
+	msg->color = color;
+	msg->rectangle.x = x;
+	msg->rectangle.y = y;
+	msg->render_list_node = render_list_node;
 	render_list_node->type = AMPH_OBJ_TXT;
-	render_list_node->data = *msg;
+	render_list_node->data = msg;
 	render_list_node->stationary = stationary;
-	SDL_strlcpy((*msg)->text, text, SDL_strlen(text) + 1);
+	SDL_strlcpy(msg->text, text, SDL_strlen(text) + 1);
 
-	(*msg)->texture = Amphora_RenderStringToTexture(*msg);
+	msg->texture = Amphora_RenderStringToTexture(msg);
 
-	return *msg;
+	return msg;
 }
 
 size_t

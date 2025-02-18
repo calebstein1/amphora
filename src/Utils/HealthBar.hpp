@@ -20,7 +20,7 @@ public:
     void increase_health() {
 	    current_health++;
 	    health_bar.push_back(nullptr);
-	    Amphora_CreateSprite(&health_bar.back(), "Objects", -96.0f - (float) (32 * (health_bar.size() - 1)), 24,
+	    health_bar.back() = Amphora_CreateSprite("Objects", -96.0f - (float) (32 * (health_bar.size() - 1)), 24,
 				 2, false, true, 1000);
 	    Amphora_AddFrameset(health_bar.back(), "Default", nullptr, 63, 0, 16, 16, 0, 0, 1, 0);
     }

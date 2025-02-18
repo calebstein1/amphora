@@ -41,10 +41,10 @@ Level1_Init() {
 	Amphora_SetMap("Overworld", 2);
 	Amphora_SetMusic("forest");
 
-	Amphora_CreateSprite(&player, "Character", (float) Amphora_LoadNumber("x", 96),
+	player = Amphora_CreateSprite("Character", (float) Amphora_LoadNumber("x", 96),
 			     (float) Amphora_LoadNumber("y", 148), 2.0, (bool) Amphora_LoadNumber("flip", false), false,
 			     101);
-	Amphora_CreateSprite(&rotating_heart, "Objects", 128, 72, 3.0, false, false, 1000);
+	rotating_heart = Amphora_CreateSprite("Objects", 128, 72, 3.0, false, false, 1000);
 
 	Amphora_AddFrameset(player, "Idle", nullptr, 0, 17, 32, 48, 0, 0, 1, 0);
 	Amphora_AddFrameset(player, "Walk", nullptr, 32, 17, 32, 48, 0, 0, 6, 250);
@@ -54,10 +54,10 @@ Level1_Init() {
 	Amphora_AddFrameset(rotating_heart, "Stationary", nullptr, 64, 129, 16, 16, 0, 0, 1, 0);
 	Amphora_AddFrameset(rotating_heart, "Rotate", nullptr, 64, 129, 16, 16, 0, 0, 4, 250);
 
-	Amphora_CreateString(&hello, "Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
-	Amphora_CreateString(&timer, "Merriweather", 32, -16, 16, 1000, black, "0", true);
-	Amphora_CreateString(&stationary, "Merriweather", 16, 76, 132, 1000, black, message.c_str(), false);
-	Amphora_CreateString(&coords, "Roboto", 32, 16, -16, 1000, black, "0, 0", true);
+	hello = Amphora_CreateString("Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
+	timer = Amphora_CreateString("Merriweather", 32, -16, 16, 1000, black, "0", true);
+	stationary = Amphora_CreateString("Merriweather", 16, 76, 132, 1000, black, message.c_str(), false);
+	coords = Amphora_CreateString("Roboto", 32, 16, -16, 1000, black, "0, 0", true);
 
 	Amphora_SetCameraTarget(player);
 

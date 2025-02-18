@@ -48,12 +48,10 @@ Amphora_IsSpriteFlipped(const AmphoraImage *spr) {
 }
 
 AmphoraImage *
-Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
-	AmphoraImage *new_sprite = NULL;
+Amphora_CreateSprite(const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
+	AmphoraImage *spr = NULL;
 	struct render_list_node_t *render_list_node = NULL;
 	int idx;
-
-	if (*spr) return *spr;
 
 	if ((idx = get_img_by_name(image_name)) == -1) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Unable to locate image %s\n", image_name);
@@ -67,28 +65,25 @@ Amphora_CreateSprite(AmphoraImage **spr, const char *image_name, const float x, 
 				   open_images);
 	}
 
-	if ((new_sprite = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
+	if ((spr = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize sprite\n");
-		*spr = NULL;
 
 		return NULL;
 	}
 	render_list_node = Amphora_AddRenderListNode(order);
 
-	*spr = new_sprite;
-
-	(*spr)->type = AMPH_OBJ_SPR;
-	(*spr)->image = idx;
-	(*spr)->rectangle.x = x;
-	(*spr)->rectangle.y = y;
-	(*spr)->scale = scale;
-	(*spr)->render_list_node = render_list_node;
-	(*spr)->flip = flip;
+	spr->type = AMPH_OBJ_SPR;
+	spr->image = idx;
+	spr->rectangle.x = x;
+	spr->rectangle.y = y;
+	spr->scale = scale;
+	spr->render_list_node = render_list_node;
+	spr->flip = flip;
 	render_list_node->type = AMPH_OBJ_SPR;
-	render_list_node->data = *spr;
+	render_list_node->data = spr;
 	render_list_node->stationary = stationary;
 
-	return *spr;
+	return spr;
 }
 
 int
