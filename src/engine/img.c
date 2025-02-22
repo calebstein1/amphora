@@ -215,7 +215,7 @@ Amphora_ReorderSprite(AmphoraImage *spr, Sint32 order) {
 
 int
 Amphora_SetSpriteLocation(AmphoraImage *spr, float x, float y) {
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	spr->rectangle.x = x;
 	spr->rectangle.y = y;
@@ -225,7 +225,7 @@ Amphora_SetSpriteLocation(AmphoraImage *spr, float x, float y) {
 
 int
 Amphora_MoveSprite(AmphoraImage *spr, float delta_x, float delta_y) {
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	spr->rectangle.x += delta_x;
 	spr->rectangle.y += delta_y;
@@ -235,7 +235,7 @@ Amphora_MoveSprite(AmphoraImage *spr, float delta_x, float delta_y) {
 
 int
 Amphora_FlipSprite(AmphoraImage *spr) {
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	spr->flip = true;
 
@@ -244,7 +244,7 @@ Amphora_FlipSprite(AmphoraImage *spr) {
 
 int
 Amphora_UnflipSprite(AmphoraImage *spr) {
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	spr->flip = false;
 
@@ -253,7 +253,7 @@ Amphora_UnflipSprite(AmphoraImage *spr) {
 
 int
 Amphora_ShowSprite(AmphoraImage *spr) {
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	spr->render_list_node->display = true;
 
@@ -262,7 +262,7 @@ Amphora_ShowSprite(AmphoraImage *spr) {
 
 int
 Amphora_HideSprite(AmphoraImage *spr) {
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	spr->render_list_node->display = false;
 
@@ -273,8 +273,8 @@ int
 Amphora_FreeSprite(AmphoraImage **spr) {
 	int i;
 
-	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED);
-	Amphora_ValidatePtrNotNull(*spr, AMPHORA_STATUS_FAIL_UNDEFINED);
+	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
+	Amphora_ValidatePtrNotNull(*spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	if (*spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
 	for (i = 0; i < (*spr)->num_framesets; i++) {
