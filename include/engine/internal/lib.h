@@ -9,6 +9,5 @@ if (!param) { \
 	return (ret); \
 }
 char *Amphora_strcat(char *s1, const char *s2);
-Uint32 Amphora_crc32(const char *data);
 
 #endif /* AMPHORA_TOOLS_INTERNAL_H */
