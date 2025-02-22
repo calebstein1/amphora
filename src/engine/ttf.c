@@ -2,7 +2,7 @@
 #include <windows.h>
 #endif
 
-#include "engine/internal/hash_table.h"
+#include "engine/internal/ht_hash.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
 
@@ -15,8 +15,8 @@ static int Amphora_GetFontByName(const char *name);
 static SDL_Texture *Amphora_RenderStringToTexture(AmphoraString *msg);
 
 /* File-scoped variables */
-static HT_HashTable fonts[FONTS_COUNT * 3 / 2];
-static HT_HashTable open_fonts[FONTS_COUNT * 3 / 2];
+static HT_HashTable fonts;
+static HT_HashTable open_fonts;
 static const char *font_names[] = {
 #define LOADFONT(name, path) #name,
 	FONTS
@@ -33,11 +33,8 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 		return NULL;
 	}
 
-	if (!Amphora_HTCheckKeyExists(font_name, open_fonts)) {
-		Amphora_HTSetValue(font_name,
-				   TTF_Font *,
-				   TTF_OpenFontRW(Amphora_HTGetValue(font_name, SDL_RWops *, fonts),
-						  0, 16),
+	if (!HT_GetValue(font_name, open_fonts)) {
+		HT_StoreRef(font_name, TTF_OpenFontRW(HT_GetRef(font_name, SDL_RWops, fonts), 0, 16),
 				   open_fonts);
 	}
 
@@ -49,7 +46,7 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 	}
 
 	msg->type = AMPH_OBJ_TXT;
-	msg->font_ptr = Amphora_HTGetValue(font_name, TTF_Font *, open_fonts);
+	msg->font_ptr = HT_GetRef(font_name, TTF_Font, open_fonts);
 	msg->pt = pt;
 	msg->len = SDL_strlen(text);
 	msg->n = 0;
@@ -157,6 +154,9 @@ Amphora_InitFonts(void) {
 	HGLOBAL ttf_resource;
 	SDL_RWops *ttf_rw;
 
+	fonts = HT_NewTable();
+	open_fonts = HT_NewTable();
+
 	for (i = 0; i < FONTS_COUNT; i++) {
 		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
 			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate font resource... Amphora will crash now\n");
@@ -168,13 +168,15 @@ Amphora_InitFonts(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
 			return -1;
 		}
-		Amphora_HTSetValue(font_names[i], SDL_RWops *, SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info)), fonts);
+		HT_StoreRef(font_names[i], SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info)), fonts);
 	}
 #else
 #define LOADFONT(name, path) extern char name##_ft[]; extern int name##_ft_size;
 	FONTS
 #undef LOADFONT
-#define LOADFONT(name, path) Amphora_HTSetValue(#name, SDL_RWops *, SDL_RWFromConstMem(name##_ft, name##_ft_size), fonts);
+	fonts = HT_NewTable();
+	open_fonts = HT_NewTable();
+#define LOADFONT(name, path) HT_StoreRef(#name, SDL_RWFromConstMem(name##_ft, name##_ft_size), fonts);
 	FONTS
 #undef LOADFONT
 #endif
@@ -192,9 +194,11 @@ Amphora_FreeFonts(void) {
 	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
-		SDL_RWclose(Amphora_HTGetValue(font_names[i], SDL_RWops *, fonts));
-		TTF_CloseFont(Amphora_HTGetValue(font_names[i], TTF_Font *, open_fonts));
+		SDL_RWclose(HT_GetRef(font_names[i], SDL_RWops, fonts));
+		TTF_CloseFont(HT_GetRef(font_names[i], TTF_Font, open_fonts));
 	}
+	HT_FreeTable(fonts);
+	HT_FreeTable(open_fonts);
 }
 
 /*

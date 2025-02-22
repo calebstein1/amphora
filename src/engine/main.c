@@ -206,6 +206,7 @@ Amphora_CleanResources(void) {
 #endif
 #ifndef DISABLE_TILEMAP
 	Amphora_FreeAllObjectGroups();
+	Amphora_CloseMapHashTables();
 #endif
 	Amphora_CloseRender();
 	Amphora_ReleaseControllers();

@@ -3,7 +3,7 @@
 #include <windows.h>
 #endif
 
-#include "engine/internal/hash_table.h"
+#include "engine/internal/ht_hash.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
@@ -23,8 +23,8 @@ static char *map_names[] = {
 	MAPS
 #undef LOADMAP
 };
-static HT_HashTable map_sizes[MAPS_COUNT * 3 / 2];
-static HT_HashTable map_data[MAPS_COUNT * 3 / 2];
+static HT_HashTable map_sizes;
+static HT_HashTable map_data;
 static struct amphora_tilemap_t current_map;
 static struct amphora_tilemap_layer_t *deferred_transition;
 static SDL_FRect map_rect;
@@ -93,6 +93,9 @@ Amphora_InitMaps(void) {
 	HRSRC map_info;
 	HGLOBAL map_resource;
 
+	map_data = HT_NewTable();
+	map_sizes = HT_NewTable();
+
 	for (i = 0; i < MAPS_COUNT; i++) {
 		if (!((map_info = FindResourceA(NULL, map_names[i], "TILEMAP")))) {
 			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate map resource... Amphora will crash now\n");
@@ -104,15 +107,17 @@ Amphora_InitMaps(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load map resource... Amphora will crash now", 0);
 			return -1;
 		}
-		map_data[i] = (char *)map_resource;
-		map_sizes[i] = SizeofResource(NULL, map_info);
+		HT_StoreRef(map_names[i], map_resource, map_data);
+		HT_SetValue(map_names[i], SizeofResource(NULL, map_info), map_sizes);
 	}
 #else
 #define LOADMAP(name, path) extern char name##_tm[]; extern int name##_tm_size;
 	MAPS
 #undef LOADMAP
-#define LOADMAP(name, path) Amphora_HTSetValue(#name, char *, name##_tm, map_data); \
-			Amphora_HTSetValue(#name, int, name##_tm_size, map_sizes);
+	map_data = HT_NewTable();
+	map_sizes = HT_NewTable();
+#define LOADMAP(name, path) HT_StoreRef(#name, name##_tm, map_data); \
+			HT_SetValue(#name, name##_tm_size, map_sizes);
 	MAPS
 #undef LOADMAP
 #endif
@@ -177,11 +182,17 @@ Amphora_FreeObjectGroup(void) {
 }
 
 void
-Amphora_FreeAllObjectGroups (void) {
+Amphora_FreeAllObjectGroups(void) {
 	Amphora_FreeObjectGroup();
 	SDL_free(obj_groups.labels);
 	SDL_free(obj_groups.c_rects);
 	SDL_free(obj_groups.rects);
+}
+
+void
+Amphora_CloseMapHashTables(void) {
+	HT_FreeTable(map_data);
+	HT_FreeTable(map_sizes);
 }
 
 SDL_FRect *
@@ -232,8 +243,8 @@ Amphora_ProcessDeferredTransition(void) {
 static int
 Amphora_ParseMapToTexture(const char *name) {
 	SDL_Renderer *renderer = Amphora_GetRenderer();
-	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(Amphora_HTGetValue(name, char *, map_data),
-								Amphora_HTGetValue(name, int, map_sizes), 0);
+	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(HT_GetRef(name, char, map_data),
+								(int)HT_GetValue(name, map_sizes), 0);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
 	int tileset_img_w, tileset_img_h;

@@ -38,6 +38,7 @@ SDL_FRect *Amphora_GetMapRectangle(void);
 void Amphora_DestroyCurrentMap(void);
 void Amphora_FreeObjectGroup(void);
 void Amphora_FreeAllObjectGroups(void);
+void Amphora_CloseMapHashTables(void);
 SDL_FRect *Amphora_GetRectsByGroup(const char *name, int *c);
 void Amphora_ProcessDeferredTransition(void);
 
