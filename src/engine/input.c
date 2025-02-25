@@ -7,7 +7,7 @@
 #include "config.h"
 
 /* Private function prototypes */
-static Uint64 rotate_mask_left(Uint32 c);
+static Uint32 rotate_mask_left(Uint32 c);
 
 /* File-scoped variables */
 static union input_state_u key_actions;
@@ -303,9 +303,9 @@ Amphora_HandleJoystick(const SDL_Event *e) {
  * Private functions
  */
 
-static Uint64
+static Uint32
 rotate_mask_left(Uint32 c) {
 	if (c == 0) return MASK;
 
-	return (MASK << c) | (MASK >> (64 - c));
+	return (MASK << c) | (MASK >> (32 - c));
 }

@@ -10,7 +10,7 @@ struct frameset_t {
 	Sint16 current_frame;
 	Uint16 num_frames;
 	Uint32 delay;
-	Uint64 last_change;
+	Uint32 last_change;
 	Vector2f position_offset;
 	void (*callback)(void);
 	bool playing_oneshot : 1;

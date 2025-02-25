@@ -79,7 +79,7 @@ Amphora_SaveWinY(int win_y) {
 }
 
 int
-Amphora_SaveWinFlags(Uint64 win_flags) {
+Amphora_SaveWinFlags(Uint32 win_flags) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE prefs SET win_flags=? WHERE uuid=?;";
@@ -108,12 +108,12 @@ Amphora_SaveFPS(Uint32 framerate) {
 	return 0;
 }
 
-Sint64
+Sint32
 Amphora_LoadWinX(void) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT win_x FROM prefs WHERE uuid=?";
-	Sint64 val;
+	Sint32 val;
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
@@ -121,18 +121,18 @@ Amphora_LoadWinX(void) {
 		sqlite3_finalize(stmt);
 		return WINDOW_X;
 	}
-	val = sqlite3_column_int64(stmt, 0);
+	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
 	return val ? val : WINDOW_X;
 }
 
-Sint64
+Sint32
 Amphora_LoadWinY(void) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT win_y FROM prefs WHERE uuid=?";
-	Sint64 val;
+	Sint32 val;
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
@@ -140,18 +140,18 @@ Amphora_LoadWinY(void) {
 		sqlite3_finalize(stmt);
 		return WINDOW_Y;
 	}
-	val = sqlite3_column_int64(stmt, 0);
+	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
 	return val ? val : WINDOW_Y;
 }
 
-Uint64
+Uint32
 Amphora_LoadWinFlags(void) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT win_flags FROM prefs WHERE uuid=?";
-	Sint64 val;
+	Sint32 val;
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
@@ -159,18 +159,18 @@ Amphora_LoadWinFlags(void) {
 		sqlite3_finalize(stmt);
 		return WINDOW_MODE;
 	}
-	val = sqlite3_column_int64(stmt, 0);
+	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
-	return val ? (Uint64)val : WINDOW_MODE;
+	return val ? (Uint32)val : WINDOW_MODE;
 }
 
-Sint64
+Sint32
 Amphora_LoadFPS(void) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT framerate FROM prefs WHERE uuid=?";
-	Sint64 val;
+	Sint32 val;
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
@@ -178,7 +178,7 @@ Amphora_LoadFPS(void) {
 		sqlite3_finalize(stmt);
 		return FRAMERATE;
 	}
-	val = sqlite3_column_int64(stmt, 0);
+	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
 	return val ? val : FRAMERATE;

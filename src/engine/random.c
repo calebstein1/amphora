@@ -7,16 +7,19 @@
 #endif
 
 /* File-scoped variables */
-static Uint64 rand_state;
+static Uint32 rand_state;
 
 Uint32
 Amphora_GetRandom(int n) {
-	Uint64 val;
+	/*
+	 * TODO: Fix this for 32-bit
+	 */
+	Uint32 val;
 
 	rand_state = rand_state * 0xff1cd035ul + 0x05;
 	val = (rand_state >> 32) * n;
 
-	return (Uint32)(val >> 32);
+	return val >> 32;
 }
 
 /*

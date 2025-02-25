@@ -8,7 +8,7 @@ Level2_Init(void) {
 }
 
 void
-Level2_Update(Uint64 frame, const InputState *input) {
+Level2_Update(Uint32 frame, const InputState *input) {
 	(void)frame;
 
 	if (input->left) {

@@ -1,7 +1,7 @@
 #ifndef INPUT_INTERNAL_H
 #define INPUT_INTERNAL_H
 
-#define MASK 0xfffffffffffffffe
+#define MASK 0xfffffffe
 #define MAX_CONTROLLERS 4
 
 #include "engine/internal/render.h"
@@ -9,7 +9,7 @@
 
 union input_state_u {
 	struct input_state_t state; /* Individual flags for the named input actions */
-	Uint64 bits; /* The raw input bitfield */
+	Uint32 bits; /* The raw input bitfield */
 };
 
 enum input_actions {
@@ -19,7 +19,7 @@ enum input_actions {
 	ACTION_COUNT
 };
 
-_Static_assert(ACTION_COUNT <= 64, "Cannot define more than 64 actions");
+_Static_assert(ACTION_COUNT <= 32, "Cannot define more than 32 actions");
 
 int Amphora_InitInput(void);
 struct input_state_t *Amphora_GetKeyActionState(void);

@@ -4,7 +4,6 @@
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
 #include "engine/internal/tilemap.h"
-#include "engine/internal/timer.h"
 
 #include "config.h"
 
@@ -13,7 +12,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-#define SCENE(name) extern void name##_Init(void); extern void name##_Update(Uint64, const InputState *); extern void name##_Destroy(void);
+#define SCENE(name) extern void name##_Init(void); extern void name##_Update(Uint32, const InputState *); extern void name##_Destroy(void);
 	SCENES
 #undef SCENE
 #ifdef __cplusplus
@@ -62,7 +61,7 @@ Amphora_InitScene(void) {
 }
 
 void
-Amphora_UpdateScene(void) {
+Amphora_UpdateScene(Uint32 frame_count) {
 	scenes[current_scene].update_func(frame_count, Amphora_GetKeyActionState());
 }
 

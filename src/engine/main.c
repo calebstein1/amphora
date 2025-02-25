@@ -22,10 +22,8 @@ static int Amphora_MainLoop(SDL_Event *e);
 static void Amphora_SaveConfig(void);
 static void Amphora_CleanResources(void);
 
-/* Globals */
-Uint64 frame_count = 0;
-
 /* File-scored variables */
+static Uint32 frame_count = 0;
 static Uint32 framerate;
 static bool quit_requested = false;
 
@@ -132,10 +130,10 @@ Amphora_GetFPS(void) {
 
 static int
 Amphora_MainLoop(SDL_Event *e) {
-	static Uint64 frame_start, frame_end;
+	static Uint32 frame_start, frame_end;
 	static Uint32 frame_time;
 
-	frame_start = SDL_GetTicks64();
+	frame_start = SDL_GetTicks();
 	frame_count++;
 
 	if (Amphora_ProcessEventLoop(e) == SDL_QUIT) quit_requested = true;
@@ -158,7 +156,7 @@ Amphora_MainLoop(SDL_Event *e) {
 #endif
 	}
 	Amphora_ClearBG();
-	Amphora_UpdateScene();
+	Amphora_UpdateScene(frame_count);
 	Amphora_ProcessDeferredTransition();
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();
@@ -166,11 +164,11 @@ Amphora_MainLoop(SDL_Event *e) {
 	SDL_RenderPresent(Amphora_GetRenderer());
 
 	frame_end = SDL_GetTicks64();
-	if ((frame_time = (Uint32)(frame_end - frame_start)) < (1000 / framerate)) {
+	if ((frame_time = (frame_end - frame_start)) < (1000 / framerate)) {
 		SDL_Delay((1000 / framerate) - frame_time);
 #ifdef DEBUG
 	} else if (frame_time > (1000 / framerate)) {
-		SDL_Log("Lag on frame %llu (frame took %llu ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 /
+		SDL_Log("Lag on frame %u (frame took %u ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 /
 			Amphora_GetFPS());
 	}
 #else

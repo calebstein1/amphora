@@ -65,10 +65,10 @@ Level1_Init() {
 }
 
 void
-Level1_Update(Uint64 frame, const InputState *key_actions) {
+Level1_Update(Uint32 frame, const InputState *key_actions) {
 	static bool f_down = false;
 	static Uint8 hello_ticker = 0;
-	static Uint64 damage_cooldown = 0;
+	static Uint32 damage_cooldown = 0;
 	float player_speed = 1;
 
 	Amphora_PlayMusic(500);
