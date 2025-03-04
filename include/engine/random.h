@@ -6,8 +6,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Get a random number less than n */
-Uint32 Amphora_GetRandom(int n);
+/* Get a 16-bit random number less than n */
+Uint16 Amphora_GetRandom(Uint16 n);
 #ifdef __cplusplus
 }
 #endif

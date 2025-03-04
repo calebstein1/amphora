@@ -6,20 +6,17 @@
 #include <time.h>
 #endif
 
-/* File-scoped variables */
 static Uint32 rand_state;
 
-Uint32
-Amphora_GetRandom(int n) {
-	/*
-	 * TODO: Fix this for 32-bit
-	 */
+Uint16
+Amphora_GetRandom(Uint16 n) {
 	Uint32 val;
 
-	rand_state = rand_state * 0xff1cd035ul + 0x05;
-	val = (rand_state >> 32) * n;
+	rand_state = rand_state * 0x41c64e6dul + 0x3c6ef35ful;
+	val = rand_state ^ (rand_state >> 11);
+	val = (val >> 16) * n;
 
-	return val >> 32;
+	return val >> 16;
 }
 
 /*
