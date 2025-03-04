@@ -8,6 +8,8 @@ extern "C" {
 #endif
 /* Get a 16-bit random number less than n */
 Uint16 Amphora_GetRandom(Uint16 n);
+/* Get a random float 0.0 to 1.0 */
+float Amphora_GetRandomF(void);
 #ifdef __cplusplus
 }
 #endif

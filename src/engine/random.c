@@ -10,13 +10,15 @@ static Uint32 rand_state;
 
 Uint16
 Amphora_GetRandom(Uint16 n) {
-	Uint32 val;
+	rand_state ^= (rand_state << 13);
+	rand_state ^= (rand_state >> 17);
+	rand_state ^= (rand_state << 5);
+	return ((rand_state >> 16) * n) >> 16;
+}
 
-	rand_state = rand_state * 0x41c64e6dul + 0x3c6ef35ful;
-	val = rand_state ^ (rand_state >> 11);
-	val = (val >> 16) * n;
-
-	return val >> 16;
+float
+Amphora_GetRandomF(void) {
+	return (float)Amphora_GetRandom(UINT16_MAX) / (float)UINT16_MAX;
 }
 
 /*
