@@ -81,7 +81,7 @@ HT_GetHash(const char *data) {
 	unsigned hash = OFFSET;
 	char *d = (char *)data;
 
-	if (!d || !*d) return 0;
+	if (!d) return 0;
 	while (*d) {
 		hash ^= *d++;
 		hash *= PRIME;
@@ -106,6 +106,7 @@ HT_GetValue(const char *key, HT_HashTable t) {
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->s - 1));
 
+	if (!key) return 0;
 	if (t->d[i].h == hash && strcmp(t->d[i].k, key) == 0) return t->d[i].d;
 	i = HT_ProbeForBucket(t, hash, i, 0);
 	if (t->d[i].h != hash) {
@@ -120,6 +121,7 @@ HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
 	unsigned hash = HT_GetHash(key);
 	int i;
 
+	if (!key) return 0;
 	if (t->c >= (t->s * 7) / 10) HT_IncreaseSizeRehash(t);
 	i = (int)(hash & (t->s - 1));
 	if (t->d[i].h && (t->d[i].h != hash || strcmp(t->d[i].k, key) != 0)) i = HT_ProbeForBucket(t, hash, i, 1);
@@ -138,6 +140,7 @@ HT_DeleteKey(const char *key, HT_HashTable t) {
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->s - 1));
 
+	if (!key) return;
 	if (t->d[i].h != hash || strcmp(t->d[i].k, key) != 0)
 		i = HT_ProbeForBucket(t, hash, i, 0);
 	if (t->d[i].s != HT_USED || t->d[i].h != hash) {
