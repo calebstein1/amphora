@@ -7,6 +7,7 @@ typedef struct amphora_scene_t {
 	void (*init_func)(void);
 	void (*update_func)(Uint32, const InputState *);
 	void (*destroy_func)(void);
+	int idx;
 } AmphoraScene;
 
 enum scene_list_e {
@@ -16,6 +17,8 @@ enum scene_list_e {
 	SCENES_COUNT
 };
 
+void Amphora_InitSceneManager(void);
+void Amphora_DeInitSceneManager(void);
 void Amphora_InitScene(void);
 void Amphora_UpdateScene(Uint32 frame_count);
 void Amphora_DestroyScene(void);

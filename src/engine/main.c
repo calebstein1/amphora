@@ -89,6 +89,7 @@ main(int argc, char **argv) {
 	Amphora_InitSave();
 	Amphora_InitInput();
 	Amphora_LoadKeymap();
+	Amphora_InitSceneManager();
 
 	framerate = (Uint32) Amphora_LoadFPS();
 
@@ -194,6 +195,7 @@ Amphora_SaveConfig(void) {
 static void
 Amphora_CleanResources(void) {
 	Amphora_DestroyScene();
+	Amphora_DeInitSceneManager();
 	Amphora_CloseIMG();
 #ifndef DISABLE_FONTS
 	Amphora_FreeFonts();

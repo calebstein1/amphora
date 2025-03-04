@@ -1,11 +1,10 @@
 #include "engine/internal/error.h"
+#include "engine/internal/ht_hash.h"
 #include "engine/internal/input.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
 #include "engine/internal/tilemap.h"
-
-#include "config.h"
 
 #include "scene_list.h"
 
@@ -19,11 +18,9 @@ extern "C"
 }
 #endif
 
-/* Prototypes for private functions */
-int Amphora_FindScene(const char *name);
-
 /* File-scoped variables */
-static AmphoraScene scenes[] = {
+static HT_HashTable scenes;
+static AmphoraScene scene_structs[] = {
 #define SCENE(name) { .init_func = name##_Init, .update_func = name##_Update, .destroy_func = name##_Destroy },
 	SCENES
 #undef SCENE
@@ -33,19 +30,12 @@ static char *scene_names[] = {
 	SCENES
 #undef SCENE
 };
-int current_scene = 0;
+static int current_scene_idx = 0;
 
 int
 Amphora_DoLoadScene(const char *name) {
-	int idx = Amphora_FindScene(name);
-
-	if (idx == -1) {
-		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to find scene %s", name);
-
-		return AMPHORA_STATUS_FAIL_UNDEFINED;
-	}
 	Amphora_DestroyScene();
-	current_scene = idx;
+	current_scene_idx = HT_GetRef(name, AmphoraScene, scenes)->idx;
 	Amphora_InitScene();
 
 	return AMPHORA_STATUS_OK;
@@ -56,13 +46,29 @@ Amphora_DoLoadScene(const char *name) {
  */
 
 void
+Amphora_InitSceneManager(void) {
+	int i;
+
+	scenes = HT_NewTable();
+	for (i = 0; i < SCENES_COUNT; i++) {
+		scene_structs[i].idx = i;
+		HT_StoreRef(scene_names[i], &scene_structs[i], scenes);
+	}
+}
+
+void
+Amphora_DeInitSceneManager(void) {
+	HT_FreeTable(scenes);
+}
+
+void
 Amphora_InitScene(void) {
-	scenes[current_scene].init_func();
+	scene_structs[current_scene_idx].init_func();
 }
 
 void
 Amphora_UpdateScene(Uint32 frame_count) {
-	scenes[current_scene].update_func(frame_count, Amphora_GetKeyActionState());
+	scene_structs[current_scene_idx].update_func(frame_count, Amphora_GetKeyActionState());
 }
 
 void
@@ -70,25 +76,10 @@ Amphora_DestroyScene(void) {
 #ifndef DISABLE_MIXER
 	Amphora_StopMusic();
 #endif
-	scenes[current_scene].destroy_func();
+	scene_structs[current_scene_idx].destroy_func();
 #ifndef DISABLE_TILEMAP
 	Amphora_DestroyCurrentMap();
 	Amphora_FreeObjectGroup();
 #endif
 	Amphora_FreeRenderList();
-}
-
-/*
- * Private functions
- */
-
-int
-Amphora_FindScene(const char *name) {
-	int i;
-
-	for (i = 0; i < SCENES_COUNT; i++) {
-		if (SDL_strcmp(name, scene_names[i]) == 0) return i;
-	}
-
-	return -1;
 }
