@@ -62,6 +62,10 @@ Level1_Init() {
 	Amphora_SetCameraTarget(player);
 
 	health_bar = new HealthBar((int) Amphora_LoadNumber("health", 3));
+
+	if (Amphora_GetSessionData("p_state") == ko) {
+		Amphora_PlayOneshot(player, "KO", nullptr);
+	}
 }
 
 void
@@ -193,6 +197,7 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 void
 Level1_Destroy() {
 	Vector2f player_pos = Amphora_GetSpritePosition(player);
+	Amphora_StoreSessionData("p_state", player_state);
 	Amphora_SaveNumber("x", player_pos.x);
 	Amphora_SaveNumber("y", player_pos.y);
 	Amphora_SaveNumber("flip", Amphora_IsSpriteFlipped(player));

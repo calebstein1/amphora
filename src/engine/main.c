@@ -10,6 +10,7 @@
 #include "engine/internal/render.h"
 #include "engine/internal/save_data.h"
 #include "engine/internal/scenes.h"
+#include "engine/internal/session_data.h"
 #include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"
 
@@ -87,6 +88,7 @@ main(int argc, char **argv) {
 		return AMPHORA_STATUS_CORE_FAIL;
 	}
 	Amphora_InitSave();
+	Amphora_InitSessionData();
 	Amphora_InitInput();
 	Amphora_LoadKeymap();
 	Amphora_InitSceneManager();
@@ -208,6 +210,7 @@ Amphora_CleanResources(void) {
 	Amphora_FreeAllObjectGroups();
 	Amphora_CloseMapHashTables();
 #endif
+	Amphora_DeInitSessionData();
 	Amphora_CloseRender();
 	Amphora_ReleaseControllers();
 	Amphora_CloseDB();

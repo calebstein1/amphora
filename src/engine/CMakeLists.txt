@@ -16,4 +16,5 @@ add_library(amphora_engine
 	lib.c
 	scenes.c
 	ht_hash.c
+	session_data.c
 )
