@@ -10,8 +10,9 @@
 
 #ifndef DISABLE_FONTS
 
+#define AMPHORA_MAX_STR_LEN 4096
+
 /* Prototypes for private functions */
-static int Amphora_GetFontByName(const char *name);
 static SDL_Texture *Amphora_RenderStringToTexture(AmphoraString *msg);
 
 /* File-scoped variables */
@@ -24,19 +25,22 @@ static const char *font_names[] = {
 };
 
 AmphoraString *
-Amphora_CreateString(const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const char *text, const bool stationary) {
+Amphora_CreateString(const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const bool stationary, const char *fmt, ...) {
 	struct render_list_node_t *render_list_node = Amphora_AddRenderListNode(order);
 	struct amphora_message_t *msg;
+	char text[AMPHORA_MAX_STR_LEN];
+	va_list args;
 
-	if (Amphora_GetFontByName(font_name) == -1) {
+	if (!HT_GetValue(font_name, fonts)) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", font_name);
 		return NULL;
 	}
-
 	if (!HT_GetValue(font_name, open_fonts)) {
 		HT_StoreRef(font_name, TTF_OpenFontRW(HT_GetRef(font_name, SDL_RWops, fonts), 0, 16),
 				   open_fonts);
 	}
+	va_start(args, fmt);
+	SDL_vsnprintf(text, sizeof(text), fmt, args);
 
 	if (!((msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
 		return NULL;
@@ -205,16 +209,6 @@ Amphora_FreeFonts(void) {
 /*
  * Private functions
  */
-
-static int
-Amphora_GetFontByName(const char *name) {
-	int i;
-
-	for (i = 0; i < FONTS_COUNT; i++) {
-		if (SDL_strcmp(name, font_names[i]) == 0) return i;
-	}
-	return -1;
-}
 
 static SDL_Texture *
 Amphora_RenderStringToTexture(AmphoraString *msg) {

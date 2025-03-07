@@ -54,10 +54,10 @@ Level1_Init() {
 	Amphora_AddFrameset(rotating_heart, "Stationary", nullptr, 64, 129, 16, 16, 0, 0, 1, 0);
 	Amphora_AddFrameset(rotating_heart, "Rotate", nullptr, 64, 129, 16, 16, 0, 0, 4, 250);
 
-	hello = Amphora_CreateString("Roboto", 32, 16, 16, 1000, black, welcome_message.c_str(), true);
-	timer = Amphora_CreateString("Merriweather", 32, -16, 16, 1000, black, "0", true);
-	stationary = Amphora_CreateString("Merriweather", 16, 76, 132, 1000, black, message.c_str(), false);
-	coords = Amphora_CreateString("Roboto", 32, 16, -16, 1000, black, "0, 0", true);
+	hello = Amphora_CreateString("Roboto", 32, 16, 16, 1000, black, true, "%s", welcome_message.c_str());
+	timer = Amphora_CreateString("Merriweather", 32, -16, 16, 1000, black, true, "0");
+	stationary = Amphora_CreateString("Merriweather", 16, 76, 132, 1000, black, false, "%s", message.c_str());
+	coords = Amphora_CreateString("Roboto", 32, 16, -16, 1000, black, true, "0, 0");
 
 	Amphora_SetCameraTarget(player);
 
