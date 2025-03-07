@@ -9,17 +9,9 @@ This makes it easy to tweak the internals of the engine as needed by the project
 Non-engine game files are located in `src` and `include`.
 
 Amphora games are written in C or C++ with SDL2 and extra utility functions provided by the engine.
-There is a demo skeleton project demonstrating the structure in `src/game_loop.c` and `include/config.h`.
-
-In the C sources, there are two required functions: `void Amphora_GameInit(void)`, and `void game_loop(Uint64 frame, const struct input_state_t *key_actions)`.
-`Amphora_GameInit` is called once at game start, and `game_loop` runs once per frame.
 
 Configuration options can be set in `include/config.h` and `include/colors.h`.
 Resource names and paths are specified in `include/resources.h`.
-
-You can see how some of the built-in functions work, as well as how to use certain built-in structures like `input_state` by looking at the provided example `game_loop.c` and `config.h` files.
-
-More proper documentation will be coming soon.
 
 Note that certain functions that allocate memory, like `Amphora_CreateSprite` may cause stutters in gameplay when built using the Debug configuration.
 These stutters should not exist in the Release configuration.
