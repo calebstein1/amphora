@@ -30,12 +30,12 @@ static char *scene_names[] = {
 	SCENES
 #undef SCENE
 };
-static int current_scene_idx = 0;
+static long current_scene_idx = 0;
 
 int
 Amphora_DoLoadScene(const char *name) {
 	Amphora_DestroyScene();
-	current_scene_idx = HT_GetRef(name, AmphoraScene, scenes)->idx;
+	current_scene_idx = HT_GetValue(name, scenes);
 	Amphora_InitScene();
 
 	return AMPHORA_STATUS_OK;
@@ -51,8 +51,7 @@ Amphora_InitSceneManager(void) {
 
 	scenes = HT_NewTable();
 	for (i = 0; i < SCENES_COUNT; i++) {
-		scene_structs[i].idx = i;
-		HT_StoreRef(scene_names[i], &scene_structs[i], scenes);
+		HT_SetValue(scene_names[i], i, scenes);
 	}
 }
 

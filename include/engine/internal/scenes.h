@@ -7,7 +7,6 @@ typedef struct amphora_scene_t {
 	void (*init_func)(void);
 	void (*update_func)(Uint32, const InputState *);
 	void (*destroy_func)(void);
-	int idx;
 } AmphoraScene;
 
 enum scene_list_e {
