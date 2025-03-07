@@ -52,7 +52,7 @@ int Amphora_ShowSprite(AmphoraImage *spr);
 /* Hide a sprite without free it */
 int Amphora_HideSprite(AmphoraImage *spr);
 /* Free a sprite slot */
-int Amphora_FreeSprite(AmphoraImage **spr);
+int Amphora_FreeSprite(AmphoraImage *spr);
 #ifdef __cplusplus
 }
 #endif

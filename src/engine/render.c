@@ -276,10 +276,10 @@ Amphora_FreeRenderList(void) {
 	for (i = 0; i < render_list_node_count; i++) {
 		switch(allocated_addrs[i]->type) {
 			case AMPH_OBJ_SPR:
-				Amphora_FreeSprite((AmphoraImage **) &allocated_addrs[i]->data);
+				Amphora_FreeSprite((AmphoraImage *)allocated_addrs[i]->data);
 				break;
 			case AMPH_OBJ_TXT:
-				Amphora_FreeString((AmphoraString **) &allocated_addrs[i]->data);
+				Amphora_FreeString((AmphoraString *)allocated_addrs[i]->data);
 				break;
 			case AMPH_OBJ_MAP:
 				SDL_DestroyTexture((SDL_Texture *)allocated_addrs[i]->data);

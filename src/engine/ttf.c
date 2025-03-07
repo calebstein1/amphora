@@ -75,44 +75,45 @@ Ampohra_GetStringText(AmphoraString *msg) {
 }
 
 AmphoraString *
-Amphora_UpdateStringText(AmphoraString **msg, const char *fmt, ...) {
+Amphora_UpdateStringText(AmphoraString *msg, const char *fmt, ...) {
 	va_list args;
 	char text[4096];
 
 	va_start(args, fmt);
 	SDL_vsnprintf(text, 4096, fmt, args);
 
-	(*msg)->len = SDL_strlen(text);
-	SDL_free((*msg)->text);
-	if (!(((*msg)->text = SDL_malloc(SDL_strlen(text) + 1)))) {
+	msg->len = SDL_strlen(text);
+	SDL_free(msg->text);
+	msg->len = SDL_strlen(text);
+	if (!((msg->text = SDL_malloc(msg->len + 1)))) {
 		return NULL;
 	}
-	SDL_strlcpy((*msg)->text, text, (*msg)->len + 1);
-	SDL_DestroyTexture((*msg)->texture);
-	(*msg)->texture = Amphora_RenderStringToTexture(*msg);
+	SDL_strlcpy(msg->text, text, msg->len + 1);
+	SDL_DestroyTexture(msg->texture);
+	msg->texture = Amphora_RenderStringToTexture(msg);
 
-	return *msg;
+	return msg;
 }
 
 AmphoraString *
-Amphora_UpdateStringCharsDisplayed(AmphoraString **msg, size_t n) {
-	if (n >= (*msg)->len) n = 0;
-	(*msg)->n = n;
-	SDL_DestroyTexture((*msg)->texture);
-	(*msg)->texture = Amphora_RenderStringToTexture(*msg);
+Amphora_UpdateStringCharsDisplayed(AmphoraString *msg, size_t n) {
+	if (n >= msg->len) n = 0;
+	msg->n = n;
+	SDL_DestroyTexture(msg->texture);
+	msg->texture = Amphora_RenderStringToTexture(msg);
 
-	return *msg;
+	return msg;
 }
 
 void
-Amphora_FreeString(AmphoraString **msg) {
-	if (!*msg) return;
+Amphora_FreeString(AmphoraString *msg) {
+	if (!msg) return;
 
-	SDL_DestroyTexture((*msg)->texture);
-	SDL_free((*msg)->text);
-	(*msg)->render_list_node->garbage = true;
-	SDL_free(*msg);
-	*msg = NULL;
+	SDL_DestroyTexture(msg->texture);
+	SDL_free(msg->text);
+	msg->render_list_node->garbage = true;
+	SDL_free(msg);
+	msg = NULL;
 }
 
 void

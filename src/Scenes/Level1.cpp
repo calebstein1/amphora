@@ -165,15 +165,15 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		Amphora_SetFrameset(rotating_heart, "Stationary");
 	}
 
-	Amphora_UpdateStringText(&coords, "%.2f, %.2f", Amphora_GetSpritePosition(player).x,
+	Amphora_UpdateStringText(coords, "%.2f, %.2f", Amphora_GetSpritePosition(player).x,
 				 Amphora_GetSpritePosition(player).y);
 
 	if (frame % Amphora_GetFPS() == 0) {
-		Amphora_UpdateStringText(&timer, "%d", frame / Amphora_GetFPS());
+		Amphora_UpdateStringText(timer, "%d", frame / Amphora_GetFPS());
 	}
 
 	if (hello && Amphora_IsEven(frame) && hello_ticker < Amphora_GetStringLength(hello)) {
-		Amphora_UpdateStringCharsDisplayed(&hello, ++hello_ticker);
+		Amphora_UpdateStringCharsDisplayed(hello, ++hello_ticker);
 	}
 
 	if (Amphora_CheckObjectGroupCollision(player, "Collision")) {

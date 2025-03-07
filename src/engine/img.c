@@ -270,21 +270,20 @@ Amphora_HideSprite(AmphoraImage *spr) {
 }
 
 int
-Amphora_FreeSprite(AmphoraImage **spr) {
+Amphora_FreeSprite(AmphoraImage *spr) {
 	int i;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
-	Amphora_ValidatePtrNotNull(*spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
-	if (*spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
-	for (i = 0; i < (*spr)->num_framesets; i++) {
-		SDL_free((*spr)->frameset_labels[i]);
+	if (spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
+	for (i = 0; i < spr->num_framesets; i++) {
+		SDL_free(spr->frameset_labels[i]);
 	}
-	if ((*spr)->frameset_labels) SDL_free((*spr)->frameset_labels);
-	if ((*spr)->framesets) SDL_free((*spr)->framesets);
-	(*spr)->render_list_node->garbage = true;
-	SDL_free(*spr);
-	*spr = NULL;
+	if (spr->frameset_labels) SDL_free(spr->frameset_labels);
+	if (spr->framesets) SDL_free(spr->framesets);
+	spr->render_list_node->garbage = true;
+	SDL_free(spr);
+	spr = NULL;
 
 	return AMPHORA_STATUS_OK;
 }

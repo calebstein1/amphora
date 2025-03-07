@@ -29,7 +29,7 @@ public:
 	    if (current_health == 0) return;
 
 	    current_health--;
-	    Amphora_FreeSprite(&health_bar.back());
+	    Amphora_FreeSprite(health_bar.back());
 	    health_bar.pop_back();
     }
 
