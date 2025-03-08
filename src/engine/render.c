@@ -229,11 +229,10 @@ Amphora_ProcessRenderList(void) {
 	SDL_FRect *map_rect;
 
 	while(render_list) {
-		if (render_list->next && render_list->next->garbage) {
+		while (render_list->next && render_list->next->garbage) {
 			garbage = render_list->next;
 			render_list->next = render_list->next->next;
 			SDL_free(garbage);
-			garbage = NULL;
 			render_list_node_count--;
 		}
 		if (!render_list->display) {

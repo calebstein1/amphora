@@ -39,7 +39,7 @@ public:
 
     void set_health(int health) {
 	    if (health < current_health) {
-		    for (int i = 0; i < current_health - health - 1; i++) {
+		    for (int i = 0; i < current_health - health; i++) {
 			    decrease_health();
 		    }
 	    } else if (health > current_health) {

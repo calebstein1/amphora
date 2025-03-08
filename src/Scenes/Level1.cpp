@@ -77,6 +77,10 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 
 	Amphora_PlayMusic(500);
 
+	Amphora_ObjectClicked(player, SDL_BUTTON_LEFT, [] {
+		health_bar->set_health(0);
+	});
+
 	if (health_bar->get_health() <= 0 && player_state != ko) {
 		player_state = ko;
 		Amphora_PlayOneshot(player, "KO", nullptr);
