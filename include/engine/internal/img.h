@@ -5,7 +5,7 @@
 #include "engine/internal/render.h"
 
 struct frameset_t {
-	ImageName override_img;
+	SDL_Texture *override_img;
 	Sint32 sx, sy, w, h;
 	Sint16 current_frame;
 	Uint16 num_frames;
@@ -18,7 +18,7 @@ struct frameset_t {
 
 struct sprite_t {
 	enum amphora_object_type_e type;
-	ImageName image;
+	SDL_Texture *image;
 	SDL_FRect rectangle;
 	float scale;
 	bool flip : 1;

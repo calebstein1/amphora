@@ -11,7 +11,6 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-static int get_img_by_name(const char *name);
 static int find_frameset(const AmphoraImage *spr, const char *name);
 
 /* File-scoped variables */
@@ -51,12 +50,6 @@ AmphoraImage *
 Amphora_CreateSprite(const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *spr = NULL;
 	struct render_list_node_t *render_list_node = NULL;
-	int idx;
-
-	if ((idx = get_img_by_name(image_name)) == -1) {
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Unable to locate image %s\n", image_name);
-		return NULL;
-	}
 
 	if (!HT_GetValue(image_name, open_images)) {
 		HT_StoreRef(image_name, IMG_LoadTexture_RW(Amphora_GetRenderer(),
@@ -72,7 +65,7 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 	render_list_node = Amphora_AddRenderListNode(order);
 
 	spr->type = AMPH_OBJ_SPR;
-	spr->image = idx;
+	spr->image = HT_GetRef(image_name, SDL_Texture, open_images);
 	spr->rectangle.x = x;
 	spr->rectangle.y = y;
 	spr->scale = scale;
@@ -87,7 +80,7 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 
 int
 Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay) {
-	int override = -1;
+	SDL_Texture *override = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 	/* TODO: Cascade error cases and free */
@@ -112,12 +105,12 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	}
 
 	if (override_img) {
-		override = get_img_by_name(override_img);
-		if (override > -1 && !HT_GetValue(img_names[override], open_images)) {
-			HT_StoreRef(img_names[override], IMG_LoadTexture_RW(Amphora_GetRenderer(),
-						   HT_GetRef(img_names[override], SDL_RWops, images), 0),
+		if (!HT_GetValue(override_img, open_images)) {
+			HT_StoreRef(override_img, IMG_LoadTexture_RW(Amphora_GetRenderer(),
+						   HT_GetRef(override_img, SDL_RWops, images), 0),
 				    open_images);
 		}
+		override = HT_GetRef(override_img, SDL_Texture, open_images);
 	}
 
 	spr->framesets[spr->num_framesets] = (struct frameset_t){
@@ -405,8 +398,7 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 	}
 
 	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(Amphora_GetResolution());
-	Amphora_RenderTexture(HT_GetRef(img_names[(int)frameset->override_img > -1 ?
-					frameset->override_img : spr->image], SDL_Texture, open_images),
+	Amphora_RenderTexture(frameset->override_img ? frameset->override_img : spr->image,
 			      &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(logical_size);
 }
@@ -414,16 +406,6 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 /*
  * Private functions
  */
-
-static int
-get_img_by_name(const char *name) {
-	int i;
-
-	for (i = 0; i < IMAGES_COUNT; i++) {
-		if (SDL_strcmp(name, img_names[i]) == 0) return i;
-	}
-	return -1;
-}
 
 static int
 find_frameset(const AmphoraImage *spr, const char *name) {
