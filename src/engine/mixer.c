@@ -4,16 +4,15 @@
 #endif
 
 #include "engine/internal/mixer.h"
+#include "engine/internal/ht_hash.h"
 
 /* Prototypes for private functions */
-static int Amphora_GetSFXByName(const char *name);
-static int Amphora_GetMusicByName(const char *name);
 static void Amphora_FreeMusic(void);
 
 /* File-scoped variables */
-static SDL_RWops *sfx[SFX_COUNT];
-static SDL_RWops *music[MUSIC_COUNT];
-static Mix_Chunk *open_sfx[SFX_COUNT];
+static HT_HashTable sfx;
+static HT_HashTable music;
+static HT_HashTable open_sfx;
 static Mix_Music *current_music;
 static const char *sfx_names[] = {
 #define LOADSFX(name, path) #name,
@@ -28,35 +27,23 @@ static const char *music_names[] = {
 
 void
 Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
-	const int idx = Amphora_GetSFXByName(name);
-
-	if (idx == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not find sfx: %s\n", name);
-		return;
-	}
-	if (!open_sfx[idx]) {
-		open_sfx[idx] = Mix_LoadWAV_RW(sfx[idx], 0);
+	if (!HT_GetValue(name, open_sfx)) {
+		HT_StoreRef(name, Mix_LoadWAV_RW(HT_GetRef(name, SDL_RWops, sfx), 0), open_sfx);
 	}
 	if (channel > -1 && Mix_Playing(channel)) return;
 
-	Mix_PlayChannel(channel, open_sfx[idx], repeat);
+	Mix_PlayChannel(channel, HT_GetRef(name, Mix_Chunk, open_sfx), repeat);
 }
 
 void
 Amphora_SetMusic(const char *name) {
-	const int idx = Amphora_GetMusicByName(name);
-
-	if (idx == -1) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not find music: %s\n", name);
-		return;
-	}
 	if (Mix_PlayingMusic()) {
 		Mix_HaltMusic();
 		Mix_FreeMusic(current_music);
 		current_music = NULL;
 	}
 
-	current_music = Mix_LoadMUS_RW(music[idx], 0);
+	current_music = Mix_LoadMUS_RW(HT_GetRef(name, SDL_RWops, music), 0);
 }
 
 void
@@ -111,7 +98,9 @@ Amphora_InitSFX(void) {
 #ifdef WIN32
 	HRSRC sfx_info;
 	HGLOBAL sfx_resource;
-	SDL_RWops *sfx_rw;
+
+	sfx = HT_NewTable();
+	open_sfx = HT_NewTable();
 
 	for (i = 0; i < SFX_COUNT; i++) {
 		if (!((sfx_info = FindResourceA(NULL, sfx_names[i], "SFX")))) {
@@ -124,15 +113,15 @@ Amphora_InitSFX(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load sfx resource... Amphora will crash now", 0);
 			return -1;
 		}
-		sfx_rw = SDL_RWFromConstMem(sfx_resource, SizeofResource(NULL, sfx_info));
-		sfx[i] = sfx_rw;
+		HT_StoreRef(sfx_names[i], SDL_RWFromConstMem(sfx_resource, SizeofResource(NULL, sfx_info)), sfx);
 	}
 #else
 #define LOADSFX(name, path) extern char name##_sf[]; extern int name##_sf_size;
 	SFX
 #undef LOADSFX
-	SDL_RWops **sfx_ptr = sfx;
-#define LOADSFX(name, path) *sfx_ptr = SDL_RWFromConstMem(name##_sf, name##_sf_size); sfx_ptr++;
+	sfx = HT_NewTable();
+	open_sfx = HT_NewTable();
+#define LOADSFX(name, path) HT_StoreRef(#name, SDL_RWFromConstMem(name##_sf, name##_sf_size), sfx);
 	SFX
 #undef LOADSFX
 #endif
@@ -164,15 +153,14 @@ Amphora_InitMusic(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load music resource... Amphora will crash now", 0);
 			return -1;
 		}
-		music_rw = SDL_RWFromConstMem(music_resource, SizeofResource(NULL, music_info));
-		music[i] = music_rw;
+		HT_StoreRef(music_names[i], SDL_RWFromConstMem(music_resource, SizeofResource(NULL, music_info)), music);
 	}
 #else
 #define LOADMUSIC(name, path) extern char name##_mu[]; extern int name##_mu_size;
 	MUSIC
 #undef LOADMUSIC
-	SDL_RWops **music_ptr = music;
-#define LOADMUSIC(name, path) *music_ptr = SDL_RWFromConstMem(name##_mu, name##_mu_size); music_ptr++;
+	music = HT_NewTable();
+#define LOADMUSIC(name, path) HT_StoreRef(#name, SDL_RWFromConstMem(name##_mu, name##_mu_size), music);
 	MUSIC
 #undef LOADMUSIC
 #endif
@@ -191,51 +179,30 @@ Amphora_CloseSFX(void) {
 	int i;
 
 	for (i = 0; i < SFX_COUNT; i++) {
-		if (open_sfx[i]) {
-			Mix_FreeChunk(open_sfx[i]);
-			open_sfx[i] = NULL;
+		if (HT_GetValue(sfx_names[i], open_sfx)) {
+			Mix_FreeChunk(HT_GetRef(sfx_names[i], Mix_Chunk, open_sfx));
 		}
-		SDL_FreeRW(sfx[i]);
-		sfx[i] = NULL;
+		SDL_FreeRW(HT_GetRef(sfx_names[i], SDL_RWops, sfx));;
 	}
+	HT_FreeTable(open_sfx);
+	HT_FreeTable(sfx);
 }
 
 void
 Amphora_CloseMusic(void) {
 	int i;
 
-	for (i = 0; i < MUSIC_COUNT; i++) {
-		SDL_FreeRW(music[i]);
-		sfx[i] = NULL;
-	}
 	if (current_music) {
 		Amphora_FreeMusic();
+	}
+	for (i = 0; i < MUSIC_COUNT; i++) {
+		SDL_FreeRW(HT_GetRef(music_names[i], SDL_RWops, music));;
 	}
 }
 
 /*
  * Private functions
  */
-
-static int
-Amphora_GetSFXByName(const char *name) {
-	int i;
-
-	for (i = 0; i < SFX_COUNT; i++) {
-		if (SDL_strcmp(name, sfx_names[i]) == 0) return i;
-	}
-	return -1;
-}
-
-static int
-Amphora_GetMusicByName(const char *name) {
-	int i;
-
-	for (i = 0; i < MUSIC_COUNT; i++) {
-		if (SDL_strcmp(name, music_names[i]) == 0) return i;
-	}
-	return -1;
-}
 
 static void
 Amphora_FreeMusic(void) {
