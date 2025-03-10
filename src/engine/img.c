@@ -3,15 +3,11 @@
 #endif
 
 #include "engine/internal/error.h"
-#include "engine/internal/ht_hash.h"
 #include "engine/internal/lib.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
 
 #include "config.h"
-
-/* Prototypes for private functions */
-static int find_frameset(const AmphoraImage *spr, const char *name);
 
 /* File-scoped variables */
 static HT_HashTable images;
@@ -34,8 +30,8 @@ Amphora_GetSpriteCenter(const AmphoraImage *spr) {
 	Amphora_ValidatePtrNotNull(spr, ((Vector2f){0, 0 }))
 
 	return (Vector2f){
-		.x = spr->rectangle.x + ((float)spr->framesets[spr->current_frameset].w / 2) - spr->framesets[spr->current_frameset].position_offset.x,
-		.y = spr->rectangle.y + ((float)spr->framesets[spr->current_frameset].h / 2) - spr->framesets[spr->current_frameset].position_offset.y
+		.x = spr->rectangle.x + ((float)spr->frameset_list[spr->current_frameset].w / 2) - spr->frameset_list[spr->current_frameset].position_offset.x,
+		.y = spr->rectangle.y + ((float)spr->frameset_list[spr->current_frameset].h / 2) - spr->frameset_list[spr->current_frameset].position_offset.y
 	};
 }
 
@@ -69,6 +65,7 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 	spr->rectangle.x = x;
 	spr->rectangle.y = y;
 	spr->scale = scale;
+	spr->framesets = HT_NewTable();
 	spr->render_list_node = render_list_node;
 	spr->flip = flip;
 	render_list_node->type = AMPH_OBJ_SPR;
@@ -83,26 +80,10 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	SDL_Texture *override = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
-	/* TODO: Cascade error cases and free */
-	if (spr->framesets) {
-		if (!((spr->framesets = SDL_realloc(spr->framesets, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
-			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
-			return AMPHORA_STATUS_ALLOC_FAIL;
-		}
-		if (!((spr->frameset_labels = SDL_realloc(spr->frameset_labels, (spr->num_framesets + 1) * sizeof(char *))))) {
-			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate frameset labels\n");
-			return AMPHORA_STATUS_ALLOC_FAIL;
-		}
-	} else {
-		if (!((spr->framesets = SDL_malloc(sizeof(struct frameset_t))))) {
-			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate framesets\n");
-			return AMPHORA_STATUS_ALLOC_FAIL;
-		}
-		if (!((spr->frameset_labels = SDL_malloc(sizeof(char *))))) {
-			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate frameset labels\n");
-			return AMPHORA_STATUS_ALLOC_FAIL;
-		}
-	}
+    if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
+        Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
+        return AMPHORA_STATUS_ALLOC_FAIL;
+    }
 
 	if (override_img) {
 		if (!HT_GetValue(override_img, open_images)) {
@@ -113,7 +94,7 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 		override = HT_GetRef(override_img, SDL_Texture, open_images);
 	}
 
-	spr->framesets[spr->num_framesets] = (struct frameset_t){
+	spr->frameset_list[spr->num_framesets] = (struct frameset_t){
 		.override_img = override,
 		.sx = sx,
 		.sy = sy,
@@ -124,67 +105,51 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 		.delay = delay,
 		.position_offset = (Vector2f){off_x, off_y }
 	};
-	if (!((spr->frameset_labels[spr->num_framesets] = SDL_malloc(strlen(name) + 1)))) {
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate frameset label\n");
-		return AMPHORA_STATUS_ALLOC_FAIL;
-	}
-	SDL_strlcpy(spr->frameset_labels[spr->num_framesets], name, strlen(name) + 1);
+	HT_SetValue(name, spr->num_framesets, spr->framesets);
 	if (++spr->num_framesets == 1) {
-		spr->rectangle.w = (float)spr->framesets[0].w * spr->scale;
-		spr->rectangle.h = (float)spr->framesets[0].h * spr->scale;
+		spr->current_frameset = 0;
+		spr->rectangle.w = (float)spr->frameset_list[0].w * spr->scale;
+		spr->rectangle.h = (float)spr->frameset_list[0].h * spr->scale;
 	}
 
 	return AMPHORA_STATUS_OK;
 }
 
-int
+void
 Amphora_SetFrameset(AmphoraImage *spr, const char *name) {
-	int frameset;
+	int idx = (int)HT_GetValue(name, spr->framesets);
+	struct frameset_t *frameset = &spr->frameset_list[idx];
 
-	if ((frameset = find_frameset(spr, name)) == -1) {
-		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to locate frameset: %s\n", name);
-		return AMPHORA_STATUS_FAIL_UNDEFINED;
-	}
-	if (frameset == spr->current_frameset) return AMPHORA_STATUS_OK;
+	if (idx == spr->current_frameset) return;
 
-	spr->framesets[frameset].playing_oneshot = false;
-	spr->current_frameset = frameset;
-	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
-	spr->rectangle.h = (float)spr->framesets[frameset].h * spr->scale;
-
-	return AMPHORA_STATUS_OK;
+	frameset->playing_oneshot = false;
+	spr->current_frameset = idx;
+	spr->rectangle.w = (float)frameset->w * spr->scale;
+	spr->rectangle.h = (float)frameset->h * spr->scale;
 }
 
-int
+void
 Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void)) {
-	int frameset;
+	int idx = (int)HT_GetValue(name, spr->framesets);
+	struct frameset_t *frameset = &spr->frameset_list[idx];
 
-	if ((frameset = find_frameset(spr, name)) == -1) {
-		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to locate frameset: %s\n", name);
-		return AMPHORA_STATUS_FAIL_UNDEFINED;
-	}
-	if (frameset == spr->current_frameset) return AMPHORA_STATUS_OK;
+	if (idx == spr->current_frameset) return;
 
-	spr->framesets[frameset].playing_oneshot = true;
-	spr->current_frameset = frameset;
-	spr->rectangle.w = (float)spr->framesets[frameset].w * spr->scale;
-	spr->rectangle.h = (float)spr->framesets[frameset].h * spr->scale;
-	spr->framesets[frameset].current_frame = -1;
-	spr->framesets[frameset].last_change = SDL_GetTicks64();
-	spr->framesets[frameset].callback = callback;
-
-	return AMPHORA_STATUS_OK;
+	frameset->playing_oneshot = true;
+	spr->current_frameset = idx;
+	spr->rectangle.w = (float)frameset->w * spr->scale;
+	spr->rectangle.h = (float)frameset->h * spr->scale;
+	frameset->current_frame = -1;
+	frameset->last_change = SDL_GetTicks();
+	frameset->callback = callback;
 }
 
 int
 Amphora_SetFramesetAnimationTime(AmphoraImage *spr, const char *name, Uint16 delay) {
-	int frameset;
+	struct frameset_t *frameset = &spr->frameset_list[HT_GetValue(name, spr->framesets)];
 
-	if ((frameset = find_frameset(spr, name)) == -1) {
-		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Failed to locate frameset: %s\n", name);
-		return AMPHORA_STATUS_FAIL_UNDEFINED;
-	}
-	spr->framesets[frameset].delay = delay;
+	if (!frameset) return AMPHORA_STATUS_FAIL_UNDEFINED;
+	frameset->delay = delay;
 
 	return AMPHORA_STATUS_OK;
 }
@@ -264,16 +229,11 @@ Amphora_HideSprite(AmphoraImage *spr) {
 
 int
 Amphora_FreeSprite(AmphoraImage *spr) {
-	int i;
-
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	if (spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
-	for (i = 0; i < spr->num_framesets; i++) {
-		SDL_free(spr->frameset_labels[i]);
-	}
-	if (spr->frameset_labels) SDL_free(spr->frameset_labels);
-	if (spr->framesets) SDL_free(spr->framesets);
+	if (spr->frameset_list) SDL_free(spr->frameset_list);
+	HT_FreeTable(spr->framesets);
 	spr->render_list_node->garbage = true;
 	SDL_free(spr);
 	spr = NULL;
@@ -353,8 +313,7 @@ Amphora_GetIMGTextureByName(const char *name) {
 
 void
 Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
-	struct frameset_t *frameset = &spr->framesets[spr->current_frameset];
-	int frameset_idx = spr->current_frameset;
+	struct frameset_t *frameset = &spr->frameset_list[spr->current_frameset];
 	SDL_Rect src;
 	SDL_FRect dst;
 	const Vector2f camera = Ampohra_GetCamera();
@@ -365,9 +324,9 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 
 	if (cur_ms - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) {
-			if (spr->framesets[frameset_idx].playing_oneshot) {
+			if (frameset->playing_oneshot) {
 				frameset->current_frame--;
-				if (spr->framesets[frameset_idx].callback) spr->framesets[frameset_idx].callback();
+				if (frameset->callback) frameset->callback();
 			} else {
 				frameset->current_frame = 0;
 			}
@@ -401,22 +360,4 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 	Amphora_RenderTexture(frameset->override_img ? frameset->override_img : spr->image,
 			      &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(logical_size);
-}
-
-/*
- * Private functions
- */
-
-static int
-find_frameset(const AmphoraImage *spr, const char *name) {
-	int i;
-
-	for (i = 0; i < spr->num_framesets; i++) {
-		if (SDL_strcmp(spr->frameset_labels[i], name) == 0) break;
-	}
-	if (i == spr->num_framesets) {
-		return -1;
-	}
-
-	return i;
 }

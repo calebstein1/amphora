@@ -2,6 +2,7 @@
 #define IMG_INTERNAL_H
 
 #include "engine/img.h"
+#include "engine/internal/ht_hash.h"
 #include "engine/internal/render.h"
 
 struct frameset_t {
@@ -22,10 +23,10 @@ struct sprite_t {
 	SDL_FRect rectangle;
 	float scale;
 	bool flip : 1;
-	Sint32 current_frameset;
+	HT_HashTable framesets;
+	int current_frameset;
+	struct frameset_t *frameset_list;
 	Sint32 num_framesets;
-	char **frameset_labels;
-	struct frameset_t *framesets;
 	struct render_list_node_t *render_list_node;
 };
 

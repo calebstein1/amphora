@@ -32,9 +32,9 @@ AmphoraImage *Amphora_CreateSprite(const char *image_name, float x, float y, flo
 int Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy,
 			 Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay);
 /* Set a sprite slot's frameset */
-int Amphora_SetFrameset(AmphoraImage *spr, const char *name);
+void Amphora_SetFrameset(AmphoraImage *spr, const char *name);
 /* Play a one-shot animation, holding on the last frame and executing a callback function when finished */
-int Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
+void Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void));
 /* Set the delay between frames of a frameset animation */
 int Amphora_SetFramesetAnimationTime(AmphoraImage *spr, const char *name, Uint16 delay);
 /* Change the draw order of a sprite */
