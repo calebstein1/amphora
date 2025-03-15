@@ -212,6 +212,7 @@ Level1_Destroy() {
 	timer = nullptr;
 	stationary = nullptr;
 	coords = nullptr;
+	Amphora_FadeOutMusic(500);
 
 	delete (health_bar);
 }

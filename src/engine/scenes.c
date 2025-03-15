@@ -72,9 +72,6 @@ Amphora_UpdateScene(Uint32 frame_count) {
 
 void
 Amphora_DestroyScene(void) {
-#ifndef DISABLE_MIXER
-	Amphora_StopMusic();
-#endif
 	scene_structs[current_scene_idx].destroy_func();
 #ifndef DISABLE_TILEMAP
 	Amphora_DestroyCurrentMap();
