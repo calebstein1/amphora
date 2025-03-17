@@ -192,7 +192,7 @@ void
 Amphora_CloseMusic(void) {
 	int i;
 
-	if (current_music) {
+	if (current_music && !Mix_FadingMusic()) {
 		Amphora_FreeMusic();
 	}
 	for (i = 0; i < MUSIC_COUNT; i++) {
