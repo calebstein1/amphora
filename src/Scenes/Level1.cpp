@@ -60,6 +60,7 @@ Level1_Init() {
 	coords = Amphora_CreateString("Roboto", 32, 16, -16, 1000, black, true, "0, 0");
 
 	Amphora_SetCameraTarget(player);
+	Amphora_BoundCameraToMap();
 
 	health_bar = new HealthBar((int) Amphora_LoadNumber("health", 3));
 

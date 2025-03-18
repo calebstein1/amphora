@@ -26,6 +26,12 @@ void Amphora_SetCamera(float x, float y);
 void Amphora_MoveCamera(float delta_x, float delta_y);
 /* Set the sprite for the camera to follow, NULL to disable tracking */
 void Amphora_SetCameraTarget(AmphoraImage *target);
+/* Bound the camera to the current map area */
+void Amphora_BoundCameraToMap(void);
+/* Bound the camera to the supplied FRect */
+void Amphora_BoundCamera(SDL_FRect boundary);
+/* Remove the currently set camera boundary */
+void Amphora_UnboundCamera(void);
 /* Set the zoom factor for the camera */
 void Amphora_SetCameraZoom(Uint16 factor, Uint16 delay);
 /* Reset the camera zoom */

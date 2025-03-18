@@ -78,4 +78,5 @@ Amphora_DestroyScene(void) {
 	Amphora_FreeObjectGroup();
 #endif
 	Amphora_FreeRenderList();
+	Amphora_UnboundCamera();
 }
