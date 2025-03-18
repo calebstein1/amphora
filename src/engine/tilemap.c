@@ -143,7 +143,7 @@ Amphora_InitMaps(void) {
 	return 0;
 }
 
-SDL_FRect *
+const SDL_FRect *
 Amphora_GetMapRectangle(void) {
 	return &map_rect;
 }
