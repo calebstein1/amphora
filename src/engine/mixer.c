@@ -37,13 +37,16 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 
 void
 Amphora_SetMusic(const char *name) {
+	SDL_RWops *mus_rw = HT_GetRef(name, SDL_RWops, music);
+
 	if (Mix_PlayingMusic()) {
 		Mix_HaltMusic();
 		Mix_FreeMusic(current_music);
 		current_music = NULL;
 	}
 
-	current_music = Mix_LoadMUS_RW(HT_GetRef(name, SDL_RWops, music), 0);
+	SDL_RWseek(mus_rw, 0, RW_SEEK_SET);
+	current_music = Mix_LoadMUS_RW(mus_rw, 0);
 }
 
 void
