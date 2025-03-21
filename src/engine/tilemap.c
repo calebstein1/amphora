@@ -23,7 +23,6 @@ static char *map_names[] = {
 	MAPS
 #undef LOADMAP
 };
-static HT_HashTable map_sizes;
 static HT_HashTable map_data;
 static struct amphora_tilemap_t current_map;
 static struct amphora_tilemap_layer_t *deferred_transition;
@@ -108,16 +107,15 @@ Amphora_InitMaps(void) {
 			return -1;
 		}
 		HT_StoreRef(map_names[i], map_resource, map_data);
-		HT_SetValue(map_names[i], SizeofResource(NULL, map_info), map_sizes);
+		HT_SetStatus(map_names[i], SizeofResource(NULL, map_info), map_data);
 	}
 #else
 #define LOADMAP(name, path) extern char name##_tm[]; extern int name##_tm_size;
 	MAPS
 #undef LOADMAP
 	map_data = HT_NewTable();
-	map_sizes = HT_NewTable();
 #define LOADMAP(name, path) HT_StoreRef(#name, name##_tm, map_data); \
-			HT_SetValue(#name, name##_tm_size, map_sizes);
+			HT_SetStatus(#name, name##_tm_size, map_data);
 	MAPS
 #undef LOADMAP
 #endif
@@ -192,7 +190,6 @@ Amphora_FreeAllObjectGroups(void) {
 void
 Amphora_CloseMapHashTables(void) {
 	HT_FreeTable(map_data);
-	HT_FreeTable(map_sizes);
 }
 
 SDL_FRect *
@@ -244,7 +241,7 @@ static int
 Amphora_ParseMapToTexture(const char *name) {
 	SDL_Renderer *renderer = Amphora_GetRenderer();
 	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(HT_GetRef(name, char, map_data),
-								(int)HT_GetValue(name, map_sizes), 0);
+								(int)HT_GetStatus(name, map_data), 0);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
 	int tileset_img_w, tileset_img_h;
