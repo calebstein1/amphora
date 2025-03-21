@@ -200,7 +200,7 @@ Amphora_CleanResources(void) {
 	Amphora_DeInitSceneManager();
 	Amphora_CloseIMG();
 #ifndef DISABLE_FONTS
-	Amphora_FreeFonts();
+	Amphora_CloseFonts();
 #endif
 #ifndef DISABLE_MIXER
 	Amphora_CloseSFX();

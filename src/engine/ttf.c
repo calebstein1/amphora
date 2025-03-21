@@ -28,6 +28,7 @@ AmphoraString *
 Amphora_CreateString(const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const bool stationary, const char *fmt, ...) {
 	struct render_list_node_t *render_list_node = Amphora_AddRenderListNode(order);
 	struct amphora_message_t *msg;
+	SDL_RWops *font_rw;
 	char text[AMPHORA_MAX_STR_LEN];
 	va_list args;
 
@@ -36,8 +37,11 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 		return NULL;
 	}
 	if (!HT_GetValue(font_name, open_fonts)) {
-		HT_StoreRef(font_name, TTF_OpenFontRW(HT_GetRef(font_name, SDL_RWops, fonts), 0, 16),
-				   open_fonts);
+#ifdef DEBUG
+		SDL_Log("Loading font: %s\n", font_name);
+#endif
+		font_rw = SDL_RWFromConstMem(HT_GetRef(font_name, char, fonts), HT_GetStatus(font_name, fonts));
+		HT_StoreRef(font_name, TTF_OpenFontRW(font_rw, 1, 16), open_fonts);
 	}
 	va_start(args, fmt);
 	SDL_vsnprintf(text, sizeof(text), fmt, args);
@@ -173,7 +177,8 @@ Amphora_InitFonts(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
 			return -1;
 		}
-		HT_StoreRef(font_names[i], SDL_RWFromConstMem(ttf_resource, SizeofResource(NULL, ttf_info)), fonts);
+		HT_StoreRef(font_names[i], ttf_resource, fonts);
+		HT_SetStatus(fonts_names[i], SizeofResource(NULL, ttf_info), fonts);
 	}
 #else
 #define LOADFONT(name, path) extern char name##_ft[]; extern int name##_ft_size;
@@ -181,7 +186,8 @@ Amphora_InitFonts(void) {
 #undef LOADFONT
 	fonts = HT_NewTable();
 	open_fonts = HT_NewTable();
-#define LOADFONT(name, path) HT_StoreRef(#name, SDL_RWFromConstMem(name##_ft, name##_ft_size), fonts);
+#define LOADFONT(name, path) HT_StoreRef(#name, name##_ft, fonts); \
+							HT_SetStatus(#name, name##_ft_size, fonts);
 	FONTS
 #undef LOADFONT
 #endif
@@ -195,13 +201,25 @@ Amphora_InitFonts(void) {
 }
 
 void
-Amphora_FreeFonts(void) {
+Amphora_FreeAllFonts(void) {
 	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
-		SDL_RWclose(HT_GetRef(font_names[i], SDL_RWops, fonts));
-		TTF_CloseFont(HT_GetRef(font_names[i], TTF_Font, open_fonts));
+		if (HT_GetValue(font_names[i], open_fonts)) {
+#ifdef DEBUG
+            SDL_Log("Unloading font: %s\n", font_names[i]);
+#endif
+			TTF_CloseFont(HT_GetRef(font_names[i], TTF_Font, open_fonts));
+			HT_SetValue(font_names[i], 0, open_fonts);
+			HT_DeleteKey(font_names[i], open_fonts);
+		}
 	}
+
+}
+
+void
+Amphora_CloseFonts(void) {
+	Amphora_FreeAllFonts();
 	HT_FreeTable(fonts);
 	HT_FreeTable(open_fonts);
 }

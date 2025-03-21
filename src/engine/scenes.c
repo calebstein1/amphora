@@ -5,6 +5,9 @@
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
+
+#include <engine/internal/ttf.h>
+
 #include "engine/internal/tilemap.h"
 
 #include "scene_list.h"
@@ -84,4 +87,7 @@ Amphora_DestroyScene(void) {
 	Amphora_FreeRenderList();
 	Amphora_UnboundCamera();
 	Amphora_FreeAllIMG();
+#ifndef DISABLE_FONTS
+	Amphora_FreeAllFonts();
+#endif
 }

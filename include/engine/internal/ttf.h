@@ -18,6 +18,7 @@ struct amphora_message_t {
 };
 
 int Amphora_InitFonts(void);
-void Amphora_FreeFonts(void);
+void Amphora_FreeAllFonts(void);
+void Amphora_CloseFonts(void);
 
 #endif /* TTF_INTERNAL_H */
