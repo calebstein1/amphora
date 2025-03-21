@@ -9,8 +9,9 @@
 #define MSG_LEN 256
 
 enum hash_status_e {
-	HT_USED = 1,
-	HT_DELETED
+	HT_DELETED = -1,
+	HT_FREE,
+	HT_USED
 };
 
 struct hash_entry_t {

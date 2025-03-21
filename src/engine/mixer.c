@@ -198,6 +198,7 @@ Amphora_FreeAllSFX(void) {
 #endif
 			Mix_FreeChunk(HT_GetRef(sfx_names[i], Mix_Chunk, open_sfx));
 			HT_SetValue(sfx_names[i], 0, open_sfx);
+			HT_DeleteKey(sfx_names[i], open_sfx);
 		}
 	}
 }
@@ -214,6 +215,7 @@ Amphora_CloseMusic(void) {
 	if (current_music && !Mix_FadingMusic()) {
 		Amphora_FreeMusic();
 	}
+	HT_FreeTable(music);
 }
 
 /*

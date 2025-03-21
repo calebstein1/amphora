@@ -306,6 +306,7 @@ Amphora_FreeAllIMG(void) {
 #endif
 			SDL_DestroyTexture(HT_GetRef(img_names[i], SDL_Texture, open_images));
 			HT_SetValue(img_names[i], 0, open_images);
+			HT_DeleteKey(img_names[i], open_images);
 		}
 	}
 }
