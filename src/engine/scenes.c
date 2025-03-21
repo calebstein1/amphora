@@ -77,6 +77,9 @@ Amphora_DestroyScene(void) {
 	Amphora_DestroyCurrentMap();
 	Amphora_FreeObjectGroup();
 #endif
+#ifndef DISABLE_MIXER
+	Amphora_FreeAllSFX();
+#endif
 	Amphora_FreeRenderList();
 	Amphora_UnboundCamera();
 }
