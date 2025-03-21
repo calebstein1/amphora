@@ -46,11 +46,14 @@ AmphoraImage *
 Amphora_CreateSprite(const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *spr = NULL;
 	struct render_list_node_t *render_list_node = NULL;
+	SDL_RWops *img_rw = NULL;
 
 	if (!HT_GetValue(image_name, open_images)) {
-		HT_StoreRef(image_name, IMG_LoadTexture_RW(Amphora_GetRenderer(),
-						      HT_GetRef(image_name, SDL_RWops, images), 0),
-				   open_images);
+#ifdef DEBUG
+		SDL_Log("Loading image: %s\n", image_name);
+#endif
+		img_rw = SDL_RWFromConstMem(HT_GetRef(image_name, char, images), HT_GetStatus(image_name, images));
+		HT_StoreRef(image_name, IMG_LoadTexture_RW(Amphora_GetRenderer(), img_rw, 1), open_images);
 	}
 
 	if ((spr = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
@@ -78,6 +81,7 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 int
 Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay) {
 	SDL_Texture *override = NULL;
+	SDL_RWops *img_rw = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
     if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
@@ -86,11 +90,13 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
     }
 
 	if (override_img) {
-		if (!HT_GetValue(override_img, open_images)) {
-			HT_StoreRef(override_img, IMG_LoadTexture_RW(Amphora_GetRenderer(),
-						   HT_GetRef(override_img, SDL_RWops, images), 0),
-				    open_images);
-		}
+        if (!HT_GetValue(override_img, open_images)) {
+#ifdef DEBUG
+            SDL_Log("Loading image: %s\n", override_img);
+#endif
+            img_rw = SDL_RWFromConstMem(HT_GetRef(override_img, char, images), HT_GetStatus(override_img, images));
+            HT_StoreRef(override_img, IMG_LoadTexture_RW(Amphora_GetRenderer(), img_rw, 1), open_images);
+        }
 		override = HT_GetRef(override_img, SDL_Texture, open_images);
 	}
 
@@ -266,7 +272,8 @@ Amphora_InitIMG(void) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load image resource... Amphora will crash now", 0);
 			return -1;
 		}
-		HT_StoreRef(img_names[i], SDL_RWFromConstMem(img_resource, SizeofResource(NULL, img_info)), images);
+		HT_StoreRef(img_names[i], img_resource, images);
+		HT_SetStatus(img_names[i], SizeofResource(NULL, img_info), images);
 	}
 #else
 #define LOADIMG(name, path) extern char name##_im[]; extern int name##_im_size;
@@ -274,7 +281,8 @@ Amphora_InitIMG(void) {
 #undef LOADIMG
 	images = HT_NewTable();
 	open_images = HT_NewTable();
-#define LOADIMG(name, path) HT_StoreRef(#name, SDL_RWFromConstMem(name##_im, name##_im_size), images);
+#define LOADIMG(name, path) HT_StoreRef(#name, name##_im, images); \
+							HT_SetStatus(#name, name##_im_size, images);
 	IMAGES
 #undef LOADIMG
 #endif
@@ -288,24 +296,36 @@ Amphora_InitIMG(void) {
 }
 
 void
-Amphora_CloseIMG(void) {
+Amphora_FreeAllIMG(void) {
 	int i;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
-		SDL_RWclose(HT_GetRef(img_names[i], SDL_RWops, images));
-		if (!HT_GetValue(img_names[i], open_images))
+		if (HT_GetValue(img_names[i], open_images)) {
+#ifdef DEBUG
+			SDL_Log("Unloading image: %s\n", img_names[i]);
+#endif
 			SDL_DestroyTexture(HT_GetRef(img_names[i], SDL_Texture, open_images));
+			HT_SetValue(img_names[i], 0, open_images);
+		}
 	}
+}
+
+void
+Amphora_CloseIMG(void) {
 	HT_FreeTable(images);
 	HT_FreeTable(open_images);
 }
 
 SDL_Texture *
 Amphora_GetIMGTextureByName(const char *name) {
+	SDL_RWops *img_rw = NULL;
+
 	if (!HT_GetValue(name, open_images)) {
-		HT_StoreRef(name, IMG_LoadTexture_RW(Amphora_GetRenderer(),
-						      HT_GetRef(name, SDL_RWops, images), 0),
-						      open_images);
+#ifdef DEBUG
+		SDL_Log("Loading image: %s\n", name);
+#endif
+		img_rw = SDL_RWFromConstMem(HT_GetRef(name, char, images), HT_GetStatus(name, images));
+		HT_StoreRef(name, IMG_LoadTexture_RW(Amphora_GetRenderer(), img_rw, 1), open_images);
 	}
 
 	return HT_GetRef(name, SDL_Texture, open_images);

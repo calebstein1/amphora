@@ -31,6 +31,7 @@ struct sprite_t {
 };
 
 int Amphora_InitIMG(void);
+void Amphora_FreeAllIMG(void);
 void Amphora_CloseIMG(void);
 SDL_Texture *Amphora_GetIMGTextureByName(const char *name);
 void Amphora_UpdateAndDrawSprite(const AmphoraImage *spr);

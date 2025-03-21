@@ -1,5 +1,6 @@
 #include "engine/internal/error.h"
 #include "engine/internal/ht_hash.h"
+#include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
@@ -82,4 +83,5 @@ Amphora_DestroyScene(void) {
 #endif
 	Amphora_FreeRenderList();
 	Amphora_UnboundCamera();
+	Amphora_FreeAllIMG();
 }
