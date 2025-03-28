@@ -9,7 +9,8 @@ Amphora_CheckCollision(const AmphoraImage *obj_a, const AmphoraImage *obj_b) {
 
 AmphoraCollision
 Amphora_CheckObjectGroupCollision(const AmphoraImage *obj, const char *name) {
-	int c, i, j;
+	int i, j;
+	Uint32 c;
 	float o_sx, o_ex, o_sy, o_ey, r_sx, r_ex, r_sy, r_ey;
 	float overlaps[4];
 	AmphoraCollision dirs[] = {

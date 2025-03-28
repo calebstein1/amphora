@@ -3,8 +3,6 @@
 
 #include "engine/tilemap.h"
 
-#define OBJ_GRP_BATCH_SIZE 4
-
 enum map_orientation_e {
 	MAP_ORTHOGONAL,
 	MAP_ISOMETRIC
@@ -26,11 +24,8 @@ struct amphora_tilemap_t {
 };
 
 struct amphora_object_groups_t {
-	char **labels;
+	HT_HashTable i;
 	SDL_FRect **rects;
-	int *c_rects;
-	int c;
-	int max_c;
 };
 
 int Amphora_InitMaps(void);
@@ -39,7 +34,7 @@ void Amphora_DestroyCurrentMap(void);
 void Amphora_FreeObjectGroup(void);
 void Amphora_FreeAllObjectGroups(void);
 void Amphora_CloseMapHashTables(void);
-SDL_FRect *Amphora_GetRectsByGroup(const char *name, int *c);
+SDL_FRect *Amphora_GetRectsByGroup(const char *name, Uint32 *c);
 void Amphora_ProcessDeferredTransition(void);
 
 #endif /* AMPHORA_TILEMAP_INTERNAL_H */

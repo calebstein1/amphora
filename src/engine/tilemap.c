@@ -124,16 +124,8 @@ Amphora_InitMaps(void) {
 		SDL_Log("Found map %s\n", map_names[i]);
 	}
 #endif
-	obj_groups.max_c = OBJ_GRP_BATCH_SIZE;
-	if (!((obj_groups.labels = SDL_malloc(OBJ_GRP_BATCH_SIZE * sizeof(char *))))) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group labels\n");
-		return -1;
-	}
-	if (!((obj_groups.c_rects = SDL_malloc(OBJ_GRP_BATCH_SIZE * sizeof(int))))) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle count\n");
-		return -1;
-	}
-	if (!((obj_groups.rects = SDL_malloc(OBJ_GRP_BATCH_SIZE * sizeof(SDL_FRect *))))) {
+	obj_groups.i = HT_NewTable();
+	if (!((obj_groups.rects = SDL_malloc(HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *))))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle list\n");
 		return -1;
 	}
@@ -166,25 +158,23 @@ Amphora_DestroyCurrentMap(void) {
 
 void
 Amphora_FreeObjectGroup(void) {
-	int i;
+	Uint32 i;
 
-	for (i = 0; i < obj_groups.c; i++) {
-		SDL_free(obj_groups.labels[i]);
-		SDL_free(obj_groups.rects[i]);
-		obj_groups.labels[i] = NULL;
-		obj_groups.rects[i] = NULL;
-
+	for (i = 0; i < HT_GetCount(obj_groups.i); i++) {
+        SDL_free(obj_groups.rects[i]);
+        obj_groups.rects[i] = NULL;
 	}
 
-	obj_groups.c = 0;
+	HT_FreeTable(obj_groups.i);
+	obj_groups.i = HT_NewTable();
+	obj_groups.rects = SDL_realloc(obj_groups.rects, HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *));
 }
 
 void
 Amphora_FreeAllObjectGroups(void) {
 	Amphora_FreeObjectGroup();
-	SDL_free(obj_groups.labels);
-	SDL_free(obj_groups.c_rects);
 	SDL_free(obj_groups.rects);
+	HT_FreeTable(obj_groups.i);
 }
 
 void
@@ -193,17 +183,10 @@ Amphora_CloseMapHashTables(void) {
 }
 
 SDL_FRect *
-Amphora_GetRectsByGroup(const char *name, int *c) {
-	int i;
+Amphora_GetRectsByGroup(const char *name, Uint32 *c) {
+	int i = (int)HT_GetValue(name, obj_groups.i);
 
-	for (i = 0; i < obj_groups.c; i++) {
-		if (SDL_strcmp(name, obj_groups.labels[i]) == 0) break;
-	}
-	if (i == obj_groups.c) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not find object group: %s\n", name);
-		return NULL;
-	}
-	*c = obj_groups.c_rects[i];
+	*c = HT_GetStatus(name, obj_groups.i);
 
 	return obj_groups.rects[i];
 }
@@ -347,24 +330,13 @@ Amphora_ParseTileLayer(const cute_tiled_map_t *map, const cute_tiled_layer_t *la
 static int
 Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 	int i;
+	unsigned c = HT_GetCount(obj_groups.i), s = HT_GetSize(obj_groups.i);
 	cute_tiled_object_t *object;
 
-	if (++obj_groups.c > obj_groups.max_c) {
-		obj_groups.max_c += OBJ_GRP_BATCH_SIZE;
-		if (!((obj_groups.labels = SDL_realloc(obj_groups.labels,
-						       obj_groups.max_c * sizeof(char *))))) {
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-				     "Failed to reallocate object group labels\n");
-			return -1;
-		}
-		if (!((obj_groups.c_rects = SDL_realloc(obj_groups.c_rects,
-							obj_groups.max_c * sizeof(int))))) {
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-				     "Failed to reallocate object group rectangle count\n");
-			return -1;
-		}
+	HT_SetValue(layer->name.ptr, c, obj_groups.i);
+	if (s != HT_GetSize(obj_groups.i)) {
 		if (!((obj_groups.rects = SDL_realloc(obj_groups.rects,
-						      obj_groups.max_c * sizeof(SDL_FRect *))))) {
+						      HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *))))) {
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
 				     "Failed to reallocate object group rectangle list\n");
 			return -1;
@@ -377,22 +349,17 @@ Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 		object = object->next;
 	}
 	object = layer->objects;
-	if (!((obj_groups.labels[obj_groups.c - 1] = SDL_malloc(SDL_strlen(layer->name.ptr) + 1)))) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for label\n");
-		return -1;
-	}
-	if (!((obj_groups.rects[obj_groups.c - 1] = SDL_malloc(i * sizeof(SDL_FRect))))) {
+	if (!((obj_groups.rects[c] = SDL_malloc(i * sizeof(SDL_FRect))))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangles\n");
 		return -1;
 	}
-	SDL_strlcpy(obj_groups.labels[obj_groups.c - 1], layer->name.ptr, SDL_strlen(layer->name.ptr) + 1);
-	obj_groups.c_rects[obj_groups.c - 1] = i;
+	HT_SetStatus(layer->name.ptr, i, obj_groups.i);
 	i = 0;
 	while (object) {
-		obj_groups.rects[obj_groups.c - 1][i].x = object->x * current_map.scale;
-		obj_groups.rects[obj_groups.c - 1][i].y = object->y * current_map.scale;
-		obj_groups.rects[obj_groups.c - 1][i].w = object->width * current_map.scale;
-		obj_groups.rects[obj_groups.c - 1][i].h = object->height * current_map.scale;
+		obj_groups.rects[c][i].x = object->x * current_map.scale;
+		obj_groups.rects[c][i].y = object->y * current_map.scale;
+		obj_groups.rects[c][i].w = object->width * current_map.scale;
+		obj_groups.rects[c][i].h = object->height * current_map.scale;
 		i++;
 		object = object->next;
 	}
