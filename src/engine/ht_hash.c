@@ -49,7 +49,7 @@ HT_NewTable(void) {
 		HT_SetError("Could not allocate table: %s", strerror(errno));
 		return NULL;
 	}
-	if (!((tbl)->table_entries = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t)))) {
+	if (!((tbl->table_entries = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t))))) {
 		HT_SetError("Could not allocate table data: %s", strerror(errno));
 		free(tbl);
 		return NULL;
@@ -65,7 +65,7 @@ HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
-	if (!(ntbl = calloc(tbl->size << 1, sizeof(struct hash_entry_t)))) {
+	if (!((ntbl = calloc(tbl->size << 1, sizeof(struct hash_entry_t))))) {
 		HT_SetError("Failed to grow table: %s", strerror(errno));
 		return NULL;
 	}
@@ -156,6 +156,16 @@ HT_SetStatus(const char *key, int val, HT_HashTable t) {
 	t->table_entries[i].status = val;
 
 	return i;
+}
+
+unsigned
+HT_GetCount(HT_HashTable t) {
+	return t->count;
+}
+
+unsigned
+HT_GetSize(HT_HashTable t) {
+	return t->size;
 }
 
 void
