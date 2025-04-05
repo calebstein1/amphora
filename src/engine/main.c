@@ -165,6 +165,7 @@ Amphora_MainLoop(SDL_Event *e) {
 	Amphora_UpdateCamera();
 
 	SDL_RenderPresent(Amphora_GetRenderer());
+	SDL_GL_SwapWindow(Amphora_GetWindow());
 
 	frame_end = SDL_GetTicks64();
 	if ((frame_time = (frame_end - frame_start)) < (1000 / framerate)) {

@@ -5,13 +5,20 @@
 #include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"
 
+#include "GL/glew.h"
+
 #include "config.h"
 
 /* Prototypes for private functions */
+int GL_Init(void);
 int Amphora_InitRenderList(void);
 
+GLuint g_uiVAO;
+GLuint g_uiVBO;
+GLuint g_uiMainProgram;
+
 /* File-scoped variables */
-static SDL_Renderer *renderer;
+static SDL_GLContext renderer;
 static SDL_Window *window;
 static Camera camera = { 0, 0 };
 static enum camera_mode_e camera_mode = CAM_MANUAL;
@@ -154,16 +161,21 @@ Ampohra_IsWindowFullscreen(void) {
 int
 Amphora_InitRender(void) {
 	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-					 (int) Amphora_LoadWinX(), (int) Amphora_LoadWinY(), (Uint32) Amphora_LoadWinFlags())))) {
+					 (int) Amphora_LoadWinX(), (int) Amphora_LoadWinY(), (Uint32) Amphora_LoadWinFlags() | SDL_WINDOW_OPENGL)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
 		return -1;
 	}
-	if (!((renderer = SDL_CreateRenderer(window, -1, 0)))) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create renderer: %s\n", SDL_GetError());
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create renderer", SDL_GetError(), 0);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	if (!((renderer = SDL_GL_CreateContext(window)))) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create OpenGL context: %s\n", SDL_GetError());
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create OpenGL context", SDL_GetError(), 0);
+		SDL_DestroyWindow(window);
 		return -1;
 	}
+	SDL_GL_SetSwapInterval(-1);
+	GL_Init();
 	if (Amphora_InitIMG() == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER,"Failed to init image system\n");
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to init image system", "Failed to initialize image system", 0);
@@ -176,7 +188,7 @@ Amphora_InitRender(void) {
 
 void
 Amphora_CloseRender(void) {
-	SDL_DestroyRenderer(renderer);
+	SDL_GL_DeleteContext(renderer);
 	SDL_DestroyWindow(window);
 }
 
@@ -188,8 +200,7 @@ Amphora_SetRenderLogicalSize(Vector2 size) {
 
 void
 Amphora_ClearBG(void) {
-	SDL_SetRenderDrawColor(renderer, bg.r, bg.g, bg.b, bg.a);
-	SDL_RenderClear(renderer);
+	glClearColor(bg.r, bg.g, bg.b, bg.a);
 }
 
 SDL_Window *
@@ -330,6 +341,25 @@ Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_F
 /*
  * Private functions
  */
+
+int
+GL_Init(void) {
+	GLenum err;
+
+	glewExperimental = GL_TRUE;
+	if (!((err = glewInit()))) {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to initialize GLEW: %s\n", glewGetErrorString(err));
+		return -1;
+	}
+
+	Amphora_ClearBG();
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_STENCIL_TEST);
+
+	return 0;
+}
 
 int
 Amphora_InitRenderList(void) {
