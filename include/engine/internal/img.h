@@ -7,7 +7,7 @@
 
 struct frameset_t {
 	SDL_Texture *override_img;
-	Sint32 sx, sy, w, h;
+	SDL_Rect rectangle;
 	Sint16 current_frame;
 	Uint16 num_frames;
 	Uint32 delay;

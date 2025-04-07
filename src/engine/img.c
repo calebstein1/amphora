@@ -30,8 +30,8 @@ Amphora_GetSpriteCenter(const AmphoraImage *spr) {
 	Amphora_ValidatePtrNotNull(spr, ((Vector2f){0, 0 }))
 
 	return (Vector2f){
-		.x = spr->rectangle.x + ((float)spr->frameset_list[spr->current_frameset].w / 2) - spr->frameset_list[spr->current_frameset].position_offset.x,
-		.y = spr->rectangle.y + ((float)spr->frameset_list[spr->current_frameset].h / 2) - spr->frameset_list[spr->current_frameset].position_offset.y
+		.x = spr->rectangle.x + ((float)spr->frameset_list[spr->current_frameset].rectangle.w / 2) - spr->frameset_list[spr->current_frameset].position_offset.x,
+		.y = spr->rectangle.y + ((float)spr->frameset_list[spr->current_frameset].rectangle.h / 2) - spr->frameset_list[spr->current_frameset].position_offset.y
 	};
 }
 
@@ -102,10 +102,10 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 
 	spr->frameset_list[spr->num_framesets] = (struct frameset_t){
 		.override_img = override,
-		.sx = sx,
-		.sy = sy,
-		.w = w,
-		.h = h,
+		.rectangle.x = sx,
+		.rectangle.y = sy,
+		.rectangle.w = w,
+		.rectangle.h = h,
 		.current_frame = -1,
 		.num_frames = num_frames,
 		.delay = delay,
@@ -114,8 +114,8 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	HT_SetValue(name, spr->num_framesets, spr->framesets);
 	if (++spr->num_framesets == 1) {
 		spr->current_frameset = 0;
-		spr->rectangle.w = (float)spr->frameset_list[0].w * spr->scale;
-		spr->rectangle.h = (float)spr->frameset_list[0].h * spr->scale;
+		spr->rectangle.w = (float)spr->frameset_list[0].rectangle.w * spr->scale;
+		spr->rectangle.h = (float)spr->frameset_list[0].rectangle.h * spr->scale;
 	}
 
 	return AMPHORA_STATUS_OK;
@@ -130,8 +130,8 @@ Amphora_SetFrameset(AmphoraImage *spr, const char *name) {
 
 	frameset->playing_oneshot = false;
 	spr->current_frameset = idx;
-	spr->rectangle.w = (float)frameset->w * spr->scale;
-	spr->rectangle.h = (float)frameset->h * spr->scale;
+	spr->rectangle.w = (float)frameset->rectangle.w * spr->scale;
+	spr->rectangle.h = (float)frameset->rectangle.h * spr->scale;
 }
 
 void
@@ -143,8 +143,8 @@ Amphora_PlayOneshot(AmphoraImage *spr, const char *name, void (*callback)(void))
 
 	frameset->playing_oneshot = true;
 	spr->current_frameset = idx;
-	spr->rectangle.w = (float)frameset->w * spr->scale;
-	spr->rectangle.h = (float)frameset->h * spr->scale;
+	spr->rectangle.w = (float)frameset->rectangle.w * spr->scale;
+	spr->rectangle.h = (float)frameset->rectangle.h * spr->scale;
 	frameset->current_frame = -1;
 	frameset->last_change = SDL_GetTicks();
 	frameset->callback = callback;
@@ -355,25 +355,21 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 		frameset->last_change = cur_ms;
 	}
 	if (frameset->current_frame == -1) frameset->current_frame = 0;
-	src = (SDL_Rect){
-		.x = frameset->sx + (frameset->w * frameset->current_frame),
-		.y = frameset->sy,
-		.w = frameset->w,
-		.h = frameset->h
-	};
+	src = frameset->rectangle;
+	src.x += (src.w * frameset->current_frame);
 	if (spr->render_list_node->stationary) {
 		dst = (SDL_FRect){
-			.x = spr->rectangle.x > 0 ? spr->rectangle.x : (float) Amphora_GetResolution().x + spr->rectangle.x - (float)frameset->w,
-			.y = spr->rectangle.y > 0 ? spr->rectangle.y : (float) Amphora_GetResolution().y + spr->rectangle.y - (float)frameset->h,
-			.w = (float)frameset->w * spr->scale,
-			.h = (float)frameset->h * spr->scale
+			.x = spr->rectangle.x > 0 ? spr->rectangle.x : (float) Amphora_GetResolution().x + spr->rectangle.x - (float)frameset->rectangle.w,
+			.y = spr->rectangle.y > 0 ? spr->rectangle.y : (float) Amphora_GetResolution().y + spr->rectangle.y - (float)frameset->rectangle.h,
+			.w = (float)frameset->rectangle.w * spr->scale,
+			.h = (float)frameset->rectangle.h * spr->scale
 		};
 	} else {
 		dst = (SDL_FRect){
 			.x = spr->rectangle.x - frameset->position_offset.x - camera.x,
 			.y = spr->rectangle.y - frameset->position_offset.y - camera.y,
-			.w = (float)frameset->w * spr->scale,
-			.h = (float)frameset->h * spr->scale
+			.w = (float)frameset->rectangle.w * spr->scale,
+			.h = (float)frameset->rectangle.h * spr->scale
 		};
 	}
 
