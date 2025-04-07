@@ -20,6 +20,8 @@ struct frameset_t {
 struct sprite_t {
 	enum amphora_object_type_e type;
 	SDL_Texture *image;
+	SDL_Surface *surface;
+	SDL_Surface *surface_orig;
 	SDL_FRect rectangle;
 	float scale;
 	bool flip : 1;
