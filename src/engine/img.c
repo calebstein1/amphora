@@ -9,6 +9,9 @@
 
 #include "config.h"
 
+/* Prototypes for private functions */
+void Amphora_LoadIMGTexture(const char *name);
+
 /* File-scoped variables */
 static HT_HashTable images;
 static HT_HashTable open_images;
@@ -46,15 +49,8 @@ AmphoraImage *
 Amphora_CreateSprite(const char *image_name, const float x, const float y, const float scale, const bool flip, const bool stationary, const Sint32 order) {
 	AmphoraImage *spr = NULL;
 	struct render_list_node_t *render_list_node = NULL;
-	SDL_RWops *img_rw = NULL;
 
-	if (!HT_GetValue(image_name, open_images)) {
-#ifdef DEBUG
-		SDL_Log("Loading image: %s\n", image_name);
-#endif
-		img_rw = SDL_RWFromConstMem(HT_GetRef(image_name, char, images), HT_GetStatus(image_name, images));
-		HT_StoreRef(image_name, IMG_LoadTexture_RW(Amphora_GetRenderer(), img_rw, 1), open_images);
-	}
+	if (!HT_GetValue(image_name, open_images)) Amphora_LoadIMGTexture(image_name);
 
 	if ((spr = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize sprite\n");
@@ -81,7 +77,6 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 int
 Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_img, Sint32 sx, Sint32 sy, Sint32 w, Sint32 h, float off_x, float off_y, Uint16 num_frames, Uint16 delay) {
 	SDL_Texture *override = NULL;
-	SDL_RWops *img_rw = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
     if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
@@ -91,11 +86,7 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 
 	if (override_img) {
         if (!HT_GetValue(override_img, open_images)) {
-#ifdef DEBUG
-            SDL_Log("Loading image: %s\n", override_img);
-#endif
-            img_rw = SDL_RWFromConstMem(HT_GetRef(override_img, char, images), HT_GetStatus(override_img, images));
-            HT_StoreRef(override_img, IMG_LoadTexture_RW(Amphora_GetRenderer(), img_rw, 1), open_images);
+        	Amphora_LoadIMGTexture(override_img);
         }
 		override = HT_GetRef(override_img, SDL_Texture, open_images);
 	}
@@ -319,15 +310,7 @@ Amphora_CloseIMG(void) {
 
 SDL_Texture *
 Amphora_GetIMGTextureByName(const char *name) {
-	SDL_RWops *img_rw = NULL;
-
-	if (!HT_GetValue(name, open_images)) {
-#ifdef DEBUG
-		SDL_Log("Loading image: %s\n", name);
-#endif
-		img_rw = SDL_RWFromConstMem(HT_GetRef(name, char, images), HT_GetStatus(name, images));
-		HT_StoreRef(name, IMG_LoadTexture_RW(Amphora_GetRenderer(), img_rw, 1), open_images);
-	}
+	if (!HT_GetValue(name, open_images)) Amphora_LoadIMGTexture(name);
 
 	return HT_GetRef(name, SDL_Texture, open_images);
 }
@@ -377,4 +360,22 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 	Amphora_RenderTexture(frameset->override_img ? frameset->override_img : spr->image,
 			      &src, &dst, 0, spr->flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 	if (spr->render_list_node->stationary) Amphora_SetRenderLogicalSize(logical_size);
+}
+
+/*
+ * Private Functions
+ */
+
+void
+Amphora_LoadIMGTexture(const char *name) {
+	SDL_RWops *img_rw = NULL;
+	SDL_Texture *texture;
+	SDL_Renderer *renderer = Amphora_GetRenderer();
+
+#ifdef DEBUG
+	SDL_Log("Loading image: %s\n", name);
+#endif
+	img_rw = SDL_RWFromConstMem(HT_GetRef(name, char, images), HT_GetStatus(name, images));
+	texture = IMG_LoadTexture_RW(renderer, img_rw, 1);
+	HT_StoreRef(name, texture, open_images);
 }
