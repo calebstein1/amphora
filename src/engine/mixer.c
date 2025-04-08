@@ -1,10 +1,12 @@
-#ifndef DISABLE_MIXER
 #ifdef WIN32
 #include <windows.h>
 #endif
 
 #include "engine/internal/mixer.h"
 #include "engine/internal/ht_hash.h"
+#include "config.h"
+
+#ifndef DISABLE_MIXER
 
 /* Prototypes for private functions */
 static void Amphora_FreeMusic(void);
