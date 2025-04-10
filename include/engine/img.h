@@ -52,7 +52,7 @@ int Amphora_ShowSprite(AmphoraImage *spr);
 /* Hide a sprite without free it */
 int Amphora_HideSprite(AmphoraImage *spr);
 /* Apply FX to a texture's pixels using the function pointer fx */
-void Amphora_ApplyFXToImage(const AmphoraImage *img, void (*fx)(SDL_Surface *));
+void Amphora_ApplyFXToImage(AmphoraImage *img, void (*fx)(SDL_Surface *));
 /* Reset an image with FX previously applied */
 void Amphora_ResetImage(AmphoraImage *img);
 /* Free a sprite slot */

@@ -30,12 +30,13 @@ struct sprite_t {
 	struct frameset_t *frameset_list;
 	Sint32 num_framesets;
 	struct render_list_node_t *render_list_node;
+	bool dirty;
 };
 
 int Amphora_InitIMG(void);
 void Amphora_FreeAllIMG(void);
 void Amphora_CloseIMG(void);
 SDL_Texture *Amphora_GetIMGTextureByName(const char *name);
-void Amphora_UpdateAndDrawSprite(const AmphoraImage *spr);
+void Amphora_UpdateAndDrawSprite(AmphoraImage *spr);
 
 #endif /* IMG_INTERNAL_H */

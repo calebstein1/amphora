@@ -229,11 +229,11 @@ Amphora_HideSprite(AmphoraImage *spr) {
 }
 
 void
-Amphora_ApplyFXToImage(const AmphoraImage *img, void (*fx)(SDL_Surface *)) {
+Amphora_ApplyFXToImage(AmphoraImage *img, void (*fx)(SDL_Surface *)) {
 	if (!fx) return;
 
 	fx(img->surface);
-	SDL_UpdateTexture(img->image, NULL, img->surface->pixels, img->surface->pitch);
+	img->dirty = true;
 }
 
 void
@@ -347,7 +347,7 @@ Amphora_GetIMGTextureByName(const char *name) {
 }
 
 void
-Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
+Amphora_UpdateAndDrawSprite(AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->frameset_list[spr->current_frameset];
 	SDL_Rect src;
 	SDL_FRect dst;
@@ -357,6 +357,10 @@ Amphora_UpdateAndDrawSprite(const AmphoraImage *spr) {
 
 	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
 
+	if (spr->dirty) {
+		SDL_UpdateTexture(spr->image, NULL, spr->surface->pixels, spr->surface->pitch);
+		spr->dirty = false;
+	}
 	if (cur_ms - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) {
 			if (frameset->playing_oneshot) {
