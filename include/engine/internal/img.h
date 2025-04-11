@@ -25,7 +25,7 @@ struct sprite_t {
 	SDL_FRect rectangle;
 	float scale;
 	bool flip : 1;
-	bool dirty : 1;
+	bool rerender : 1;
 	HT_HashTable framesets;
 	int current_frameset;
 	struct frameset_t *frameset_list;

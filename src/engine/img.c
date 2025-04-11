@@ -233,14 +233,14 @@ Amphora_ApplyFXToImage(AmphoraImage *img, void (*fx)(SDL_Surface *)) {
 	if (!fx) return;
 
 	fx(img->surface);
-	img->dirty = true;
+	img->rerender = true;
 }
 
 void
 Amphora_ResetImage(AmphoraImage *img) {
 	SDL_memcpy(img->surface->pixels, img->surface_orig->pixels,
 		img->surface_orig->w * img->surface_orig->h * img->surface_orig->format->BytesPerPixel);
-	img->dirty = true;
+	img->rerender = true;
 }
 
 int
@@ -357,9 +357,9 @@ Amphora_UpdateAndDrawSprite(AmphoraImage *spr) {
 
 	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
 
-	if (spr->dirty) {
+	if (spr->rerender) {
 		SDL_UpdateTexture(spr->image, NULL, spr->surface->pixels, spr->surface->pitch);
-		spr->dirty = false;
+		spr->rerender = false;
 	}
 	if (cur_ms - frameset->last_change > frameset->delay) {
 		if (++frameset->current_frame == frameset->num_frames) {
