@@ -20,9 +20,12 @@ struct frameset_t {
 struct sprite_t {
 	enum amphora_object_type_e type;
 	SDL_Texture *image;
+	SDL_Surface *surface;
+	SDL_Surface *surface_orig;
 	SDL_FRect rectangle;
 	float scale;
 	bool flip : 1;
+	bool rerender : 1;
 	HT_HashTable framesets;
 	int current_frameset;
 	struct frameset_t *frameset_list;
@@ -34,6 +37,6 @@ int Amphora_InitIMG(void);
 void Amphora_FreeAllIMG(void);
 void Amphora_CloseIMG(void);
 SDL_Texture *Amphora_GetIMGTextureByName(const char *name);
-void Amphora_UpdateAndDrawSprite(const AmphoraImage *spr);
+void Amphora_UpdateAndDrawSprite(AmphoraImage *spr);
 
 #endif /* IMG_INTERNAL_H */

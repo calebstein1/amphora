@@ -257,7 +257,7 @@ Amphora_ProcessRenderList(void) {
 		}
 		switch (render_list->type) {
 			case AMPH_OBJ_SPR:
-				Amphora_UpdateAndDrawSprite((const AmphoraImage *) render_list->data);
+				Amphora_UpdateAndDrawSprite((AmphoraImage *) render_list->data);
 				break;
 			case AMPH_OBJ_TXT:
 				Amphora_RenderString((const AmphoraString *) render_list->data);

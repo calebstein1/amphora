@@ -2,6 +2,7 @@
 #include "colors.h"
 
 #include "../Utils/HealthBar.hpp"
+#include "FX/motion_blur.h"
 
 #include <string>
 
@@ -29,6 +30,7 @@ AmphoraString *coords;
 enum player_state_e player_state = idle;
 enum player_directions_e player_direction = LEFT;
 HealthBar *health_bar = nullptr;
+static bool blur = false;
 
 Amphora_BeginScene(Level1)
 
@@ -85,6 +87,10 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 	if (health_bar->get_health() <= 0 && player_state != ko) {
 		player_state = ko;
 		Amphora_PlayOneshot(player, "KO", nullptr);
+		if (blur) {
+			Amphora_ResetImage(player);
+			blur = false;
+		}
 	}
 
 	if (key_actions->toggle_fullscreen && !f_down) {
@@ -103,6 +109,10 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		Amphora_FlipSprite(player);
 		Amphora_MoveSprite(player, -player_speed, 0);
 		Amphora_PlaySFX("leaves01", 1, 0);
+		if (!blur) {
+			Amphora_ApplyFXToImage(player, MotionBlur);
+			blur = true;
+		}
 	}
 	if (key_actions->right && player_state != atk && player_state != ko) {
 		player_state = walk;
@@ -111,6 +121,10 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		Amphora_UnflipSprite(player);
 		Amphora_MoveSprite(player, player_speed, 0);
 		Amphora_PlaySFX("leaves02", 1, 0);
+		if (!blur) {
+			Amphora_ApplyFXToImage(player, MotionBlur);
+			blur = true;
+		}
 	}
 	if (key_actions->up && player_state != atk && player_state != ko) {
 		player_state = walk;
@@ -128,8 +142,14 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 	}
 	if (key_actions->attack && player_state != atk && player_state != ko) {
 		player_state = atk;
+		if (!blur) {
+            Amphora_ApplyFXToImage(player, MotionBlur);
+			blur = true;
+		}
 		Amphora_PlayOneshot(player, "Attack", [] {
 		    player_state = idle;
+			blur = false;
+			Amphora_ResetImage(player);
 		    Amphora_SetFrameset(player, "Idle");
 		});
 	}
@@ -137,6 +157,10 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 	    player_state == walk) {
 		player_state = idle;
 		Amphora_SetFrameset(player, "Idle");
+		if (blur) {
+			Amphora_ResetImage(player);
+			blur = false;
+		}
 	}
 	if (key_actions->damage && frame - damage_cooldown > (Amphora_GetFPS() / 2)) {
 		damage_cooldown = frame;
@@ -213,6 +237,7 @@ Level1_Destroy() {
 	timer = nullptr;
 	stationary = nullptr;
 	coords = nullptr;
+	blur = false;
 	Amphora_FadeOutMusic(500);
 
 	delete (health_bar);
