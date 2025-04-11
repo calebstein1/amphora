@@ -2,15 +2,16 @@
 #include "FX/motion_blur.h"
 
 void MotionBlur(SDL_Surface *surface) {
-	Uint32 *pixels = (Uint32 *)surface->pixels, i;
+	AmphoraPixelDataABGR *pixels = surface->pixels;
+	int i;
 
 	for (i = 0; i < surface->w * surface->h; i++) {
-		if (!pixels[i] && pixels[i + 1]) {
-			pixels[i + 2] -= 0x11000000;
-			pixels[i + 1] -= 0x22000000;
-			pixels[i] = pixels[i + 1] - 0x44000000;
-			pixels[i - 1] = pixels[i + 1] - 0x88000000;
-			pixels[i - 2] = pixels[i + 1] - 0xcc000000;
+		if (!pixels[i].pixel && pixels[i + 1].pixel) {
+			pixels[i + 2].color_data.alpha -= 0x11;
+			pixels[i + 1].color_data.alpha -= 0x22;
+			pixels[i].color_data.alpha = pixels[i + 1].color_data.alpha - 0x44;
+			pixels[i - 1].color_data.alpha = pixels[i + 1].color_data.alpha - 0x88;
+			pixels[i - 2].color_data.alpha = pixels[i + 1].color_data.alpha - 0xcc;
 		}
 	}
 }

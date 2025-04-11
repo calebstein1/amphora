@@ -11,6 +11,13 @@ typedef SDL_Point Vector2;
 typedef struct sprite_t AmphoraImage;
 typedef struct amphora_message_t AmphoraString;
 
+typedef union amphora_pixeldata_abgr_u {
+	struct {
+		Uint8 red, green, blue, alpha;
+	} color_data;
+	Uint32 pixel;
+} AmphoraPixelDataABGR;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
