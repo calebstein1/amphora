@@ -238,9 +238,9 @@ Amphora_ApplyFXToImage(AmphoraImage *img, void (*fx)(SDL_Surface *)) {
 
 void
 Amphora_ResetImage(AmphoraImage *img) {
-	SDL_UpdateTexture(img->image, NULL, img->surface_orig->pixels, img->surface_orig->pitch);
 	SDL_memcpy(img->surface->pixels, img->surface_orig->pixels,
 		img->surface_orig->w * img->surface_orig->h * img->surface_orig->format->BytesPerPixel);
+	img->dirty = true;
 }
 
 int
