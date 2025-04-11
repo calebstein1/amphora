@@ -25,12 +25,12 @@ struct sprite_t {
 	SDL_FRect rectangle;
 	float scale;
 	bool flip : 1;
+	bool dirty : 1;
 	HT_HashTable framesets;
 	int current_frameset;
 	struct frameset_t *frameset_list;
 	Sint32 num_framesets;
 	struct render_list_node_t *render_list_node;
-	bool dirty;
 };
 
 int Amphora_InitIMG(void);
