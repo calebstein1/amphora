@@ -1,6 +1,8 @@
 #ifndef AMPHORA_SESSION_DATA_H
 #define AMPHORA_SESSION_DATA_H
 
+#include "SDL.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
