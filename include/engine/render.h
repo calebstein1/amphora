@@ -36,7 +36,7 @@ void Amphora_SetCameraTarget(AmphoraImage *target);
 /* Bound the camera to the current map area */
 void Amphora_BoundCameraToMap(void);
 /* Bound the camera to the supplied FRect */
-void Amphora_BoundCamera(SDL_FRect boundary);
+void Amphora_BoundCamera(const SDL_FRect *boundary);
 /* Remove the currently set camera boundary */
 void Amphora_UnboundCamera(void);
 /* Set the zoom factor for the camera */

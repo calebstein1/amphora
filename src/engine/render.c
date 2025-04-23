@@ -60,12 +60,12 @@ Amphora_SetCameraTarget(AmphoraImage *target) {
 
 void
 Amphora_BoundCameraToMap(void) {
-	camera_boundary = *Amphora_GetMapRectangle();
+	SDL_memcpy(&camera_boundary, Amphora_GetMapRectangle(), sizeof(camera_boundary));
 }
 
 void
-Amphora_BoundCamera(SDL_FRect boundary) {
-	camera_boundary = boundary;
+Amphora_BoundCamera(const SDL_FRect *boundary) {
+	SDL_memcpy(&camera_boundary, boundary, sizeof(camera_boundary));
 }
 
 void
@@ -312,14 +312,18 @@ Amphora_UpdateCamera(void) {
 	if (camera_mode == CAM_MANUAL) return;
 
 	camera = Amphora_GetSpriteCenter(camera_target);
-	camera.x -= ((float)render_logical_size.x / 2.0f);
-	camera.y -= ((float)render_logical_size.y / 2.0f);
+	camera.x -= (float)render_logical_size.x / 2.0f;
+	camera.y -= (float)render_logical_size.y / 2.0f;
 	if (!camera_boundary.w && !camera_boundary.h) return;
 
 	if (camera.x < camera_boundary.x || camera.x + (float)render_logical_size.x > camera_boundary.x + camera_boundary.w)
-		camera.x = camera.x > 0 ? camera_boundary.x + camera_boundary.w - (float)render_logical_size.x : 0;
+		camera.x = camera.x > camera_boundary.x ?
+			camera_boundary.x + camera_boundary.w - (float)render_logical_size.x :
+			camera_boundary.x;
 	if (camera.y < camera_boundary.y || camera.y + (float)render_logical_size.y > camera_boundary.y + camera_boundary.h)
-		camera.y = camera.y > 0 ? camera_boundary.y + camera_boundary.h - (float)render_logical_size.y : 0;
+		camera.y = camera.y > camera_boundary.y ?
+			camera_boundary.y + camera_boundary.h - (float)render_logical_size.y :
+			camera_boundary.y;
 }
 
 void
