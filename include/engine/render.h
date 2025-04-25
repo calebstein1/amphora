@@ -10,6 +10,7 @@ typedef SDL_FPoint Camera;
 typedef SDL_Point Vector2;
 typedef struct sprite_t AmphoraImage;
 typedef struct amphora_message_t AmphoraString;
+typedef struct emitter_t AmphoraEmitter;
 
 typedef union amphora_pixeldata_abgr_u {
 	struct {

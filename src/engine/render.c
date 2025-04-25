@@ -1,5 +1,6 @@
 #include "engine/internal/error.h"
 #include "engine/internal/img.h"
+#include "engine/internal/particles.h"
 #include "engine/internal/prefs.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
@@ -268,6 +269,9 @@ Amphora_ProcessRenderList(void) {
 				map_rect.y = -camera.y;
 				Amphora_RenderTexture((SDL_Texture *) render_list->data, NULL, &map_rect, 0,
 						      SDL_FLIP_NONE);
+				break;
+			case AMPH_OBJ_EMITTER:
+				Amphora_RenderParticleEmitter((AmphoraEmitter *) render_list->data);
 				break;
 			default:
 				break;
