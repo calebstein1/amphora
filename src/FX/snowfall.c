@@ -11,6 +11,8 @@ Snowfall(AmphoraParticle *particle, const SDL_FRect *rect) {
 	}
 
 	particle->y += particle->vy;
+	particle->color.a = (Uint8)(255.0f * (1.0f - particle->y / rect->h));
+	if (particle->color.a < 128) particle->color.a = 128;
 
 	if (particle->data3 == 1) {
 		particle->x += particle->vx * 0.5f;
