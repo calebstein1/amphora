@@ -3,12 +3,12 @@
 #include "engine/internal/tilemap.h"
 
 bool
-Amphora_CheckCollision(const AmphoraImage *obj_a, const AmphoraImage *obj_b) {
+Amphora_CheckCollisionInterface(const IAmphoraCollidable *obj_a, const IAmphoraCollidable *obj_b) {
 	return SDL_HasIntersectionF(&obj_a->rectangle, &obj_b->rectangle);
 }
 
 AmphoraCollision
-Amphora_CheckObjectGroupCollision(const AmphoraImage *obj, const char *name) {
+Amphora_CheckObjectGroupCollisionInterface(const IAmphoraCollidable *obj, const char *name) {
 	int i, j;
 	Uint32 c;
 	float o_sx, o_ex, o_sy, o_ey, r_sx, r_ex, r_sy, r_ey;

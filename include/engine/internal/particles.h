@@ -8,8 +8,8 @@
 
 struct emitter_t {
 	enum amphora_object_type_e type;
-	SDL_Texture *texture;
 	SDL_FRect rectangle;
+	SDL_Texture *texture;
 	AmphoraParticle *particles;
 	int particles_count;
 	SDL_Color initial_color;

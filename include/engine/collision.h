@@ -6,6 +6,8 @@
 #include "engine/render.h"
 #include "engine/util.h"
 
+typedef struct amphora_collidable_t IAmphoraCollidable;
+
 typedef enum {
 	AMPHORA_COLLISION_NONE,
 	AMPHORA_COLLISION_LEFT,
@@ -14,13 +16,16 @@ typedef enum {
 	AMPHORA_COLLISION_BOTTOM
 } AmphoraCollision;
 
+#define Amphora_CheckCollision(obj_a, obj_b) Amphora_CheckCollisionInterface((IAmphoraCollidable *)(obj_a), (IAmphoraCollidable *)(obj_b))
+#define Amphora_CheckObjectGroupCollision(obj, name) Amphora_CheckObjectGroupCollisionInterface((IAmphoraCollidable *)(obj), (name))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 /* Returns true if two objects have collided */
-bool Amphora_CheckCollision(const AmphoraImage *obj_a, const AmphoraImage *obj_b);
+bool Amphora_CheckCollisionInterface(const IAmphoraCollidable *obj_a, const IAmphoraCollidable *obj_b);
 /* Returns the direction of collision if the object has collided with any rectangle in the object group */
-AmphoraCollision Amphora_CheckObjectGroupCollision(const AmphoraImage *obj, const char *name);
+AmphoraCollision Amphora_CheckObjectGroupCollisionInterface(const IAmphoraCollidable *obj, const char *name);
 #ifdef __cplusplus
 }
 #endif
