@@ -50,6 +50,11 @@ Amphora_SetMap(const char *name, const float scale) {
 	}
 }
 
+const SDL_FRect *
+Amphora_GetMapRectangle(void) {
+	return &map_rect;
+}
+
 void
 Amphora_HideMapLayer(const char *name, int t) {
 	int n = Amphora_GetMapLayerByName(name);
@@ -131,11 +136,6 @@ Amphora_InitMaps(void) {
 	}
 
 	return 0;
-}
-
-const SDL_FRect *
-Amphora_GetMapRectangle(void) {
-	return &map_rect;
 }
 
 void

@@ -29,7 +29,6 @@ struct amphora_object_groups_t {
 };
 
 int Amphora_InitMaps(void);
-const SDL_FRect *Amphora_GetMapRectangle(void);
 void Amphora_DestroyCurrentMap(void);
 void Amphora_FreeObjectGroup(void);
 void Amphora_FreeAllObjectGroups(void);

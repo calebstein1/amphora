@@ -15,6 +15,7 @@ enum tilemaps_e {
 extern "C" {
 #endif
 void Amphora_SetMap(const char *name, float scale);
+const SDL_FRect *Amphora_GetMapRectangle(void);
 void Amphora_HideMapLayer(const char *name, int t);
 void Amphora_ShowMapLayer(const char *name, int t);
 #ifdef __cplusplus
