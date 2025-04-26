@@ -303,6 +303,8 @@ Amphora_FreeRenderList(void) {
 			case AMPH_OBJ_MAP:
 				SDL_DestroyTexture((SDL_Texture *)allocated_addrs[i]->data);
 				break;
+			case AMPH_OBJ_EMITTER:
+				Amphora_DestroyEmitter((AmphoraEmitter *)allocated_addrs[i]->data);
 			default:
 				break;
 		}

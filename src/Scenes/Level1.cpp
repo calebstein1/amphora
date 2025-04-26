@@ -23,6 +23,7 @@ enum player_directions_e {
 /* Game globals */
 AmphoraImage *player;
 AmphoraImage *rotating_heart;
+AmphoraEmitter *snow;
 AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
@@ -55,6 +56,8 @@ Level1_Init() {
 
 	Amphora_AddFrameset(rotating_heart, "Stationary", nullptr, 64, 129, 16, 16, 0, 0, 1, 0);
 	Amphora_AddFrameset(rotating_heart, "Rotate", nullptr, 64, 129, 16, 16, 0, 0, 4, 250);
+
+	snow = Amphora_CreateEmitter(0, 0, (float)Amphora_GetResolution().x, (float)Amphora_GetResolution().y, (float)Amphora_GetResolution().x / 2, 0, Amphora_GetResolution().x, 0, 512, 2, 2, white, true, 10000, nullptr);
 
 	hello = Amphora_CreateString("Roboto", 32, 16, 16, 1000, black, true, "%s", welcome_message.c_str());
 	timer = Amphora_CreateString("Merriweather", 32, -16, 16, 1000, black, true, "0");
@@ -233,6 +236,7 @@ Level1_Destroy() {
 	Amphora_SaveNumber("health", health_bar->get_health());
 	player = nullptr;
 	rotating_heart = nullptr;
+	snow = nullptr;
 	hello = nullptr;
 	timer = nullptr;
 	stationary = nullptr;

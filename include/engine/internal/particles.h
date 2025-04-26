@@ -7,13 +7,14 @@
 #include "engine/internal/render.h"
 
 struct emitter_t {
+	enum amphora_object_type_e type;
 	SDL_Texture *texture;
 	SDL_FRect rectangle;
 	AmphoraParticle *particles;
 	int particles_count;
-	SDL_Color color;
+	SDL_Color initial_color;
 	SDL_FPoint start_position;
-	int start_spread_x, start_spread_y;
+	int spread_x, spread_y;
 	void (*update)(AmphoraParticle *, SDL_FRect);
 	struct render_list_node_t *render_list_node;
 };
