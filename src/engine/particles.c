@@ -10,7 +10,7 @@
 SDL_FPoint Amphora_CalculateParticleStartPosition(float start_x, float start_y, int spread_x, int spread_y);
 
 AmphoraEmitter *
-Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float start_y, int spread_x, int spread_y, int count, float p_w, float p_h, SDL_Color color, bool stationary, Sint32 order, void (*update_fn)(AmphoraParticle *, SDL_FRect)) {
+Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float start_y, int spread_x, int spread_y, int count, float p_w, float p_h, SDL_Color color, bool stationary, Sint32 order, void (*update_fn)(AmphoraParticle *, const SDL_FRect *)) {
 	AmphoraEmitter *emitter = NULL;
 	struct render_list_node_t *render_list_node = NULL;
 	SDL_FPoint position;
@@ -51,6 +51,8 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 	render_list_node->data = emitter;
 	render_list_node->stationary = stationary;
 
+	SDL_SetTextureBlendMode(emitter->texture, SDL_BLENDMODE_BLEND);
+
 	for (i = 0; i < count; i++) {
 		position = Amphora_CalculateParticleStartPosition(start_x, start_y, spread_x, spread_y);
 		emitter->particles[i].x = position.x;
@@ -58,7 +60,9 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 		emitter->particles[i].w = p_w;
 		emitter->particles[i].h = p_h;
 		emitter->particles[i].color = color;
-		emitter->particles[i].emitter = emitter;
+		emitter->particles[i].data1 = 0;
+		emitter->particles[i].data2 = 0;
+		emitter->particles[i].data3 = 0;
 	}
 
 	return emitter;
@@ -80,7 +84,43 @@ Amphora_DestroyEmitter(AmphoraEmitter *emitter) {
  */
 
 void
-Amphora_RenderParticleEmitter(AmphoraEmitter *emitter) {
+Amphora_UpdateAndRenderParticleEmitter(AmphoraEmitter *emitter) {
+	SDL_Renderer *renderer = Amphora_GetRenderer();
+	SDL_Color color = { 0, 0, 0, 0 };
+	SDL_FRect dst;
+	Camera camera = Amphora_GetCamera();
+	int i;
+
+	SDL_SetRenderTarget(renderer, emitter->texture);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderClear(renderer);
+
+	for (i = 0; i < emitter->particles_count; i++) {
+		if (emitter->update) emitter->update(&emitter->particles[i], &emitter->rectangle);
+		if (SDL_memcmp(&color, &emitter->particles[i].color, sizeof(SDL_Color)) != 0) {
+			SDL_memcpy(&color, &emitter->particles[i].color, sizeof(SDL_Color));
+			SDL_SetRenderDrawColor(
+				renderer,
+				color.r,
+				color.g,
+				color.b,
+				color.a
+			);
+		}
+		dst = (SDL_FRect) {
+			emitter->particles[i].x,
+			emitter->particles[i].y,
+			emitter->particles[i].w,
+			emitter->particles[i].h
+		};
+		if (!emitter->render_list_node->stationary) {
+			dst.x -= camera.x;
+			dst.y -= camera.y;
+		}
+		SDL_RenderFillRectF(renderer, &dst);
+	}
+	SDL_SetRenderTarget(renderer, NULL);
+	Amphora_RenderTexture(emitter->texture, NULL, &emitter->rectangle, 0, SDL_FLIP_NONE);
 }
 
 /*

@@ -15,10 +15,10 @@ struct emitter_t {
 	SDL_Color initial_color;
 	SDL_FPoint start_position;
 	int spread_x, spread_y;
-	void (*update)(AmphoraParticle *, SDL_FRect);
+	void (*update)(AmphoraParticle *, const SDL_FRect *);
 	struct render_list_node_t *render_list_node;
 };
 
-void Amphora_RenderParticleEmitter(AmphoraEmitter *emitter);
+void Amphora_UpdateAndRenderParticleEmitter(AmphoraEmitter *emitter);
 
 #endif /* PARTICLES_INTERNAL_H */

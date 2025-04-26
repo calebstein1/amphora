@@ -37,7 +37,7 @@ Amphora_GetRenderLogicalSize(void) {
 }
 
 Vector2f
-Ampohra_GetCamera(void) {
+Amphora_GetCamera(void) {
 	return camera;
 }
 
@@ -271,7 +271,7 @@ Amphora_ProcessRenderList(void) {
 						      SDL_FLIP_NONE);
 				break;
 			case AMPH_OBJ_EMITTER:
-				Amphora_RenderParticleEmitter((AmphoraEmitter *) render_list->data);
+				Amphora_UpdateAndRenderParticleEmitter((AmphoraEmitter *) render_list->data);
 				break;
 			default:
 				break;

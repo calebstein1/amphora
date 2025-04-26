@@ -27,7 +27,7 @@ Vector2 Amphora_GetResolution(void);
 /* Get the renderer logical size */
 Vector2 Amphora_GetRenderLogicalSize(void);
 /* Get the current upper-left point of the camera */
-Vector2f Ampohra_GetCamera(void);
+Vector2f Amphora_GetCamera(void);
 /* Set the location of the camera's top left point */
 void Amphora_SetCamera(float x, float y);
 /* Move the camera */
