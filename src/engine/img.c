@@ -351,7 +351,7 @@ Amphora_UpdateAndDrawSprite(AmphoraImage *spr) {
 	struct frameset_t *frameset = &spr->frameset_list[spr->current_frameset];
 	SDL_Rect src;
 	SDL_FRect dst;
-	const Vector2f camera = Ampohra_GetCamera();
+	const Vector2f camera = Amphora_GetCamera();
 	Vector2 logical_size = Amphora_GetRenderLogicalSize();
 	Uint32 cur_ms = SDL_GetTicks();
 

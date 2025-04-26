@@ -127,7 +127,7 @@ Amphora_FreeString(AmphoraString *msg) {
 void
 Amphora_RenderString(const AmphoraString *msg) {
 	SDL_FRect pos_adj;
-	const Vector2f camera = Ampohra_GetCamera();
+	const Vector2f camera = Amphora_GetCamera();
 	Vector2 logical_size = Amphora_GetRenderLogicalSize();
 
 	if (msg->render_list_node->stationary) {
