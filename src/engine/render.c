@@ -1,5 +1,6 @@
 #include "engine/internal/error.h"
 #include "engine/internal/img.h"
+#include "engine/internal/particles.h"
 #include "engine/internal/prefs.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
@@ -36,7 +37,7 @@ Amphora_GetRenderLogicalSize(void) {
 }
 
 Vector2f
-Ampohra_GetCamera(void) {
+Amphora_GetCamera(void) {
 	return camera;
 }
 
@@ -269,6 +270,9 @@ Amphora_ProcessRenderList(void) {
 				Amphora_RenderTexture((SDL_Texture *) render_list->data, NULL, &map_rect, 0,
 						      SDL_FLIP_NONE);
 				break;
+			case AMPH_OBJ_EMITTER:
+				Amphora_UpdateAndRenderParticleEmitter((AmphoraEmitter *) render_list->data);
+				break;
 			default:
 				break;
 		}
@@ -299,6 +303,8 @@ Amphora_FreeRenderList(void) {
 			case AMPH_OBJ_MAP:
 				SDL_DestroyTexture((SDL_Texture *)allocated_addrs[i]->data);
 				break;
+			case AMPH_OBJ_EMITTER:
+				Amphora_DestroyEmitter((AmphoraEmitter *)allocated_addrs[i]->data);
 			default:
 				break;
 		}

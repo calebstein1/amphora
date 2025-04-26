@@ -10,6 +10,7 @@ typedef SDL_FPoint Camera;
 typedef SDL_Point Vector2;
 typedef struct sprite_t AmphoraImage;
 typedef struct amphora_message_t AmphoraString;
+typedef struct emitter_t AmphoraEmitter;
 
 typedef union amphora_pixeldata_abgr_u {
 	struct {
@@ -26,7 +27,7 @@ Vector2 Amphora_GetResolution(void);
 /* Get the renderer logical size */
 Vector2 Amphora_GetRenderLogicalSize(void);
 /* Get the current upper-left point of the camera */
-Vector2f Ampohra_GetCamera(void);
+Vector2f Amphora_GetCamera(void);
 /* Set the location of the camera's top left point */
 void Amphora_SetCamera(float x, float y);
 /* Move the camera */

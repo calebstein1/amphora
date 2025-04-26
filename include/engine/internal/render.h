@@ -13,6 +13,7 @@ enum amphora_object_type_e {
 	AMPH_OBJ_SPR,
 	AMPH_OBJ_TXT,
 	AMPH_OBJ_MAP,
+	AMPH_OBJ_EMITTER,
 	AMPH_OBJ_NIL
 };
 

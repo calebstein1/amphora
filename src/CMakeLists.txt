@@ -2,7 +2,8 @@ add_subdirectory(engine)
 
 add_executable(${CMAKE_PROJECT_NAME} Scenes/Level1.cpp
 	Scenes/Level2.c
-	FX/motion_blur.c)
+	FX/motion_blur.c
+	FX/snowfall.c)
 
 if(WIN32)
 	target_sources(${CMAKE_PROJECT_NAME} PRIVATE engine/bin_loader.rc)

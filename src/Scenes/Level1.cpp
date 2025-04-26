@@ -3,6 +3,7 @@
 
 #include "../Utils/HealthBar.hpp"
 #include "FX/motion_blur.h"
+#include "FX/snowfall.h"
 
 #include <string>
 
@@ -23,6 +24,7 @@ enum player_directions_e {
 /* Game globals */
 AmphoraImage *player;
 AmphoraImage *rotating_heart;
+AmphoraEmitter *snow;
 AmphoraString *hello;
 AmphoraString *timer;
 AmphoraString *stationary;
@@ -55,6 +57,8 @@ Level1_Init() {
 
 	Amphora_AddFrameset(rotating_heart, "Stationary", nullptr, 64, 129, 16, 16, 0, 0, 1, 0);
 	Amphora_AddFrameset(rotating_heart, "Rotate", nullptr, 64, 129, 16, 16, 0, 0, 4, 250);
+
+	snow = Amphora_CreateEmitter(0, 0, Amphora_GetMapRectangle()->w, Amphora_GetMapRectangle()->h, Amphora_GetMapRectangle()->w / 2, Amphora_GetMapRectangle()->h / 2, (int)Amphora_GetMapRectangle()->w, (int)Amphora_GetMapRectangle()->h, 1024, 4, 4, white, false, 10000, Snowfall);
 
 	hello = Amphora_CreateString("Roboto", 32, 16, 16, 1000, black, true, "%s", welcome_message.c_str());
 	timer = Amphora_CreateString("Merriweather", 32, -16, 16, 1000, black, true, "0");
@@ -233,6 +237,7 @@ Level1_Destroy() {
 	Amphora_SaveNumber("health", health_bar->get_health());
 	player = nullptr;
 	rotating_heart = nullptr;
+	snow = nullptr;
 	hello = nullptr;
 	timer = nullptr;
 	stationary = nullptr;
