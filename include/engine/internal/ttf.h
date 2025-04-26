@@ -6,8 +6,8 @@
 
 struct amphora_message_t {
 	enum amphora_object_type_e type;
-	SDL_Texture *texture;
 	SDL_FRect rectangle;
+	SDL_Texture *texture;
 	TTF_Font *font_ptr;
 	int pt;
 	size_t len;
