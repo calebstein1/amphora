@@ -77,6 +77,11 @@ Amphora_GetStringLength(const AmphoraString *msg) {
 	return msg->len;
 }
 
+size_t
+Amphora_GetNumCharactersDisplayed(const AmphoraString *msg) {
+	return msg->n;
+}
+
 const char *
 Ampohra_GetStringText(AmphoraString *msg) {
 	return msg->text;
@@ -105,7 +110,7 @@ Amphora_UpdateStringText(AmphoraString *msg, const char *fmt, ...) {
 
 AmphoraString *
 Amphora_UpdateStringCharsDisplayed(AmphoraString *msg, size_t n) {
-	if (n >= msg->len) n = 0;
+	if (n > msg->len) n = 0;
 	msg->n = n;
 	SDL_DestroyTexture(msg->texture);
 	msg->texture = Amphora_RenderStringToTexture(msg);
@@ -242,7 +247,7 @@ Amphora_RenderStringToTexture(AmphoraString *msg) {
 
 	if (n) {
 		if ((n_buff = SDL_malloc(n + 1))) {
-			SDL_strlcpy(n_buff, text, n);
+			SDL_strlcpy(n_buff, text, n + 1);
 		} else {
 			SDL_LogWarn(SDL_LOG_CATEGORY_ERROR, "Failed to allocate buffer for partial string\n");
 			n = 0;

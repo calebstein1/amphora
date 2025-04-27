@@ -24,6 +24,8 @@ extern "C" {
 AmphoraString *Amphora_CreateString(const char *font_name, int pt, float x, float y, int order, SDL_Color color, bool stationary, const char *fmt, ...);
 /* Get the number of characters in a message */
 size_t Amphora_GetStringLength(const AmphoraString *msg);
+/* Get the number of characters currently displayed in a message */
+size_t Amphora_GetNumCharactersDisplayed(const AmphoraString *msg);
 /* Get the text of an AmphoraString */
 const char *Ampohra_GetStringText(AmphoraString *msg);
 /* Update the text in a string */
