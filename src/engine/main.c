@@ -123,6 +123,11 @@ Amphora_QuitGame(void) {
 }
 
 Uint32
+Amphora_GetFrame(void) {
+	return frame_count;
+}
+
+Uint32
 Amphora_GetFPS(void) {
 	return framerate;
 }

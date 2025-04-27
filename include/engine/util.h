@@ -29,6 +29,7 @@
 extern "C" {
 #endif
 void Amphora_QuitGame(void); /* Request to quit the game */
+Uint32 Amphora_GetFrame(void); /* Get the current running framerate */
 Uint32 Amphora_GetFPS(void); /* Get the current running framerate */
 #ifdef __cplusplus
 }
