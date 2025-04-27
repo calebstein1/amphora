@@ -98,7 +98,6 @@ Amphora_InitMaps(void) {
 	HGLOBAL map_resource;
 
 	map_data = HT_NewTable();
-	map_sizes = HT_NewTable();
 
 	for (i = 0; i < MAPS_COUNT; i++) {
 		if (!((map_info = FindResourceA(NULL, map_names[i], "TILEMAP")))) {

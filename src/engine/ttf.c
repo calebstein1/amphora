@@ -178,7 +178,7 @@ Amphora_InitFonts(void) {
 			return -1;
 		}
 		HT_StoreRef(font_names[i], ttf_resource, fonts);
-		HT_SetStatus(fonts_names[i], SizeofResource(NULL, ttf_info), fonts);
+		HT_SetStatus(font_names[i], SizeofResource(NULL, ttf_info), fonts);
 	}
 #else
 #define LOADFONT(name, path) extern char name##_ft[]; extern int name##_ft_size;
