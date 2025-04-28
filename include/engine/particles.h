@@ -7,7 +7,8 @@ typedef struct {
 	float x, y, w, h, vx, vy;
 	SDL_Color color;
 	float data1, data2;
-	int data3;
+	int data3, data4;
+	bool hidden;
 } AmphoraParticle;
 
 #ifdef __cplusplus

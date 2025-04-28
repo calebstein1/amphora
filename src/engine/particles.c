@@ -63,6 +63,8 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 		emitter->particles[i].data1 = 0;
 		emitter->particles[i].data2 = 0;
 		emitter->particles[i].data3 = 0;
+		emitter->particles[i].data4 = 0;
+		emitter->particles[i].hidden = false;
 	}
 
 	return emitter;
@@ -97,6 +99,7 @@ Amphora_UpdateAndRenderParticleEmitter(AmphoraEmitter *emitter) {
 
 	for (i = 0; i < emitter->particles_count; i++) {
 		if (emitter->update) emitter->update(&emitter->particles[i], &emitter->rectangle);
+		if (emitter->particles[i].hidden) continue;
 		if (SDL_memcmp(&color, &emitter->particles[i].color, sizeof(SDL_Color)) != 0) {
 			SDL_memcpy(&color, &emitter->particles[i].color, sizeof(SDL_Color));
 			SDL_SetRenderDrawColor(
