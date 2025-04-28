@@ -6,6 +6,11 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 	set(VCPKG_LIBRARY_LINKAGE static)
 endif()
 
+if (APPLE)
+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+    set(CMAKE_MACOSX_BUNDLE ON)
+endif()
+
 # Set project name here
 project(amphora LANGUAGES C CXX ASM)
 
