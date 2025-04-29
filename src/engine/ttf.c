@@ -87,6 +87,11 @@ Ampohra_GetStringText(AmphoraString *msg) {
 	return msg->text;
 }
 
+char
+Amphora_GetStringCharAtIndex(const AmphoraString *msg, int idx) {
+	return msg->text[idx];
+}
+
 AmphoraString *
 Amphora_UpdateStringText(AmphoraString *msg, const char *fmt, ...) {
 	va_list args;
