@@ -13,9 +13,7 @@ typedef struct amphora_message_t AmphoraString;
 typedef struct emitter_t AmphoraEmitter;
 
 typedef union amphora_pixeldata_abgr_u {
-	struct {
-		Uint8 red, green, blue, alpha;
-	} color_data;
+	SDL_Color color_data;
 	Uint32 pixel;
 } AmphoraPixelDataABGR;
 
