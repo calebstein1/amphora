@@ -64,7 +64,7 @@ Ampohra_LoadString(const char *attribute, char **out_string) {
 		return -1;
 	}
 	val = sqlite3_column_text(stmt, 0);
-	if (!(*out_string = SDL_malloc(sqlite3_column_bytes(stmt, 0) + 1))) {
+	if (!((*out_string = SDL_malloc(sqlite3_column_bytes(stmt, 0) + 1)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate space for string\n");
 		sqlite3_finalize(stmt);
 		return -1;
