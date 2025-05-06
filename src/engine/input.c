@@ -20,6 +20,8 @@ static const char *action_names[] = {
 static SDL_Keycode keys[ACTION_COUNT];
 static SDL_GameControllerButton controller_buttons[ACTION_COUNT];
 static SDL_Keycode pressed_key;
+static bool joystickl_active, joystickr_active;
+static Vector2f joystickl_state, joystickr_state;
 
 void
 Amphora_LoadKeymap(void) {
@@ -129,6 +131,26 @@ Amphora_ObjectHover(void *obj) {
 SDL_Keycode
 Amphora_GetPressedKey(void) {
 	return pressed_key;
+}
+
+bool
+Amphora_LeftJoystickActive(void) {
+	return joystickl_active;
+}
+
+bool
+Amphora_RightJoystickActive(void) {
+	return joystickr_active;
+}
+
+Vector2f
+Amphora_GetLeftJoystickState(void) {
+	return joystickl_state;
+}
+
+Vector2f
+Amphora_GetRightJoystickState(void) {
+	return joystickr_state;
 }
 
 char *
@@ -288,15 +310,35 @@ Amphora_HandleGamepadUp(const SDL_Event *e) {
 	}
 }
 
-Vector2f
+void
 Amphora_HandleJoystick(const SDL_Event *e) {
-	Uint8 axis = e->caxis.axis;
-	Sint16 val = e->caxis.value;
+	float deadzone = 0.15f, x, y, magnitude, scale;
+	SDL_GameControllerAxis ax = SDL_CONTROLLER_AXIS_LEFTX, ay = SDL_CONTROLLER_AXIS_LEFTY;
+	bool *jactive = &joystickl_active;
+	Vector2f *js = &joystickl_state;
+	Uint8 leave = 0;
 
-	(void)axis;
-	(void)val;
+	joystickl_active = false;
+	joystickr_active = false;
 
-	return (Vector2f){0, 0 };
+	do {
+		x = (float)SDL_GameControllerGetAxis(controllers[0], ax) / SDL_MAX_SINT16;
+		y = (float)SDL_GameControllerGetAxis(controllers[0], ay) / SDL_MAX_SINT16;
+		magnitude = SDL_sqrtf(x * x + y * y);
+
+		if (magnitude > deadzone) {
+			*jactive = true;
+			scale = (magnitude - deadzone) / (1.0f - deadzone);
+
+			js->x = x / magnitude * scale;
+			js->y = y / magnitude * scale;
+		}
+
+		ax = SDL_CONTROLLER_AXIS_RIGHTX;
+		ay = SDL_CONTROLLER_AXIS_RIGHTY;
+		jactive = &joystickr_active;
+		js = &joystickr_state;
+	} while (leave++);
 }
 
 /*
