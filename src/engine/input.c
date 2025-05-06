@@ -11,7 +11,7 @@ static Uint32 rotate_mask_left(Uint32 c);
 
 /* File-scoped variables */
 static union input_state_u key_actions;
-static SDL_GameController *controllers[MAX_CONTROLLERS];
+static SDL_GameController *controller;
 static const char *action_names[] = {
 #define KMAP(action, key, gamepad) #action,
 	DEFAULT_KEYMAP
@@ -220,44 +220,29 @@ Amphora_GetKeyActionState(void) {
 
 void
 Amphora_AddController(Sint32 idx) {
-	Uint8 i;
+	if (controller) return;
 
-	for (i = 0; i < MAX_CONTROLLERS; i++) {
-		if (!controllers[i]) {
-			controllers[i] = SDL_GameControllerOpen(idx);
-			break;
-		}
-	}
+	controller = SDL_GameControllerOpen(idx);
 #ifdef DEBUG
-	SDL_Log("Added controller %d to slot %d\n", SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controllers[idx])), i);
+	SDL_Log("Connected controller %d\n", SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller)));
 #endif
 }
 
 void
 Amphora_RemoveController(SDL_JoystickID id) {
-	Uint8 i;
+	if (id != SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller))) return;
 
-	for (i = 0; i < MAX_CONTROLLERS; i++) {
-		if (controllers[i] && id == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controllers[i]))) {
-			SDL_GameControllerClose(controllers[i]);
-			controllers[i] = NULL;
-			break;
-		}
-	}
+	SDL_GameControllerClose(controller);
+	controller = NULL;
 #ifdef DEBUG
-	SDL_Log("Removed joystick %d from slot %d\n", id, i);
+	SDL_Log("Disconnected controller %d\n", id);
 #endif
 }
 
 void
 Amphora_ReleaseControllers(void) {
-	Uint32 i;
-
-	for (i = 0; i < MAX_CONTROLLERS; i++) {
-		if (SDL_IsGameController(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controllers[i])))) {
-			SDL_GameControllerClose(controllers[i]);
-		}
-	}
+	SDL_GameControllerClose(controller);
+	controller = NULL;
 }
 
 void
@@ -322,8 +307,8 @@ Amphora_HandleJoystick(const SDL_Event *e) {
 	joystickr_active = false;
 
 	do {
-		x = (float)SDL_GameControllerGetAxis(controllers[0], ax) / SDL_MAX_SINT16;
-		y = (float)SDL_GameControllerGetAxis(controllers[0], ay) / SDL_MAX_SINT16;
+		x = (float)SDL_GameControllerGetAxis(controller, ax) / SDL_MAX_SINT16;
+		y = (float)SDL_GameControllerGetAxis(controller, ay) / SDL_MAX_SINT16;
 		magnitude = SDL_sqrtf(x * x + y * y);
 
 		if (magnitude > deadzone) {
