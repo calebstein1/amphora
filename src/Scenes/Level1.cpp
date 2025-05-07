@@ -81,6 +81,8 @@ Level1_Init() {
 
 	if (Amphora_GetSessionData("p_state") == ko) {
 		Amphora_PlayOneshot(player, "KO", nullptr);
+	} else if (Amphora_GetSessionData("p_state") == atk) {
+		player_state = idle;
 	}
 }
 
@@ -156,14 +158,14 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 	if (key_actions->attack && player_state != atk && player_state != ko) {
 		player_state = atk;
 		if (!blur) {
-            Amphora_ApplyFXToImage(player, MotionBlur);
+			Amphora_ApplyFXToImage(player, MotionBlur);
 			blur = true;
 		}
 		Amphora_PlayOneshot(player, "Attack", [] {
-		    player_state = idle;
+			player_state = idle;
 			blur = false;
 			Amphora_ResetImage(player);
-		    Amphora_SetFrameset(player, "Idle");
+			Amphora_SetFrameset(player, "Idle");
 		});
 	}
 	if (!key_actions->left && !key_actions->right && !key_actions->up && !key_actions->down &&
