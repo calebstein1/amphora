@@ -1,7 +1,3 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "engine/internal/error.h"
 #include "engine/internal/lib.h"
 #include "engine/internal/img.h"
@@ -19,6 +15,11 @@ static HT_HashTable image_surfaces_orig;
 static HT_HashTable open_images;
 static const char *img_names[] = {
 #define LOADIMG(name, path) #name,
+	IMAGES
+#undef LOADIMG
+};
+static const char *img_paths[] = {
+#define LOADIMG(name, path) path,
 	IMAGES
 #undef LOADIMG
 };
@@ -264,9 +265,6 @@ Amphora_FreeSprite(AmphoraImage *spr) {
 int
 Amphora_InitIMG(void) {
 	int i;
-#ifdef WIN32
-	HRSRC img_info;
-	HGLOBAL img_resource;
 
 	images = HT_NewTable();
 	open_images = HT_NewTable();
@@ -274,37 +272,11 @@ Amphora_InitIMG(void) {
 	image_surfaces_orig = HT_NewTable();
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
-		if (!((img_info = FindResourceA(NULL, img_names[i], "PNG_IMG")))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate image resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate image resource... Amphora will crash now", 0);
-			return -1;
-		}
-		if (!((img_resource = LoadResource(NULL, img_info)))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load image resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load image resource... Amphora will crash now", 0);
-			return -1;
-		}
-		HT_StoreRef(img_names[i], img_resource, images);
-		HT_SetStatus(img_names[i], SizeofResource(NULL, img_info), images);
-	}
-#else
-#define LOADIMG(name, path) extern char name##_im[]; extern int name##_im_size;
-	IMAGES
-#undef LOADIMG
-	images = HT_NewTable();
-	open_images = HT_NewTable();
-	image_surfaces = HT_NewTable();
-	image_surfaces_orig = HT_NewTable();
-#define LOADIMG(name, path) HT_StoreRef(#name, name##_im, images); \
-							HT_SetStatus(#name, name##_im_size, images);
-	IMAGES
-#undef LOADIMG
-#endif
+		HT_StoreRef(img_names[i], img_paths[i], images);
 #ifdef DEBUG
-	for (i = 0; i < IMAGES_COUNT; i++) {
 		SDL_Log("Found image %s\n", img_names[i]);
-	}
 #endif
+	}
 
 	return 0;
 }
@@ -409,7 +381,7 @@ Amphora_LoadIMGTexture(const char *name) {
 #ifdef DEBUG
 	SDL_Log("Loading image: %s\n", name);
 #endif
-	img_rw = SDL_RWFromConstMem(HT_GetRef(name, char, images), HT_GetStatus(name, images));
+	img_rw = SDL_RWFromFile(HT_GetRef(name, char, images), "rb");
 	surface = IMG_Load_RW(img_rw, 1);
 	surface_orig = SDL_DuplicateSurface(surface);
 	HT_StoreRef(name, SDL_CreateTextureFromSurface(Amphora_GetRenderer(), surface), open_images);

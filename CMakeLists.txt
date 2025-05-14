@@ -8,11 +8,11 @@ endif()
 
 if (APPLE)
     set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-    set(CMAKE_MACOSX_BUNDLE ON)
+    # set(CMAKE_MACOSX_BUNDLE ON)
 endif()
 
 # Set project name here
-project(amphora LANGUAGES C CXX ASM)
+project(amphora LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 17)
@@ -45,3 +45,4 @@ include_directories(
 )
 
 add_subdirectory(src)
+file(COPY content DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)

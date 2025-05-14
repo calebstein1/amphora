@@ -1,7 +1,3 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "engine/internal/mixer.h"
 #include "engine/internal/ht_hash.h"
 #include "config.h"
@@ -21,8 +17,18 @@ static const char *sfx_names[] = {
 	SFX
 #undef LOADSFX
 };
+static const char *sfx_paths[] = {
+#define LOADSFX(name, path) path,
+	SFX
+#undef LOADSFX
+};
 static const char *music_names[] = {
 #define LOADMUSIC(name, path) #name,
+	MUSIC
+#undef LOADMUSIC
+};
+static const char *music_paths[] = {
+#define LOADMUSIC(name, path) path,
 	MUSIC
 #undef LOADMUSIC
 };
@@ -35,7 +41,7 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 #ifdef DEBUG
 		SDL_Log("Loading sfx: %s\n", name);
 #endif
-		sfx_rw = SDL_RWFromConstMem(HT_GetRef(name, char, sfx), HT_GetStatus(name, sfx));
+		sfx_rw = SDL_RWFromFile(HT_GetRef(name, char, sfx), "rb");
 		HT_StoreRef(name, Mix_LoadWAV_RW(sfx_rw, 1), open_sfx);
 	}
 	if (channel > -1 && Mix_Playing(channel)) return;
@@ -45,7 +51,7 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 
 void
 Amphora_SetMusic(const char *name) {
-	SDL_RWops *mus_rw = SDL_RWFromConstMem(HT_GetRef(name, char, music), HT_GetStatus(name, music));
+	SDL_RWops *mus_rw = SDL_RWFromFile(HT_GetRef(name, char, music), "rb");
 
 	if (Mix_PlayingMusic()) {
 		Mix_HaltMusic();
@@ -106,43 +112,15 @@ Amphora_FadeOutMusic(int ms) {
 int
 Amphora_InitSFX(void) {
 	int i;
-#ifdef WIN32
-	HRSRC sfx_info;
-	HGLOBAL sfx_resource;
 
 	sfx = HT_NewTable();
 	open_sfx = HT_NewTable();
-
 	for (i = 0; i < SFX_COUNT; i++) {
-		if (!((sfx_info = FindResourceA(NULL, sfx_names[i], "SFX")))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate sfx resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate sfx resource... Amphora will crash now", 0);
-			return -1;
-		}
-		if (!((sfx_resource = LoadResource(NULL, sfx_info)))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load sfx resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load sfx resource... Amphora will crash now", 0);
-			return -1;
-		}
-		HT_StoreRef(sfx_names[i], sfx_resource, sfx);
-		HT_SetStatus(sfx_names[i], SizeofResource(NULL, sfx_info), sfx);
-	}
-#else
-#define LOADSFX(name, path) extern char name##_sf[]; extern int name##_sf_size;
-	SFX
-#undef LOADSFX
-	sfx = HT_NewTable();
-	open_sfx = HT_NewTable();
-#define LOADSFX(name, path) HT_StoreRef(#name, name##_sf, sfx); \
-							HT_SetStatus(#name, name##_sf_size, sfx);
-	SFX
-#undef LOADSFX
-#endif
+		HT_StoreRef(sfx_names[i], sfx_paths[i], sfx);
 #ifdef DEBUG
-	for (i = 0; i < SFX_COUNT; i++) {
 		SDL_Log("Found sfx %s\n", sfx_names[i]);
-	}
 #endif
+	}
 
 	return 0;
 }
@@ -150,40 +128,14 @@ Amphora_InitSFX(void) {
 int
 Amphora_InitMusic(void) {
 	int i;
-#ifdef WIN32
-	HRSRC music_info;
-	HGLOBAL music_resource;
-	SDL_RWops *music_rw;
 
-	for (i = 0; i < MUSIC_COUNT; i++) {
-		if (!((music_info = FindResourceA(NULL, music_names[i], "MUSIC")))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate music resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate music resource... Amphora will crash now", 0);
-			return -1;
-		}
-		if (!((music_resource = LoadResource(NULL, music_info)))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load music resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load music resource... Amphora will crash now", 0);
-			return -1;
-		}
-		HT_StoreRef(music_names[i], music_resource, music);
-		HT_SetStatus(music_names[i], SizeofResource(NULL, music_info), music);
-	}
-#else
-#define LOADMUSIC(name, path) extern char name##_mu[]; extern int name##_mu_size;
-	MUSIC
-#undef LOADMUSIC
 	music = HT_NewTable();
-#define LOADMUSIC(name, path) HT_StoreRef(#name, name##_mu, music); \
-                            HT_SetStatus(#name, name##_mu_size, music);
-	MUSIC
-#undef LOADMUSIC
-#endif
-#ifdef DEBUG
 	for (i = 0; i < MUSIC_COUNT; i++) {
+		HT_StoreRef(music_names[i], music_paths[i], music);
+#ifdef DEBUG
 		SDL_Log("Found music %s\n", music_names[i]);
-	}
 #endif
+	}
 	Mix_HookMusicFinished(Amphora_FreeMusic);
 
 	return 0;

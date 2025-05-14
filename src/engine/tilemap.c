@@ -1,8 +1,4 @@
 #ifndef DISABLE_TILEMAP
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
@@ -20,6 +16,11 @@ static int Amphora_GetMapLayerByName(const char *name);
 /* File-scoped variables */
 static char *map_names[] = {
 #define LOADMAP(name, path) #name,
+	MAPS
+#undef LOADMAP
+};
+static char *map_paths[] = {
+#define LOADMAP(name, path) path,
 	MAPS
 #undef LOADMAP
 };
@@ -93,41 +94,15 @@ Amphora_ShowMapLayer(const char *name, int t) {
 int
 Amphora_InitMaps(void) {
 	int i;
-#ifdef WIN32
-	HRSRC map_info;
-	HGLOBAL map_resource;
 
 	map_data = HT_NewTable();
-
 	for (i = 0; i < MAPS_COUNT; i++) {
-		if (!((map_info = FindResourceA(NULL, map_names[i], "TILEMAP")))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate map resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate map resource... Amphora will crash now", 0);
-			return -1;
-		}
-		if (!((map_resource = LoadResource(NULL, map_info)))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load map resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load map resource... Amphora will crash now", 0);
-			return -1;
-		}
-		HT_StoreRef(map_names[i], map_resource, map_data);
-		HT_SetStatus(map_names[i], SizeofResource(NULL, map_info), map_data);
-	}
-#else
-#define LOADMAP(name, path) extern char name##_tm[]; extern int name##_tm_size;
-	MAPS
-#undef LOADMAP
-	map_data = HT_NewTable();
-#define LOADMAP(name, path) HT_StoreRef(#name, name##_tm, map_data); \
-			HT_SetStatus(#name, name##_tm_size, map_data);
-	MAPS
-#undef LOADMAP
-#endif
+		HT_StoreRef(map_names[i], map_paths[i], map_data);
 #ifdef DEBUG
-	for (i = 0; i < MAPS_COUNT; i++) {
 		SDL_Log("Found map %s\n", map_names[i]);
-	}
 #endif
+	}
+
 	obj_groups.i = HT_NewTable();
 	if (!((obj_groups.rects = SDL_malloc(HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *))))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle list\n");
@@ -222,8 +197,7 @@ Amphora_ProcessDeferredTransition(void) {
 static int
 Amphora_ParseMapToTexture(const char *name) {
 	SDL_Renderer *renderer = Amphora_GetRenderer();
-	cute_tiled_map_t *map = cute_tiled_load_map_from_memory(HT_GetRef(name, char, map_data),
-								(int)HT_GetStatus(name, map_data), 0);
+	cute_tiled_map_t *map = cute_tiled_load_map_from_file(HT_GetRef(name, char, map_data), NULL);
 	cute_tiled_layer_t *layer = map->layers;
 	cute_tiled_tileset_t *tileset = map->tilesets;
 	int tileset_img_w, tileset_img_h;

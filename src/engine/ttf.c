@@ -1,7 +1,3 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
@@ -23,6 +19,11 @@ static const char *font_names[] = {
 	FONTS
 #undef LOADFONT
 };
+static const char *font_paths[] = {
+#define LOADFONT(name, path) path,
+	FONTS
+#undef LOADFONT
+};
 
 AmphoraString *
 Amphora_CreateString(const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const bool stationary, const char *fmt, ...) {
@@ -40,7 +41,7 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 #ifdef DEBUG
 		SDL_Log("Loading font: %s\n", font_name);
 #endif
-		font_rw = SDL_RWFromConstMem(HT_GetRef(font_name, char, fonts), HT_GetStatus(font_name, fonts));
+		font_rw = SDL_RWFromFile(HT_GetRef(font_name, char, fonts), "rb");
 		HT_StoreRef(font_name, TTF_OpenFontRW(font_rw, 1, 16), open_fonts);
 	}
 	va_start(args, fmt);
@@ -168,44 +169,15 @@ Amphora_RenderString(const AmphoraString *msg) {
 int
 Amphora_InitFonts(void) {
 	int i;
-#ifdef WIN32
-	HRSRC ttf_info;
-	HGLOBAL ttf_resource;
-	SDL_RWops *ttf_rw;
 
 	fonts = HT_NewTable();
 	open_fonts = HT_NewTable();
-
 	for (i = 0; i < FONTS_COUNT; i++) {
-		if (!((ttf_info = FindResourceA(NULL, font_names[i], "TTF_FONT")))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to locate font resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to locate font resource... Amphora will crash now", 0);
-			return -1;
-		}
-		if (!((ttf_resource = LoadResource(NULL, ttf_info)))) {
-			SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to load font resource... Amphora will crash now\n");
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Resource load error", "Failed to load font resource... Amphora will crash now", 0);
-			return -1;
-		}
-		HT_StoreRef(font_names[i], ttf_resource, fonts);
-		HT_SetStatus(font_names[i], SizeofResource(NULL, ttf_info), fonts);
-	}
-#else
-#define LOADFONT(name, path) extern char name##_ft[]; extern int name##_ft_size;
-	FONTS
-#undef LOADFONT
-	fonts = HT_NewTable();
-	open_fonts = HT_NewTable();
-#define LOADFONT(name, path) HT_StoreRef(#name, name##_ft, fonts); \
-							HT_SetStatus(#name, name##_ft_size, fonts);
-	FONTS
-#undef LOADFONT
-#endif
+		HT_StoreRef(font_names[i], font_paths[i], fonts);
 #ifdef DEBUG
-	for (i = 0; i < FONTS_COUNT; i++) {
 		SDL_Log("Found font %s\n", font_names[i]);
-	}
 #endif
+	}
 
 	return 0;
 }
