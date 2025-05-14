@@ -20,7 +20,7 @@ static char *map_names[] = {
 #undef LOADMAP
 };
 static char *map_paths[] = {
-#define LOADMAP(name, path) path,
+#define LOADMAP(name, path) #path,
 	MAPS
 #undef LOADMAP
 };

@@ -18,7 +18,7 @@ static const char *sfx_names[] = {
 #undef LOADSFX
 };
 static const char *sfx_paths[] = {
-#define LOADSFX(name, path) path,
+#define LOADSFX(name, path) #path,
 	SFX
 #undef LOADSFX
 };
@@ -28,7 +28,7 @@ static const char *music_names[] = {
 #undef LOADMUSIC
 };
 static const char *music_paths[] = {
-#define LOADMUSIC(name, path) path,
+#define LOADMUSIC(name, path) #path,
 	MUSIC
 #undef LOADMUSIC
 };

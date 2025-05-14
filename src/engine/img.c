@@ -19,7 +19,7 @@ static const char *img_names[] = {
 #undef LOADIMG
 };
 static const char *img_paths[] = {
-#define LOADIMG(name, path) path,
+#define LOADIMG(name, path) #path,
 	IMAGES
 #undef LOADIMG
 };

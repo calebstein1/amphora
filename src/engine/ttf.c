@@ -20,7 +20,7 @@ static const char *font_names[] = {
 #undef LOADFONT
 };
 static const char *font_paths[] = {
-#define LOADFONT(name, path) path,
+#define LOADFONT(name, path) #path,
 	FONTS
 #undef LOADFONT
 };
