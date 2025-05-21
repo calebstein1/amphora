@@ -1,7 +1,6 @@
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
-
 #include "config.h"
 
 #ifndef DISABLE_FONTS

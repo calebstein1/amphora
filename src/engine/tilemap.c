@@ -1,8 +1,10 @@
-#ifndef DISABLE_TILEMAP
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/img.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
+#include "config.h"
+
+#ifndef DISABLE_TILEMAP
 
 #define CUTE_TILED_IMPLEMENTATION
 #include "vendor/cute_tiled.h"
