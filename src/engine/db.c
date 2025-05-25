@@ -20,7 +20,7 @@ Amphora_InitDB(void) {
 	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
 	const char *filename = "amphora.db";
 
-	if (!((path = Amphora_strcat(path, filename)))) {
+	if (!((path = Amphora_ConcatString(path, filename)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to create database path");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
