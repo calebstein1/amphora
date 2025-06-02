@@ -47,6 +47,7 @@ Amphora_UnregisterEvent(const char *name) {
 	ev_count--;
 	SDL_free(ev_names[i]);
 	ev_names[i] = NULL;
+	HT_StoreRef(name, NULL, ev_table);
 	HT_DeleteKey(name, ev_table);
 
 	return AMPHORA_STATUS_OK;
