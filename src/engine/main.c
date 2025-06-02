@@ -83,6 +83,7 @@ main(int argc, char **argv) {
 	Amphora_InitRand();
 	Amphora_InitDB();
 	Amphora_InitConfig();
+	Amphora_InitEvents();
 	if (Amphora_InitRender() == -1) {
 		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL,"Failed to init renderer");
 		return AMPHORA_STATUS_CORE_FAIL;
@@ -165,6 +166,7 @@ Amphora_MainLoop(SDL_Event *e) {
 	}
 	Amphora_ClearBG();
 	Amphora_UpdateScene(frame_count);
+	Amphora_ProcessRegisteredEvents();
 	Amphora_ProcessDeferredTransition();
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();
@@ -203,6 +205,7 @@ static void
 Amphora_CleanResources(void) {
 	Amphora_DestroyScene();
 	Amphora_DeInitSceneManager();
+	Amphora_DeInitEvents();
 	Amphora_CloseIMG();
 #ifndef DISABLE_FONTS
 	Amphora_CloseFonts();
