@@ -24,7 +24,7 @@ extern "C"
 #endif
 
 /* Prototypes for private functions */
-void Amphora_SceneTransitionEvent(void);
+static void Amphora_SceneTransitionEvent(void);
 
 /* File-scoped variables */
 static HT_HashTable scenes;
