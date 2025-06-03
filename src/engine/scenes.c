@@ -136,7 +136,7 @@ Amphora_DestroyScene(void) {
  * Private functions
  */
 
-void
+static void
 Amphora_SceneTransitionEvent(void) {
 	SDL_Renderer *renderer = Amphora_GetRenderer();
 
