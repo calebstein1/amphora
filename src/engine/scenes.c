@@ -75,7 +75,7 @@ Amphora_DoLoadScene(const char *name) {
 	}
 	fade_idx = 0;
 	fade_idx_mod = 1;
-	Amphora_RegisterEvent("amph_internal_transition", Amphora_SceneTransitionEvent);
+	Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent);
 
 	return AMPHORA_STATUS_OK;
 }
@@ -147,7 +147,7 @@ Amphora_SceneTransitionEvent(void) {
 		Amphora_DestroyScene();
 		current_scene_idx = HT_GetValue(scene_names[current_scene_name], scenes);
 		Amphora_InitScene();
-		Amphora_UnregisterEvent("amph_internal_transition");
+		Amphora_UnregisterEvent("amph_internal_scene_transition");
 		return;
 	}
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -163,6 +163,6 @@ Amphora_SceneTransitionEvent(void) {
 	}
 	if (fade_idx == 0 && fade_idx_mod == -1) {
 		SDL_free(fade_steps);
-		Amphora_UnregisterEvent("amph_internal_transition");
+		Amphora_UnregisterEvent("amph_internal_scene_transition");
 	}
 }
