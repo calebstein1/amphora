@@ -47,7 +47,6 @@ static int fade_idx_mod = 1;
 static Uint8 *fade_steps;
 static SDL_Color fade_color = { 255, 255, 255, 255 };
 static SDL_Rect fade_rect;
-static bool scene_loaded = false;
 
 int
 Amphora_DoLoadScene(const char *name) {
@@ -108,15 +107,9 @@ Amphora_DeInitSceneManager(void) {
 	HT_FreeTable(scenes);
 }
 
-bool
-Amphora_IsSceneLoaded(void) {
-	return scene_loaded;
-}
-
 void
 Amphora_InitScene(void) {
 	scene_structs[current_scene_idx].init_func();
-	scene_loaded = true;
 }
 
 void
@@ -140,7 +133,6 @@ Amphora_DestroyScene(void) {
 #ifndef DISABLE_FONTS
 	Amphora_FreeAllFonts();
 #endif
-	scene_loaded = false;
 }
 
 /*

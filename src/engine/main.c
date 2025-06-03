@@ -165,12 +165,10 @@ Amphora_MainLoop(SDL_Event *e) {
 #endif
 	}
 	Amphora_ClearBG();
-	if (Amphora_IsSceneLoaded()) {
-		Amphora_UpdateScene(frame_count);
-		Amphora_ProcessDeferredTransition();
-		Amphora_ProcessRenderList();
-		Amphora_UpdateCamera();
-	}
+	Amphora_UpdateScene(frame_count);
+	Amphora_ProcessDeferredTransition();
+	Amphora_ProcessRenderList();
+	Amphora_UpdateCamera();
 	Amphora_ProcessRegisteredEvents();
 
 	SDL_RenderPresent(Amphora_GetRenderer());
