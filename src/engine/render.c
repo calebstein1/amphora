@@ -314,6 +314,12 @@ Amphora_FreeRenderList(void) {
 }
 
 void
+Amphora_ResetRenderList(void) {
+	Amphora_FreeRenderList();
+	Amphora_InitRenderList();
+}
+
+void
 Amphora_UpdateCamera(void) {
 	if (camera_mode == CAM_MANUAL) return;
 

@@ -41,6 +41,7 @@ AmphoraImage *Amphora_GetCameraTarget(void);
 struct render_list_node_t *Amphora_AddRenderListNode(int order);
 void Amphora_ProcessRenderList(void);
 void Amphora_FreeRenderList(void);
+void Amphora_ResetRenderList(void);
 void Amphora_UpdateCamera(void);
 void Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_FRect *dstrect, double angle, SDL_RendererFlip flip);
 

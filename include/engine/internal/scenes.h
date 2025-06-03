@@ -18,6 +18,7 @@ enum scene_list_e {
 
 void Amphora_InitSceneManager(void);
 void Amphora_DeInitSceneManager(void);
+bool Amphora_IsSceneLoaded(void);
 void Amphora_InitScene(void);
 void Amphora_UpdateScene(Uint32 frame_count);
 void Amphora_DestroyScene(void);

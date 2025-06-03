@@ -21,6 +21,7 @@ extern void name##_Destroy(void);
 extern "C" {
 #endif
 int Amphora_DoLoadScene(const char *name);
+int Amphora_SetSceneFadeParameters(Uint16 ms, SDL_Color color);
 #ifdef __cplusplus
 }
 #endif
