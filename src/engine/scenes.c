@@ -159,6 +159,7 @@ Amphora_SceneTransitionEvent(void) {
 		Amphora_DestroyScene();
 		current_scene_idx = HT_GetValue(scene_names[current_scene_name], scenes);
 		Amphora_InitScene();
+		Amphora_SetCamera(0, 0);
 	}
 	if (fade_idx == 0 && fade_idx_mod == -1) {
 		SDL_free(fade_steps);
