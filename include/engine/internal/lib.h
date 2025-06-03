@@ -8,6 +8,15 @@ if (!param) { \
 	Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "%s is NULL but shouldn't be!", #param); \
 	return (ret); \
 }
+
+typedef struct {
+	Uint16 timer;
+	Uint16 frames;
+	int idx;
+	int idx_mod;
+	Uint8 *steps;
+} AmphoraFader;
+
 char *Amphora_ConcatString(char *s1, const char *s2);
 
 #endif /* AMPHORA_TOOLS_INTERNAL_H */

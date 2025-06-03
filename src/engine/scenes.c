@@ -2,6 +2,7 @@
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
+#include "engine/internal/lib.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
@@ -40,11 +41,7 @@ static char *scene_names[] = {
 };
 static long current_scene_idx = 0;
 static int current_scene_name = 0;
-static Uint16 fade_timer = 0;
-static Uint16 fade_frames = 0;
-static int fade_idx = 0;
-static int fade_idx_mod = 1;
-static Uint8 *fade_steps;
+static AmphoraFader transition_fader;
 static SDL_Color fade_color = { 255, 255, 255, 255 };
 static SDL_Rect fade_rect;
 
@@ -65,16 +62,16 @@ Amphora_DoLoadScene(const char *name) {
 	}
 	fade_rect.w = screen_size.x;
 	fade_rect.h = screen_size.y;
-	fade_frames = fade_timer / Amphora_GetFPS();
-	if (!((fade_steps = SDL_malloc((fade_frames >> 1) * sizeof(Uint8))))) {
+	transition_fader.frames = transition_fader.timer / Amphora_GetFPS();
+	if (!((transition_fader.steps = SDL_malloc((transition_fader.frames >> 1) * sizeof(Uint8))))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
-	for (i = 0; i < (fade_frames >> 1); i++) {
-		fade_steps[i] = i * 255 / ((fade_frames >> 1) - 1);
+	for (i = 0; i < (transition_fader.frames >> 1); i++) {
+		transition_fader.steps[i] = i * 255 / ((transition_fader.frames >> 1) - 1);
 	}
-	fade_idx = 0;
-	fade_idx_mod = 1;
+	transition_fader.idx = 0;
+	transition_fader.idx_mod = 1;
 	Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent);
 
 	return AMPHORA_STATUS_OK;
@@ -82,7 +79,7 @@ Amphora_DoLoadScene(const char *name) {
 
 int
 Amphora_SetSceneFadeParameters(Uint16 ms, SDL_Color color) {
-	fade_timer = ms;
+	transition_fader.timer = ms;
 	fade_color = color;
 
 	return AMPHORA_STATUS_OK;
@@ -143,7 +140,7 @@ void
 Amphora_SceneTransitionEvent(void) {
 	SDL_Renderer *renderer = Amphora_GetRenderer();
 
-	if (!fade_timer) {
+	if (!transition_fader.timer) {
 		Amphora_DestroyScene();
 		current_scene_idx = HT_GetValue(scene_names[current_scene_name], scenes);
 		Amphora_InitScene();
@@ -151,18 +148,18 @@ Amphora_SceneTransitionEvent(void) {
 		return;
 	}
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer, fade_color.r, fade_color.g, fade_color.b, fade_steps[fade_idx]);
+	SDL_SetRenderDrawColor(renderer, fade_color.r, fade_color.g, fade_color.b, transition_fader.steps[transition_fader.idx]);
 	SDL_RenderFillRect(renderer, &fade_rect);
-	fade_idx += fade_idx_mod;
-	if (fade_idx == (fade_frames >> 1) - 1) {
-		fade_idx_mod = -1;
+	transition_fader.idx += transition_fader.idx_mod;
+	if (transition_fader.idx == (transition_fader.frames >> 1) - 1) {
+		transition_fader.idx_mod = -1;
 		Amphora_DestroyScene();
 		current_scene_idx = HT_GetValue(scene_names[current_scene_name], scenes);
 		Amphora_InitScene();
 		Amphora_SetCamera(0, 0);
 	}
-	if (fade_idx == 0 && fade_idx_mod == -1) {
-		SDL_free(fade_steps);
+	if (transition_fader.idx == 0 && transition_fader.idx_mod == -1) {
+		SDL_free(transition_fader.steps);
 		Amphora_UnregisterEvent("amph_internal_scene_transition");
 	}
 }
