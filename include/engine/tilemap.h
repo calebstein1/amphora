@@ -16,8 +16,8 @@ extern "C" {
 #endif
 void Amphora_SetMap(const char *name, float scale);
 const SDL_FRect *Amphora_GetMapRectangle(void);
-void Amphora_HideMapLayer(const char *name, int t);
-void Amphora_ShowMapLayer(const char *name, int t);
+int Amphora_HideMapLayer(const char *name, int t);
+int Amphora_ShowMapLayer(const char *name, int t);
 #ifdef __cplusplus
 }
 #endif

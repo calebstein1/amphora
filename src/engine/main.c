@@ -166,7 +166,6 @@ Amphora_MainLoop(SDL_Event *e) {
 	}
 	Amphora_ClearBG();
 	Amphora_UpdateScene(frame_count);
-	Amphora_ProcessDeferredTransition();
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();
 	Amphora_ProcessRegisteredEvents();

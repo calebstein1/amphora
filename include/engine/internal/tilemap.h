@@ -11,8 +11,6 @@ enum map_orientation_e {
 struct amphora_tilemap_layer_t {
 	SDL_Texture *texture;
 	struct render_list_node_t *node;
-	float a, a_stp;
-	bool hiding;
 };
 
 struct amphora_tilemap_t {
@@ -34,6 +32,5 @@ void Amphora_FreeObjectGroup(void);
 void Amphora_FreeAllObjectGroups(void);
 void Amphora_CloseMapHashTables(void);
 SDL_FRect *Amphora_GetRectsByGroup(const char *name, Uint32 *c);
-void Amphora_ProcessDeferredTransition(void);
 
 #endif /* AMPHORA_TILEMAP_INTERNAL_H */
