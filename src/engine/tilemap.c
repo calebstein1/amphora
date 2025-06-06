@@ -362,12 +362,12 @@ Amphora_GetMapLayerByName(const char *name) {
 static void
 Amphora_ProcessDeferredTransition(void) {
 	SDL_SetTextureAlphaMod(fade_layer->texture, transition_fader.steps[transition_fader.idx++]);
-	if (transition_fader.idx == transition_fader.frames) {
-		fade_layer->node->display = persist_shown;
-		transitioning = false;
-		SDL_free(transition_fader.steps);
-		Amphora_UnregisterEvent("amph_internal_map_layer_fade");
-	}
+	if (transition_fader.idx != transition_fader.frames) return;
+
+	fade_layer->node->display = persist_shown;
+	transitioning = false;
+	SDL_free(transition_fader.steps);
+	Amphora_UnregisterEvent("amph_internal_map_layer_fade");
 }
 
 #endif
