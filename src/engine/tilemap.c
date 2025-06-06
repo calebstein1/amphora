@@ -77,7 +77,7 @@ Amphora_HideMapLayer(const char *name, int t) {
 		return AMPHORA_STATUS_OK;
 	}
 	transition_fader.timer = t;
-	transition_fader.frames = transition_fader.timer / Amphora_GetFPS();
+	transition_fader.frames = transition_fader.timer / (1000 / Amphora_GetFPS());
 	transition_fader.idx = 0;
 	if (!((transition_fader.steps = SDL_malloc(transition_fader.frames * sizeof(Uint8))))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
@@ -106,7 +106,7 @@ Amphora_ShowMapLayer(const char *name, int t) {
 		return AMPHORA_STATUS_OK;
 	}
 	transition_fader.timer = t;
-	transition_fader.frames = transition_fader.timer / Amphora_GetFPS();
+	transition_fader.frames = transition_fader.timer / (1000 / Amphora_GetFPS());
 	transition_fader.idx = 0;
 	if (!((transition_fader.steps = SDL_malloc(transition_fader.frames * sizeof(Uint8))))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");

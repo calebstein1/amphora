@@ -41,7 +41,7 @@ Level1_Init() {
 	const std::string welcome_message = "Hello, and welcome to the Amphora demo!";
 	const std::string message = "I'm going to be fixed right here in place!";
 
-	Amphora_SetSceneFadeParameters(2000, black);
+	Amphora_SetSceneFadeParameters(1000, black);
 	Amphora_SetBGColor(sky);
 	Amphora_SetMap("Overworld", 2);
 	Amphora_SetMusic("forest");
