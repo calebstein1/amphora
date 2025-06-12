@@ -72,11 +72,12 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 
 int
 Amphora_DestroyEmitter(AmphoraEmitter *emitter) {
+	if (!emitter) return AMPHORA_STATUS_FAIL_UNDEFINED;
+
 	SDL_DestroyTexture(emitter->texture);
 	SDL_free(emitter->particles);
 	emitter->render_list_node->garbage = true;
 	SDL_free(emitter);
-	emitter = NULL;
 
 	return AMPHORA_STATUS_OK;
 }
