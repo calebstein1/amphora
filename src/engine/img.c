@@ -253,7 +253,6 @@ Amphora_FreeSprite(AmphoraImage *spr) {
 	HT_FreeTable(spr->framesets);
 	spr->render_list_node->garbage = true;
 	SDL_free(spr);
-	spr = NULL;
 
 	return AMPHORA_STATUS_OK;
 }

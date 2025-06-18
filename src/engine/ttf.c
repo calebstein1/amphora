@@ -131,7 +131,6 @@ Amphora_FreeString(AmphoraString *msg) {
 	SDL_free(msg->text);
 	msg->render_list_node->garbage = true;
 	SDL_free(msg);
-	msg = NULL;
 }
 
 void
