@@ -67,7 +67,7 @@ Amphora_DoLoadScene(const char *name) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
-	for (i = 0; i < (transition_fader.frames >> 1); i++) {
+	for (i = 0; i < transition_fader.frames >> 1; i++) {
 		transition_fader.steps[i] = i * 255 / ((transition_fader.frames >> 1) - 1);
 	}
 	transition_fader.idx = 0;
