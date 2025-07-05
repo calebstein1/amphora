@@ -36,6 +36,8 @@ static const char *music_paths[] = {
 void
 Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 	SDL_RWops *sfx_rw = NULL;
+	Mix_Chunk *sfx_chunk = NULL;
+	int v;
 
 	if (!HT_GetValue(name, open_sfx)) {
 #ifdef DEBUG
@@ -45,8 +47,17 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 		HT_StoreRef(name, Mix_LoadWAV_RW(sfx_rw, 1), open_sfx);
 	}
 	if (channel > -1 && Mix_Playing(channel)) return;
+	sfx_chunk = HT_GetRef(name, Mix_Chunk, open_sfx);
 
-	Mix_PlayChannel(channel, HT_GetRef(name, Mix_Chunk, open_sfx), repeat);
+	if (Mix_VolumeChunk(sfx_chunk, -1) != (v = (int)HT_GetStatus(name, sfx))) Mix_VolumeChunk(sfx_chunk, v);
+	Mix_PlayChannel(channel, sfx_chunk, repeat);
+}
+
+void
+Amphora_SetSFXVolume(const char *name, int volume) {
+	if (!HT_GetValue(name, sfx)) return;
+
+	HT_SetStatus(name, volume, sfx);
 }
 
 void
@@ -117,6 +128,7 @@ Amphora_InitSFX(void) {
 	open_sfx = HT_NewTable();
 	for (i = 0; i < SFX_COUNT; i++) {
 		HT_StoreRef(sfx_names[i], sfx_paths[i], sfx);
+		HT_SetStatus(sfx_names[i], MIX_MAX_VOLUME, sfx);
 #ifdef DEBUG
 		SDL_Log("Found sfx %s\n", sfx_names[i]);
 #endif

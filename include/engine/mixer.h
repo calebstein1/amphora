@@ -25,6 +25,8 @@ extern "C" {
 #endif
 /* Play a sound effect */
 void Amphora_PlaySFX(const char *name, int channel, int repeat);
+/* Sets the volume for a sound effect */
+void Amphora_SetSFXVolume(const char *name, int volume);
 /* Sets the current music track */
 void Amphora_SetMusic(const char *name);
 /* Play the current set music track with a fade-in, looping infinitely */

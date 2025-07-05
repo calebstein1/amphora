@@ -74,6 +74,8 @@ Level1_Init() {
 	stationary = Amphora_CreateString("Merriweather", 16, 76, 132, 1000, black, false, "%s", message.c_str());
 	coords = Amphora_CreateString("Roboto", 32, 16, -16, 1000, black, true, "0, 0");
 
+	Amphora_SetSFXVolume("keypress", 24);
+
 	Amphora_SetCameraTarget(player->PlayerImage);
 	Amphora_BoundCameraToMap();
 
