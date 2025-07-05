@@ -2,8 +2,8 @@
 #include "colors.h"
 
 #include "../Utils/HealthBar.hpp"
-#include "FX/motion_blur.h"
-#include "FX/snowfall.h"
+#include "../FX/motion_blur.h"
+#include "../FX/snowfall.h"
 
 #include <string>
 

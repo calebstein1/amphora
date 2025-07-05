@@ -1,5 +1,5 @@
 #include "engine/amphora.h"
-#include "FX/snowfall.h"
+#include "snowfall.h"
 
 void
 Snowfall(AmphoraParticle *particle, const SDL_FRect *rect) {

@@ -1,5 +1,5 @@
 #include "engine/amphora.h"
-#include "FX/motion_blur.h"
+#include "motion_blur.h"
 
 void MotionBlur(SDL_Surface *surface) {
 	AmphoraPixelDataABGR *pixels = surface->pixels;
