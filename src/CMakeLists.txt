@@ -3,7 +3,9 @@ add_subdirectory(engine)
 add_executable(${CMAKE_PROJECT_NAME} Scenes/Level1.cpp
 	Scenes/Level2.c
 	FX/motion_blur.c
-	FX/snowfall.c)
+	FX/snowfall.c
+	Entities/Player.cpp
+	Entities/Player.h)
 
 if(EMSCRIPTEN)
 	target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE

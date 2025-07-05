@@ -1,6 +1,7 @@
 #include "engine/amphora.h"
 #include "colors.h"
 
+#include "../Entities/Player.h"
 #include "../Utils/HealthBar.hpp"
 #include "../FX/motion_blur.h"
 #include "../FX/snowfall.h"
@@ -22,7 +23,7 @@ enum player_directions_e {
 };
 
 /* Game globals */
-AmphoraImage *player;
+Player *player;
 AmphoraImage *rotating_heart;
 AmphoraEmitter *snow;
 AmphoraString *hello;
@@ -46,15 +47,13 @@ Level1_Init() {
 	Amphora_SetMap("Overworld", 2);
 	Amphora_SetMusic("forest");
 
-	player = Amphora_CreateSprite("Character", (float) Amphora_LoadNumber("x", 96),
-			     (float) Amphora_LoadNumber("y", 148), 2.0, (bool) Amphora_LoadNumber("flip", false), false,
-			     101);
+	player = new Player(
+		static_cast<float>(Amphora_LoadNumber("x", 96)),
+		static_cast<float>(Amphora_LoadNumber("y", 148)),
+		2.0,
+		static_cast<bool>(Amphora_LoadNumber("flip", false))
+	);
 	rotating_heart = Amphora_CreateSprite("Objects", 128, 72, 3.0, false, false, 1000);
-
-	Amphora_AddFrameset(player, "Idle", nullptr, 0, 17, 32, 48, 0, 0, 1, 0);
-	Amphora_AddFrameset(player, "Walk", nullptr, 32, 17, 32, 48, 0, 0, 6, 250);
-	Amphora_AddFrameset(player, "Attack", nullptr, 223, 145, 32, 48, 0, 0, 2, 250);
-	Amphora_AddFrameset(player, "KO", nullptr, 81, 355, 48, 32, 8, -8, 2, 500);
 
 	Amphora_AddFrameset(rotating_heart, "Stationary", nullptr, 64, 129, 16, 16, 0, 0, 1, 0);
 	Amphora_AddFrameset(rotating_heart, "Rotate", nullptr, 64, 129, 16, 16, 0, 0, 4, 250);
@@ -75,13 +74,13 @@ Level1_Init() {
 	stationary = Amphora_CreateString("Merriweather", 16, 76, 132, 1000, black, false, "%s", message.c_str());
 	coords = Amphora_CreateString("Roboto", 32, 16, -16, 1000, black, true, "0, 0");
 
-	Amphora_SetCameraTarget(player);
+	Amphora_SetCameraTarget(player->PlayerImage);
 	Amphora_BoundCameraToMap();
 
 	health_bar = new HealthBar((int) Amphora_LoadNumber("health", 3));
 
 	if (Amphora_GetSessionData("p_state") == ko) {
-		Amphora_PlayOneshot(player, "KO", nullptr);
+		Amphora_PlayOneshot(player->PlayerImage, "KO", nullptr);
 	} else if (Amphora_GetSessionData("p_state") == atk) {
 		player_state = idle;
 	}
@@ -102,9 +101,9 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 
 	if (health_bar->get_health() <= 0 && player_state != ko) {
 		player_state = ko;
-		Amphora_PlayOneshot(player, "KO", nullptr);
+		Amphora_PlayOneshot(player->PlayerImage, "KO", nullptr);
 		if (blur) {
-			Amphora_ResetImage(player);
+			Amphora_ResetImage(player->PlayerImage);
 			blur = false;
 		}
 	}
@@ -116,65 +115,65 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		f_down = false;
 	}
 
-	Amphora_SetFramesetAnimationTime(player, "Walk", key_actions->dash ? 166 : 250);
+	Amphora_SetFramesetAnimationTime(player->PlayerImage, "Walk", key_actions->dash ? 166 : 250);
 	player_speed *= key_actions->dash ? 2 : 1;
 	if (key_actions->left && player_state != atk && player_state != ko) {
 		player_state = walk;
 		player_direction = LEFT;
-		Amphora_SetFrameset(player, "Walk");
-		Amphora_FlipSprite(player);
-		Amphora_MoveSprite(player, -player_speed, 0);
+		Amphora_SetFrameset(player->PlayerImage, "Walk");
+		Amphora_FlipSprite(player->PlayerImage);
+		Amphora_MoveSprite(player->PlayerImage, -player_speed, 0);
 		Amphora_PlaySFX("leaves01", 1, 0);
 		if (!blur) {
-			Amphora_ApplyFXToImage(player, MotionBlur);
+			Amphora_ApplyFXToImage(player->PlayerImage, MotionBlur);
 			blur = true;
 		}
 	}
 	if (key_actions->right && player_state != atk && player_state != ko) {
 		player_state = walk;
 		player_direction = RIGHT;
-		Amphora_SetFrameset(player, "Walk");
-		Amphora_UnflipSprite(player);
-		Amphora_MoveSprite(player, player_speed, 0);
+		Amphora_SetFrameset(player->PlayerImage, "Walk");
+		Amphora_UnflipSprite(player->PlayerImage);
+		Amphora_MoveSprite(player->PlayerImage, player_speed, 0);
 		Amphora_PlaySFX("leaves02", 1, 0);
 		if (!blur) {
-			Amphora_ApplyFXToImage(player, MotionBlur);
+			Amphora_ApplyFXToImage(player->PlayerImage, MotionBlur);
 			blur = true;
 		}
 	}
 	if (key_actions->up && player_state != atk && player_state != ko) {
 		player_state = walk;
 		player_direction = UP;
-		Amphora_SetFrameset(player, "Walk");
-		Amphora_MoveSprite(player, 0, -player_speed);
+		Amphora_SetFrameset(player->PlayerImage, "Walk");
+		Amphora_MoveSprite(player->PlayerImage, 0, -player_speed);
 		Amphora_PlaySFX("leaves01", 1, 0);
 	}
 	if (key_actions->down && player_state != atk && player_state != ko) {
 		player_state = walk;
 		player_direction = DOWN;
-		Amphora_SetFrameset(player, "Walk");
-		Amphora_MoveSprite(player, 0, player_speed);
+		Amphora_SetFrameset(player->PlayerImage, "Walk");
+		Amphora_MoveSprite(player->PlayerImage, 0, player_speed);
 		Amphora_PlaySFX("leaves02", 1, 0);
 	}
 	if (key_actions->attack && player_state != atk && player_state != ko) {
 		player_state = atk;
 		if (!blur) {
-			Amphora_ApplyFXToImage(player, MotionBlur);
+			Amphora_ApplyFXToImage(player->PlayerImage, MotionBlur);
 			blur = true;
 		}
-		Amphora_PlayOneshot(player, "Attack", [] {
+		Amphora_PlayOneshot(player->PlayerImage, "Attack", [] {
 			player_state = idle;
 			blur = false;
-			Amphora_ResetImage(player);
-			Amphora_SetFrameset(player, "Idle");
+			Amphora_ResetImage(player->PlayerImage);
+			Amphora_SetFrameset(player->PlayerImage, "Idle");
 		});
 	}
 	if (!key_actions->left && !key_actions->right && !key_actions->up && !key_actions->down &&
 	    player_state == walk) {
 		player_state = idle;
-		Amphora_SetFrameset(player, "Idle");
+		Amphora_SetFrameset(player->PlayerImage, "Idle");
 		if (blur) {
-			Amphora_ResetImage(player);
+			Amphora_ResetImage(player->PlayerImage);
 			blur = false;
 		}
 	}
@@ -187,7 +186,7 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		health_bar->increase_health();
 		if (player_state == ko) {
 			player_state = idle;
-			Amphora_SetFrameset(player, "Idle");
+			Amphora_SetFrameset(player->PlayerImage, "Idle");
 		}
 	}
 	if (key_actions->zoom) {
@@ -210,8 +209,8 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		Amphora_SetFrameset(rotating_heart, "Stationary");
 	}
 
-	Amphora_UpdateStringText(coords, "%.2f, %.2f", Amphora_GetSpritePosition(player).x,
-				 Amphora_GetSpritePosition(player).y);
+	Amphora_UpdateStringText(coords, "%.2f, %.2f", Amphora_GetSpritePosition(player->PlayerImage).x,
+				 Amphora_GetSpritePosition(player->PlayerImage).y);
 
 	if (frame % Amphora_GetFPS() == 0) {
 		Amphora_UpdateStringText(timer, "%d", frame / Amphora_GetFPS());
@@ -221,19 +220,19 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		Amphora_UpdateStringCharsDisplayed(hello, ++hello_ticker);
 	}
 
-	if (Amphora_CheckObjectGroupCollision(player, "Collision")) {
+	if (Amphora_CheckObjectGroupCollision(player->PlayerImage, "Collision")) {
 		switch (player_direction) {
 			case LEFT:
-				Amphora_MoveSprite(player, player_speed, 0);
+				Amphora_MoveSprite(player->PlayerImage, player_speed, 0);
 				break;
 			case RIGHT:
-				Amphora_MoveSprite(player, -player_speed, 0);
+				Amphora_MoveSprite(player->PlayerImage, -player_speed, 0);
 				break;
 			case UP:
-				Amphora_MoveSprite(player, 0, player_speed);
+				Amphora_MoveSprite(player->PlayerImage, 0, player_speed);
 				break;
 			case DOWN:
-				Amphora_MoveSprite(player, 0, -player_speed);
+				Amphora_MoveSprite(player->PlayerImage, 0, -player_speed);
 				break;
 		}
 	}
@@ -241,11 +240,11 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 
 void
 Level1_Destroy() {
-	Vector2f player_pos = Amphora_GetSpritePosition(player);
+	Vector2f player_pos = Amphora_GetSpritePosition(player->PlayerImage);
 	Amphora_StoreSessionData("p_state", player_state);
 	Amphora_SaveNumber("x", player_pos.x);
 	Amphora_SaveNumber("y", player_pos.y);
-	Amphora_SaveNumber("flip", Amphora_IsSpriteFlipped(player));
+	Amphora_SaveNumber("flip", Amphora_IsSpriteFlipped(player->PlayerImage));
 	Amphora_SaveNumber("health", health_bar->get_health());
 	player = nullptr;
 	rotating_heart = nullptr;
