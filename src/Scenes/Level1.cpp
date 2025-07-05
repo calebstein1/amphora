@@ -247,7 +247,7 @@ Level1_Destroy() {
 	Amphora_SaveNumber("y", player_pos.y);
 	Amphora_SaveNumber("flip", Amphora_IsSpriteFlipped(player->PlayerImage));
 	Amphora_SaveNumber("health", health_bar->get_health());
-	player = nullptr;
+	delete player;
 	rotating_heart = nullptr;
 	snow = nullptr;
 	hello = nullptr;
