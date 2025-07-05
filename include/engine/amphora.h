@@ -20,6 +20,7 @@
 #include "engine/internal/tilemap.h"
 #include "engine/internal/timer.h"
 #include "engine/internal/ttf.h"
+#include "engine/internal/typewriter.h"
 #include "engine/util.h"
 #else
 #include "engine/collision.h"
@@ -37,6 +38,7 @@
 #include "engine/session_data.h"
 #include "engine/tilemap.h"
 #include "engine/ttf.h"
+#include "engine/typewriter.h"
 #include "engine/util.h"
 #endif
 

@@ -18,4 +18,5 @@ add_library(amphora_engine
 	ht_hash.c
 	session_data.c
 	particles.c
+	typewriter.c
 )

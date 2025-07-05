@@ -89,11 +89,12 @@ Level1_Init() {
 void
 Level1_Update(Uint32 frame, const InputState *key_actions) {
 	static bool f_down = false;
-	static Uint8 hello_ticker = 0;
 	static Uint32 damage_cooldown = 0;
 	float player_speed = 1;
 
 	Amphora_PlayMusic(500);
+
+	Amphora_TypeString(hello, 60, nullptr);
 
 	Amphora_ObjectClicked(player, SDL_BUTTON_LEFT, [] {
 		health_bar->set_health(0);
@@ -214,10 +215,6 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 
 	if (frame % Amphora_GetFPS() == 0) {
 		Amphora_UpdateStringText(timer, "%d", frame / Amphora_GetFPS());
-	}
-
-	if (hello && Amphora_IsEven(frame) && hello_ticker < Amphora_GetStringLength(hello)) {
-		Amphora_UpdateStringCharsDisplayed(hello, ++hello_ticker);
 	}
 
 	if (Amphora_CheckObjectGroupCollision(player->PlayerImage, "Collision")) {
