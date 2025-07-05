@@ -100,7 +100,7 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 		Amphora_PlaySFX("keypress", -1, 0);
 	});
 
-	Amphora_ObjectClicked(player, SDL_BUTTON_LEFT, [] {
+	Amphora_ObjectClicked(player->PlayerImage, SDL_BUTTON_LEFT, [] {
 		health_bar->set_health(0);
 	});
 
