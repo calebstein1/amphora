@@ -257,5 +257,5 @@ Level1_Destroy() {
 	blur = false;
 	Amphora_FadeOutMusic(500);
 
-	delete (health_bar);
+	delete health_bar;
 }
