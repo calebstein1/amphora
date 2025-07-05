@@ -21,7 +21,8 @@
 #define SFX							\
 	/* LOADSFX(name, path) */				\
 	LOADSFX(leaves01, content/sfx/leaves01.ogg)	\
-	LOADSFX(leaves02, content/sfx/leaves02.ogg)
+	LOADSFX(leaves02, content/sfx/leaves02.ogg)	\
+	LOADSFX(keypress, content/sfx/keypress-019.wav)
 
 #define MUSIC							\
 	/* LOADMUSIC(name, path) */				\

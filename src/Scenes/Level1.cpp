@@ -94,7 +94,9 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 
 	Amphora_PlayMusic(500);
 
-	Amphora_TypeString(hello, 60, nullptr);
+	Amphora_TypeString(hello, 90, [] (int i, char c) {
+		Amphora_PlaySFX("keypress", -1, 0);
+	});
 
 	Amphora_ObjectClicked(player, SDL_BUTTON_LEFT, [] {
 		health_bar->set_health(0);
