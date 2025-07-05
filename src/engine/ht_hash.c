@@ -142,7 +142,12 @@ HT_GetStatus(const char *key, HT_HashTable t) {
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key) return 0;
-
+	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0) return t->table_entries[i].status;
+	i = HT_ProbeForBucket(t, hash, i, 0);
+	if (t->table_entries[i].hash != hash) {
+		HT_SetError("Key %s does not exist in table", key);
+		return 0;
+	}
 	return t->table_entries[i].status;
 }
 
@@ -152,6 +157,7 @@ HT_SetStatus(const char *key, int val, HT_HashTable t) {
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key || !t->table_entries[i].status) return 0;
+	if (t->table_entries[i].hash && (t->table_entries[i].hash != hash || strcmp(t->table_entries[i].key, key) != 0)) i = HT_ProbeForBucket(t, hash, i, 1);
 
 	t->table_entries[i].status = val;
 
