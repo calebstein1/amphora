@@ -7,6 +7,7 @@
 #endif
 
 #include "engine/internal/db.h"
+#include "engine/internal/lib.h"
 #include "engine/internal/prefs.h"
 
 #include "config.h"
@@ -191,15 +192,12 @@ Amphora_LoadFPS(void) {
 static SDL_GUID
 Amphora_GetUUID(void) {
 	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
-	const char *filename = "uuid";
 	SDL_RWops *rw;
 	char *file_contents;
-	size_t new_len = SDL_strlen(path) + SDL_strlen(filename) + 1;
 	SDL_GUID guid;
 	char guid_str[33];
 
-	path = SDL_realloc(path, new_len);
-	SDL_strlcat(path, filename, new_len);
+	Amphora_ConcatString(&path, "uuid");
 
 	if ((rw = SDL_RWFromFile(path, "rb"))) {
 #ifdef DEBUG
