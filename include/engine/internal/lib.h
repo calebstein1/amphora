@@ -17,6 +17,6 @@ typedef struct {
 	Uint8 *steps;
 } AmphoraFader;
 
-char *Amphora_ConcatString(char *s1, const char *s2);
+char *Amphora_ConcatString(char **s1, const char *s2);
 
 #endif /* AMPHORA_TOOLS_INTERNAL_H */
