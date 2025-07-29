@@ -6,9 +6,6 @@
 
 #include "config.h"
 
-/* Private function prototypes */
-static Uint32 rotate_mask_left(Uint32 c);
-
 /* File-scoped variables */
 static union input_state_u key_actions;
 static SDL_GameController *controller;
@@ -265,7 +262,7 @@ Amphora_HandleKeyUp(const SDL_Event *e) {
 	if (pressed_key == e->key.keysym.sym) pressed_key = 0;
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->key.keysym.sym == keys[i]) {
-			key_actions.bits &= (rotate_mask_left(i));
+			key_actions.bits &= ~(1LL << i);
 			return;
 		}
 	}
@@ -289,7 +286,7 @@ Amphora_HandleGamepadUp(const SDL_Event *e) {
 
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (e->cbutton.button == controller_buttons[i]) {
-			key_actions.bits &= (rotate_mask_left(i));
+			key_actions.bits &= ~(1LL << i);
 			return;
 		}
 	}
@@ -324,15 +321,4 @@ Amphora_HandleJoystick(const SDL_Event *e) {
 		jactive = &joystickr_active;
 		js = &joystickr_state;
 	} while (leave++);
-}
-
-/*
- * Private functions
- */
-
-static Uint32
-rotate_mask_left(Uint32 c) {
-	if (c == 0) return MASK;
-
-	return (MASK << c) | (MASK >> (32 - c));
 }
