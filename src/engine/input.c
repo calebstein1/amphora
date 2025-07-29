@@ -320,5 +320,5 @@ Amphora_HandleJoystick(const SDL_Event *e) {
 		ay = SDL_CONTROLLER_AXIS_RIGHTY;
 		jactive = &joystickr_active;
 		js = &joystickr_state;
-	} while (leave++);
+	} while (leave++ < 1);
 }
