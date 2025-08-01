@@ -1,9 +1,6 @@
 #ifndef INPUT_INTERNAL_H
 #define INPUT_INTERNAL_H
 
-#define MASK 0xfffffffe
-#define MAX_CONTROLLERS 4
-
 #include "engine/internal/render.h"
 #include "engine/input.h"
 
