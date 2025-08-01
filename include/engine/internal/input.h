@@ -30,6 +30,6 @@ void Amphora_HandleKeyDown(const SDL_Event *e);
 void Amphora_HandleKeyUp(const SDL_Event *e);
 void Amphora_HandleGamepadDown(const SDL_Event *e);
 void Amphora_HandleGamepadUp(const SDL_Event *e);
-void Amphora_HandleJoystick(const SDL_Event *e);
+void Amphora_HandleJoystick(void);
 
 #endif /* INPUT_INTERNAL_H */

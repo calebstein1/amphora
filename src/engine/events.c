@@ -96,7 +96,7 @@ Amphora_ProcessEventLoop(SDL_Event *e) {
 				Amphora_HandleGamepadUp(e);
 				break;
 			case SDL_CONTROLLERAXISMOTION:
-				Amphora_HandleJoystick(e);
+				Amphora_HandleJoystick();
 				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				Amphora_AddController(e->cdevice.which);
@@ -108,6 +108,7 @@ Amphora_ProcessEventLoop(SDL_Event *e) {
 				if (e->window.event != SDL_WINDOWEVENT_RESIZED) break;
 
 				Amphora_SetRenderLogicalSize(Amphora_GetResolution());
+				break;
 		}
 	}
 

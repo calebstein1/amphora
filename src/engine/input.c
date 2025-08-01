@@ -6,6 +6,9 @@
 
 #include "config.h"
 
+/* Prototypes for private functions */
+void Amphora_ProcessJoystickState(SDL_GameControllerAxis ax, SDL_GameControllerAxis ay, Vector2f *js, bool *jactive);
+
 /* File-scoped variables */
 static union input_state_u key_actions;
 static SDL_GameController *controller;
@@ -293,32 +296,32 @@ Amphora_HandleGamepadUp(const SDL_Event *e) {
 }
 
 void
-Amphora_HandleJoystick(const SDL_Event *e) {
+Amphora_HandleJoystick(void) {
+	Amphora_ProcessJoystickState(SDL_CONTROLLER_AXIS_LEFTX, SDL_CONTROLLER_AXIS_LEFTY,
+				     &joystickl_state, &joystickl_active);
+	Amphora_ProcessJoystickState(SDL_CONTROLLER_AXIS_RIGHTX, SDL_CONTROLLER_AXIS_RIGHTY,
+				     &joystickr_state, &joystickr_active);
+}
+
+/*
+ * Private functions
+ */
+
+void
+Amphora_ProcessJoystickState(SDL_GameControllerAxis ax, SDL_GameControllerAxis ay, Vector2f *js, bool *jactive) {
 	float deadzone = 0.15f, x, y, magnitude, scale;
-	SDL_GameControllerAxis ax = SDL_CONTROLLER_AXIS_LEFTX, ay = SDL_CONTROLLER_AXIS_LEFTY;
-	bool *jactive = &joystickl_active;
-	Vector2f *js = &joystickl_state;
-	Uint8 leave = 0;
 
-	joystickl_active = false;
-	joystickr_active = false;
+	x = (float)SDL_GameControllerGetAxis(controller, ax) / SDL_MAX_SINT16;
+	y = (float)SDL_GameControllerGetAxis(controller, ay) / SDL_MAX_SINT16;
+	magnitude = SDL_sqrtf(x * x + y * y);
 
-	do {
-		x = (float)SDL_GameControllerGetAxis(controller, ax) / SDL_MAX_SINT16;
-		y = (float)SDL_GameControllerGetAxis(controller, ay) / SDL_MAX_SINT16;
-		magnitude = SDL_sqrtf(x * x + y * y);
+	if (magnitude <= deadzone) {
+		*jactive = false;
+		return;
+	}
+	*jactive = true;
+	scale = (magnitude - deadzone) / (1.0f - deadzone);
 
-		if (magnitude > deadzone) {
-			*jactive = true;
-			scale = (magnitude - deadzone) / (1.0f - deadzone);
-
-			js->x = x / magnitude * scale;
-			js->y = y / magnitude * scale;
-		}
-
-		ax = SDL_CONTROLLER_AXIS_RIGHTX;
-		ay = SDL_CONTROLLER_AXIS_RIGHTY;
-		jactive = &joystickr_active;
-		js = &joystickr_state;
-	} while (leave++ < 1);
+	js->x = x / magnitude * scale;
+	js->y = y / magnitude * scale;
 }
