@@ -165,6 +165,7 @@ Amphora_MainLoop(SDL_Event *e) {
 #endif
 	}
 	Amphora_ClearBG();
+	if (Amphora_ControllerConnected()) Amphora_HandleJoystick();
 	Amphora_UpdateScene(frame_count);
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();

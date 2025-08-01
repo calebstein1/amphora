@@ -7,7 +7,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-void Amphora_ProcessJoystickState(SDL_GameControllerAxis ax, SDL_GameControllerAxis ay, Vector2f *js, bool *jactive);
+static void Amphora_ProcessJoystickState(SDL_GameControllerAxis ax, SDL_GameControllerAxis ay, Vector2f *js, bool *jactive);
 
 /* File-scoped variables */
 static union input_state_u key_actions;
@@ -245,6 +245,11 @@ Amphora_ReleaseControllers(void) {
 	controller = NULL;
 }
 
+bool
+Amphora_ControllerConnected(void) {
+	return controller != NULL;
+}
+
 void
 Amphora_HandleKeyDown(const SDL_Event *e) {
 	Uint32 i;
@@ -307,16 +312,20 @@ Amphora_HandleJoystick(void) {
  * Private functions
  */
 
-void
+static void
 Amphora_ProcessJoystickState(SDL_GameControllerAxis ax, SDL_GameControllerAxis ay, Vector2f *js, bool *jactive) {
 	float deadzone = 0.15f, x, y, magnitude, scale;
+	Sint16 raw_x, raw_y;
 
-	x = (float)SDL_GameControllerGetAxis(controller, ax) / SDL_MAX_SINT16;
-	y = (float)SDL_GameControllerGetAxis(controller, ay) / SDL_MAX_SINT16;
+	raw_x = SDL_GameControllerGetAxis(controller, ax);
+	raw_y = SDL_GameControllerGetAxis(controller, ay);
+	x = raw_x < 0 ? (float)raw_x / 32768.0f : (float)raw_x / 32767.0f;
+	y = raw_y < 0 ? (float)raw_y / 32768.0f : (float)raw_y / 32767.0f;
 	magnitude = SDL_sqrtf(x * x + y * y);
 
 	if (magnitude <= deadzone) {
 		*jactive = false;
+		SDL_memset(js, 0, sizeof(Vector2f));
 		return;
 	}
 	*jactive = true;

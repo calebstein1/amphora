@@ -95,9 +95,6 @@ Amphora_ProcessEventLoop(SDL_Event *e) {
 			case SDL_CONTROLLERBUTTONUP:
 				Amphora_HandleGamepadUp(e);
 				break;
-			case SDL_CONTROLLERAXISMOTION:
-				Amphora_HandleJoystick();
-				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				Amphora_AddController(e->cdevice.which);
 				break;
