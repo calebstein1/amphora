@@ -84,10 +84,10 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	SDL_Texture *override = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
-    if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
-        Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
-        return AMPHORA_STATUS_ALLOC_FAIL;
-    }
+	if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
+		return AMPHORA_STATUS_ALLOC_FAIL;
+	}
 
 	if (override_img) {
         if (!HT_GetValue(override_img, open_images)) {
