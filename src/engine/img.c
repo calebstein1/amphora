@@ -6,7 +6,7 @@
 #include "config.h"
 
 /* Prototypes for private functions */
-void Amphora_LoadIMGTexture(const char *name);
+static void Amphora_LoadIMGTexture(const char *name);
 
 /* File-scoped variables */
 static HT_HashTable images;
@@ -372,7 +372,7 @@ Amphora_UpdateAndDrawSprite(AmphoraImage *spr) {
  * Private Functions
  */
 
-void
+static void
 Amphora_LoadIMGTexture(const char *name) {
 	SDL_RWops *img_rw = NULL;
 	SDL_Surface *surface, *surface_orig;
