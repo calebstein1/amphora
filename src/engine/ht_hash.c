@@ -33,7 +33,7 @@ HT_SetError(char *fmt, ...) {
 	va_list args;
 
 	va_start(args, fmt);
-	vsnprintf(msg, MSG_LEN, fmt, args);
+	(void)vsnprintf(msg, MSG_LEN, fmt, args);
 }
 
 const char *
@@ -132,7 +132,7 @@ HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
 	}
 	if (t->table_entries[i].status != HT_USED) t->count++;
 	t->table_entries[i].data = val, t->table_entries[i].hash = hash, t->table_entries[i].status = HT_USED;
-	strlcpy(t->table_entries[i].key, key, MAX_KEY_LEN - 1);
+	(void)strlcpy(t->table_entries[i].key, key, MAX_KEY_LEN - 1);
 	return i;
 }
 
