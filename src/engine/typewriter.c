@@ -28,7 +28,7 @@ Amphora_TypeString(AmphoraString *string, Uint32 ms, void (*callback)(int, char)
 		typewriters[i].ms = ms;
 		typewriters[i].last_update = SDL_GetTicks();
 		typewriters[i].used = true;
-		Amphora_UpdateStringCharsDisplayed(string, 1);
+		(void)Amphora_UpdateStringCharsDisplayed(string, 1);
 		typewriters_count++;
 		return TYPEWRITER_CREATED;
 	}
@@ -36,7 +36,7 @@ Amphora_TypeString(AmphoraString *string, Uint32 ms, void (*callback)(int, char)
 
 	typewriters[i].last_update = SDL_GetTicks();
 	if (callback) callback(typewriters[i].ticker, Amphora_GetStringCharAtIndex(string, typewriters[i].ticker));
-	Amphora_UpdateStringCharsDisplayed(string, ++typewriters[i].ticker);
+	(void)Amphora_UpdateStringCharsDisplayed(string, ++typewriters[i].ticker);
 	if (typewriters[i].ticker == Amphora_GetStringLength(string)) {
 		typewriters[i].used = false;
 		typewriters_count--;

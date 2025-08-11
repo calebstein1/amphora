@@ -1,3 +1,4 @@
+#include "engine/internal/error.h"
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
@@ -44,7 +45,7 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 		HT_StoreRef(font_name, TTF_OpenFontRW(font_rw, 1, 16), open_fonts);
 	}
 	va_start(args, fmt);
-	SDL_vsnprintf(text, sizeof(text), fmt, args);
+	(void)SDL_vsnprintf(text, sizeof(text), fmt, args);
 
 	if (!((msg = SDL_malloc(sizeof(struct amphora_message_t))))) {
 		return NULL;
@@ -65,7 +66,7 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 	render_list_node->type = AMPH_OBJ_TXT;
 	render_list_node->data = msg;
 	render_list_node->stationary = stationary;
-	SDL_strlcpy(msg->text, text, SDL_strlen(text) + 1);
+	(void)SDL_strlcpy(msg->text, text, SDL_strlen(text) + 1);
 
 	msg->texture = Amphora_RenderStringToTexture(msg);
 
@@ -98,7 +99,7 @@ Amphora_UpdateStringText(AmphoraString *msg, const char *fmt, ...) {
 	char text[4096];
 
 	va_start(args, fmt);
-	SDL_vsnprintf(text, 4096, fmt, args);
+	(void)SDL_vsnprintf(text, 4096, fmt, args);
 
 	msg->len = SDL_strlen(text);
 	SDL_free(msg->text);
@@ -191,7 +192,7 @@ Amphora_FreeAllFonts(void) {
             SDL_Log("Unloading font: %s\n", font_names[i]);
 #endif
 			TTF_CloseFont(HT_GetRef(font_names[i], TTF_Font, open_fonts));
-			HT_SetValue(font_names[i], 0, open_fonts);
+			(void)HT_SetValue(font_names[i], 0, open_fonts);
 			HT_DeleteKey(font_names[i], open_fonts);
 		}
 	}
@@ -223,17 +224,19 @@ Amphora_RenderStringToTexture(AmphoraString *msg) {
 
 	if (n) {
 		if ((n_buff = SDL_malloc(n + 1))) {
-			SDL_strlcpy(n_buff, text, n + 1);
+			(void)SDL_strlcpy(n_buff, text, n + 1);
 		} else {
-			SDL_LogWarn(SDL_LOG_CATEGORY_ERROR, "Failed to allocate buffer for partial string\n");
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate buffer for partial string\n");
 			n = 0;
 		}
 	}
-	TTF_SetFontSize(font, pt);
+	if (TTF_SetFontSize(font, pt) == -1) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to set font size\n");
+	}
 
 	surface = TTF_RenderUTF8_Blended(font, n ? n_buff : text, text_color);
 	texture = SDL_CreateTextureFromSurface(Amphora_GetRenderer(), surface);
-	TTF_SizeUTF8(font, n ? n_buff : text, &msg_rect_w, &msg_rect_h);
+	(void)TTF_SizeUTF8(font, n ? n_buff : text, &msg_rect_w, &msg_rect_h);
 	msg->rectangle.w = (float)msg_rect_w;
 	msg->rectangle.h = (float)msg_rect_h;
 	SDL_FreeSurface(surface);
@@ -241,4 +244,5 @@ Amphora_RenderStringToTexture(AmphoraString *msg) {
 
 	return texture;
 }
+
 #endif

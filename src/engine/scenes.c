@@ -72,7 +72,7 @@ Amphora_DoLoadScene(const char *name) {
 	}
 	transition_fader.idx = 0;
 	transition_fader.idx_mod = 1;
-	Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent);
+	(void)Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent);
 
 	return AMPHORA_STATUS_OK;
 }
@@ -95,7 +95,7 @@ Amphora_InitSceneManager(void) {
 
 	scenes = HT_NewTable();
 	for (i = 0; i < SCENES_COUNT; i++) {
-		HT_SetValue(scene_names[i], i, scenes);
+		(void)HT_SetValue(scene_names[i], i, scenes);
 	}
 }
 
@@ -144,12 +144,12 @@ Amphora_SceneTransitionEvent(void) {
 		Amphora_DestroyScene();
 		current_scene_idx = HT_GetValue(scene_names[current_scene_name], scenes);
 		Amphora_InitScene();
-		Amphora_UnregisterEvent("amph_internal_scene_transition");
+		(void)Amphora_UnregisterEvent("amph_internal_scene_transition");
 		return;
 	}
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer, fade_color.r, fade_color.g, fade_color.b, transition_fader.steps[transition_fader.idx]);
-	SDL_RenderFillRect(renderer, &fade_rect);
+	(void)SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	(void)SDL_SetRenderDrawColor(renderer, fade_color.r, fade_color.g, fade_color.b, transition_fader.steps[transition_fader.idx]);
+	(void)SDL_RenderFillRect(renderer, &fade_rect);
 	transition_fader.idx += transition_fader.idx_mod;
 	if (transition_fader.idx == (transition_fader.frames >> 1) - 1) {
 		transition_fader.idx_mod = -1;
@@ -160,6 +160,6 @@ Amphora_SceneTransitionEvent(void) {
 	}
 	if (transition_fader.idx == 0 && transition_fader.idx_mod == -1) {
 		SDL_free(transition_fader.steps);
-		Amphora_UnregisterEvent("amph_internal_scene_transition");
+		(void)Amphora_UnregisterEvent("amph_internal_scene_transition");
 	}
 }
