@@ -19,8 +19,11 @@ int
 Amphora_InitDB(void) {
 	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
 
-	Amphora_ConcatString(&path, "amphora.db");
-	sqlite3_open_v2(path, &game_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+	(void)Amphora_ConcatString(&path, "amphora.db");
+	if (sqlite3_open_v2(path, &game_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) != SQLITE_OK) {
+		SDL_free(path);
+		return AMPHORA_STATUS_ALLOC_FAIL;
+	}
 	SDL_free(path);
 
 	return AMPHORA_STATUS_OK;
@@ -28,5 +31,5 @@ Amphora_InitDB(void) {
 
 void
 Amphora_CloseDB(void) {
-	sqlite3_close_v2(game_db);
+	(void)sqlite3_close_v2(game_db);
 }
