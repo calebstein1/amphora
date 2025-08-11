@@ -33,8 +33,10 @@ static char *map_paths[] = {
 static HT_HashTable map_data;
 static struct amphora_tilemap_t current_map;
 static AmphoraFader transition_fader;
-static bool transitioning = false;
-static bool persist_shown = false;
+static struct {
+	bool transitioning : 1;
+	bool persist_shown : 1;
+} tilemap_flags;
 static struct amphora_tilemap_layer_t *fade_layer;
 static SDL_FRect map_rect;
 static struct amphora_object_groups_t obj_groups;
@@ -69,7 +71,7 @@ int
 Amphora_HideMapLayer(const char *name, int t) {
 	int i, n = Amphora_GetMapLayerByName(name);
 
-	if (n == -1 || !current_map.layers[n].node->display || transitioning) return AMPHORA_STATUS_OK;
+	if (n == -1 || !current_map.layers[n].node->display || tilemap_flags.transitioning) return AMPHORA_STATUS_OK;
 
 	fade_layer = &current_map.layers[n];
 	if (t < 1) {
@@ -86,9 +88,9 @@ Amphora_HideMapLayer(const char *name, int t) {
 	for (i = 0; i < transition_fader.frames; i++) {
 		transition_fader.steps[i] = 255 - i * 255 / (transition_fader.frames - 1);
 	}
-	transitioning = true;
-	persist_shown = false;
-	Amphora_RegisterEvent("amph_internal_map_layer_fade", Amphora_ProcessDeferredTransition);
+	tilemap_flags.transitioning = true;
+	tilemap_flags.persist_shown = false;
+	(void)Amphora_RegisterEvent("amph_internal_map_layer_fade", Amphora_ProcessDeferredTransition);
 
 	return AMPHORA_STATUS_OK;
 }
@@ -97,12 +99,12 @@ int
 Amphora_ShowMapLayer(const char *name, int t) {
 	int i, n = Amphora_GetMapLayerByName(name);
 
-	if (n == -1 || current_map.layers[n].node->display || transitioning) return AMPHORA_STATUS_OK;
+	if (n == -1 || current_map.layers[n].node->display || tilemap_flags.transitioning) return AMPHORA_STATUS_OK;
 
 	current_map.layers[n].node->display = true;
 	fade_layer = &current_map.layers[n];
 	if (t < 1) {
-		SDL_SetTextureAlphaMod(fade_layer->texture, 0xff);
+		(void)SDL_SetTextureAlphaMod(fade_layer->texture, 0xff);
 		return AMPHORA_STATUS_OK;
 	}
 	transition_fader.timer = t;
@@ -115,9 +117,9 @@ Amphora_ShowMapLayer(const char *name, int t) {
 	for (i = 0; i < transition_fader.frames; i++) {
 		transition_fader.steps[i] = i * 255 / (transition_fader.frames - 1);
 	}
-	transitioning = true;
-	persist_shown = true;
-	Amphora_RegisterEvent("amph_internal_map_layer_fade", Amphora_ProcessDeferredTransition);
+	tilemap_flags.transitioning = true;
+	tilemap_flags.persist_shown = true;
+	(void)Amphora_RegisterEvent("amph_internal_map_layer_fade", Amphora_ProcessDeferredTransition);
 
 	return AMPHORA_STATUS_OK;
 }
@@ -193,7 +195,7 @@ Amphora_CloseMapHashTables(void) {
 
 SDL_FRect *
 Amphora_GetRectsByGroup(const char *name, Uint32 *c) {
-	int i = (int)HT_GetValue(name, obj_groups.i);
+	const int i = (int)HT_GetValue(name, obj_groups.i);
 
 	*c = HT_GetStatus(name, obj_groups.i);
 
@@ -247,19 +249,19 @@ Amphora_ParseMapToTexture(const char *name) {
 	} else {
 		return -1;
 	}
-	SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
+	(void)SDL_QueryTexture(tileset_img, NULL, NULL, &tileset_img_w, &tileset_img_h);
 	i = 0;
 	while (layer) {
 		if (SDL_strcmp(layer->type.ptr, "tilelayer") == 0) {
-			Amphora_ParseTileLayer(map, layer, tileset_img_w, tileset_img, i++);
+			(void)Amphora_ParseTileLayer(map, layer, tileset_img_w, tileset_img, i++);
 		} else if (SDL_strcmp(layer->type.ptr, "objectgroup") == 0) {
-			Amphora_ParseObjectGroup(layer);
+			(void)Amphora_ParseObjectGroup(layer);
 		}
 		layer = layer->next;
 	}
-	SDL_SetRenderTarget(renderer, NULL);
+	(void)SDL_SetRenderTarget(renderer, NULL);
 	cute_tiled_free_map(map);
-	SDL_QueryTexture(current_map.layers[0].texture, NULL, NULL, &map_base_w, &map_base_h);
+	(void)SDL_QueryTexture(current_map.layers[0].texture, NULL, NULL, &map_base_w, &map_base_h);
 	map_rect.w = (float)map_base_w * current_map.scale;
 	map_rect.h = (float)map_base_h * current_map.scale;
 
@@ -272,16 +274,14 @@ Amphora_ParseTileLayer(const cute_tiled_map_t *map, const cute_tiled_layer_t *la
 	SDL_Rect tile_s = { .w = map->tilewidth, .h = map->tileheight };
 	SDL_Rect tile_d = { .w = map->tilewidth, .h = map->tileheight };
 	int i, tile_idx, row;
-	size_t name_len;
 
-	name_len = SDL_strlen(layer->name.ptr);
-	if ((current_map.layer_names[n] = SDL_malloc(name_len + 1))) {
-		SDL_strlcpy(current_map.layer_names[n], layer->name.ptr, name_len + 1);
-	} else {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate space for layer name!");
+	current_map.layer_names[n] = SDL_strdup(layer->name.ptr);
+	if (current_map.layer_names[n] == NULL) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Could not allocate space for layer name!");
+		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
-	SDL_SetTextureBlendMode(current_map.layers[n].texture, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderTarget(renderer, current_map.layers[n].texture);
+	(void)SDL_SetTextureBlendMode(current_map.layers[n].texture, SDL_BLENDMODE_BLEND);
+	(void)SDL_SetRenderTarget(renderer, current_map.layers[n].texture);
 	for (i = 0; i < layer->data_count; i++) {
 		tile_idx = layer->data[i] - 1;
 		row = ((i * map->tilewidth) / (map->width * map->tilewidth));
@@ -303,7 +303,7 @@ Amphora_ParseTileLayer(const cute_tiled_map_t *map, const cute_tiled_layer_t *la
 					   (row * (map->tileheight / 2));
 				break;
 		}
-		SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
+		(void)SDL_RenderCopy(renderer, tileset_img, &tile_s, &tile_d);
 	}
 
 	return AMPHORA_STATUS_OK;
@@ -315,13 +315,13 @@ Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 	unsigned c = HT_GetCount(obj_groups.i), s = HT_GetSize(obj_groups.i);
 	cute_tiled_object_t *object;
 
-	HT_SetValue(layer->name.ptr, c, obj_groups.i);
+	(void)HT_SetValue(layer->name.ptr, c, obj_groups.i);
 	if (s != HT_GetSize(obj_groups.i)) {
 		if (!((obj_groups.rects = SDL_realloc(obj_groups.rects,
 						      HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *))))) {
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-				     "Failed to reallocate object group rectangle list\n");
-			return -1;
+			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL,
+				     "Failed to reallocate object group rectangle list!");
+			return AMPHORA_STATUS_ALLOC_FAIL;
 		}
 	}
 	object = layer->objects;
@@ -332,10 +332,10 @@ Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 	}
 	object = layer->objects;
 	if (!((obj_groups.rects[c] = SDL_malloc(i * sizeof(SDL_FRect))))) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangles\n");
-		return -1;
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate object group rectangles!");
+		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
-	HT_SetStatus(layer->name.ptr, i, obj_groups.i);
+	(void)HT_SetStatus(layer->name.ptr, i, obj_groups.i);
 	i = 0;
 	while (object) {
 		obj_groups.rects[c][i].x = object->x * current_map.scale;
@@ -361,13 +361,13 @@ Amphora_GetMapLayerByName(const char *name) {
 
 static void
 Amphora_ProcessDeferredTransition(void) {
-	SDL_SetTextureAlphaMod(fade_layer->texture, transition_fader.steps[transition_fader.idx++]);
+	(void)SDL_SetTextureAlphaMod(fade_layer->texture, transition_fader.steps[transition_fader.idx++]);
 	if (transition_fader.idx != transition_fader.frames) return;
 
-	fade_layer->node->display = persist_shown;
-	transitioning = false;
+	fade_layer->node->display = tilemap_flags.persist_shown;
+	tilemap_flags.transitioning = false;
 	SDL_free(transition_fader.steps);
-	Amphora_UnregisterEvent("amph_internal_map_layer_fade");
+	(void)Amphora_UnregisterEvent("amph_internal_map_layer_fade");
 }
 
 #endif
