@@ -17,6 +17,8 @@ extern "C" {
 const char *Amphora_GetError(void);
 /* Gets the last set error code */
 AmphoraStatusCode Amphora_GetErrorCode(void);
+/* Sets a custom catastrophe handler function in case of an unrecoverable error */
+void Amphora_SetCatastropheHandler(void (*)(void));
 #ifdef __cplusplus
 }
 #endif
