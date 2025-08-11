@@ -51,7 +51,7 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 	render_list_node->data = emitter;
 	render_list_node->stationary = stationary;
 
-	SDL_SetTextureBlendMode(emitter->texture, SDL_BLENDMODE_BLEND);
+	(void)SDL_SetTextureBlendMode(emitter->texture, SDL_BLENDMODE_BLEND);
 
 	for (i = 0; i < count; i++) {
 		position = Amphora_CalculateParticleStartPosition(start_x, start_y, spread_x, spread_y);
@@ -94,16 +94,16 @@ Amphora_UpdateAndRenderParticleEmitter(AmphoraEmitter *emitter) {
 	Camera camera = Amphora_GetCamera();
 	int i;
 
-	SDL_SetRenderTarget(renderer, emitter->texture);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderClear(renderer);
+	(void)SDL_SetRenderTarget(renderer, emitter->texture);
+	(void)SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	(void)SDL_RenderClear(renderer);
 
 	for (i = 0; i < emitter->particles_count; i++) {
 		if (emitter->update) emitter->update(&emitter->particles[i], &emitter->rectangle);
 		if (emitter->particles[i].hidden) continue;
 		if (SDL_memcmp(&color, &emitter->particles[i].color, sizeof(SDL_Color)) != 0) {
-			SDL_memcpy(&color, &emitter->particles[i].color, sizeof(SDL_Color));
-			SDL_SetRenderDrawColor(
+			(void)SDL_memcpy(&color, &emitter->particles[i].color, sizeof(SDL_Color));
+			(void)SDL_SetRenderDrawColor(
 				renderer,
 				color.r,
 				color.g,
@@ -121,9 +121,9 @@ Amphora_UpdateAndRenderParticleEmitter(AmphoraEmitter *emitter) {
 			dst.x -= camera.x;
 			dst.y -= camera.y;
 		}
-		SDL_RenderFillRectF(renderer, &dst);
+		(void)SDL_RenderFillRectF(renderer, &dst);
 	}
-	SDL_SetRenderTarget(renderer, NULL);
+	(void)SDL_SetRenderTarget(renderer, NULL);
 	Amphora_RenderTexture(emitter->texture, NULL, &emitter->rectangle, 0, SDL_FLIP_NONE);
 }
 

@@ -50,14 +50,14 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 	sfx_chunk = HT_GetRef(name, Mix_Chunk, open_sfx);
 
 	if (Mix_VolumeChunk(sfx_chunk, -1) != (v = (int)HT_GetStatus(name, sfx))) Mix_VolumeChunk(sfx_chunk, v);
-	Mix_PlayChannel(channel, sfx_chunk, repeat);
+	(void)Mix_PlayChannel(channel, sfx_chunk, repeat);
 }
 
 void
 Amphora_SetSFXVolume(const char *name, int volume) {
 	if (!HT_GetValue(name, sfx)) return;
 
-	HT_SetStatus(name, volume, sfx);
+	(void)HT_SetStatus(name, volume, sfx);
 }
 
 void
@@ -65,12 +65,12 @@ Amphora_SetMusic(const char *name) {
 	SDL_RWops *mus_rw = SDL_RWFromFile(HT_GetRef(name, char, music), "rb");
 
 	if (Mix_PlayingMusic()) {
-		Mix_HaltMusic();
-		Mix_FreeMusic(current_music);
+		(void)Mix_HaltMusic();
+		(void)Mix_FreeMusic(current_music);
 		current_music = NULL;
 	}
 
-	SDL_RWseek(mus_rw, 0, RW_SEEK_SET);
+	(void)SDL_RWseek(mus_rw, 0, RW_SEEK_SET);
 	current_music = Mix_LoadMUS_RW(mus_rw, 1);
 }
 
@@ -78,14 +78,14 @@ void
 Amphora_PlayMusic(int ms) {
 	if (Mix_PlayingMusic()) return;
 
-	Mix_FadeInMusic(current_music, -1, ms);
+	(void)Mix_FadeInMusic(current_music, -1, ms);
 }
 
 void
 Amphora_PlayMusicN(int n, int ms) {
 	if (Mix_PlayingMusic()) return;
 
-	Mix_FadeInMusic(current_music, n, ms);
+	(void)Mix_FadeInMusic(current_music, n, ms);
 }
 
 void
@@ -106,14 +106,14 @@ void
 Amphora_StopMusic(void) {
 	if (!Mix_PlayingMusic()) return;
 
-	Mix_HaltMusic();
+	(void)Mix_HaltMusic();
 }
 
 void
 Amphora_FadeOutMusic(int ms) {
 	if (!Mix_PlayingMusic()) return;
 
-	Mix_FadeOutMusic(ms);
+	(void)Mix_FadeOutMusic(ms);
 }
 
 /*
@@ -128,7 +128,7 @@ Amphora_InitSFX(void) {
 	open_sfx = HT_NewTable();
 	for (i = 0; i < SFX_COUNT; i++) {
 		HT_StoreRef(sfx_names[i], sfx_paths[i], sfx);
-		HT_SetStatus(sfx_names[i], MIX_MAX_VOLUME, sfx);
+		(void)HT_SetStatus(sfx_names[i], MIX_MAX_VOLUME, sfx);
 #ifdef DEBUG
 		SDL_Log("Found sfx %s\n", sfx_names[i]);
 #endif
@@ -163,7 +163,7 @@ Amphora_FreeAllSFX(void) {
 			SDL_Log("Unloading sfx: %s\n", sfx_names[i]);
 #endif
 			Mix_FreeChunk(HT_GetRef(sfx_names[i], Mix_Chunk, open_sfx));
-			HT_SetValue(sfx_names[i], 0, open_sfx);
+			(void)HT_SetValue(sfx_names[i], 0, open_sfx);
 			HT_DeleteKey(sfx_names[i], open_sfx);
 		}
 	}
