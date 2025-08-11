@@ -19,4 +19,5 @@ add_library(amphora_engine
 	session_data.c
 	particles.c
 	typewriter.c
+	memory.c
 )

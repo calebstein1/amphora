@@ -4,6 +4,7 @@
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/prefs.h"
 #include "engine/internal/random.h"
@@ -36,6 +37,10 @@ main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 
+	/*
+	 * TODO: check Init* error codes
+	 */
+	Amphora_InitHeap();
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
 		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to init SDL: %s", SDL_GetError());
 		return AMPHORA_STATUS_CORE_FAIL;
@@ -80,9 +85,6 @@ main(int argc, char **argv) {
 		return AMPHORA_STATUS_CORE_FAIL;
 	}
 #endif
-	/*
-	 * TODO: check Init* error codes
-	 */
 	Amphora_InitRand();
 	Amphora_InitDB();
 	Amphora_InitConfig();
@@ -228,4 +230,5 @@ Amphora_CleanResources(void) {
 	Amphora_CloseRender();
 	Amphora_ReleaseControllers();
 	Amphora_CloseDB();
+	Amphora_DestroyHeap();
 }

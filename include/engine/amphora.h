@@ -11,6 +11,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/render.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/particles.h"
 #include "engine/internal/random.h"
