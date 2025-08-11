@@ -18,7 +18,7 @@ extern "C" {
 #endif
 void Amphora_LoadKeymap(void);
 /* Change the keymap for an action */
-void Amphora_UpdateKeymap(const char *action, SDL_Keycode keycode);
+int Amphora_UpdateKeymap(const char *action, SDL_Keycode keycode);
 /* Execute a callback function if a specified AmphoraImage or AmphoraString is clicked, button is an SDL_BUTTON_X macro */
 bool Amphora_ObjectClicked(void *spr, int button, void (*callback)(void));
 /* Returns true if the mouse is over the provided object, false if not */
@@ -34,7 +34,7 @@ Vector2f Amphora_GetLeftJoystickState(void);
 /* Get the state of the left joystick */
 Vector2f Amphora_GetRightJoystickState(void);
 /* Get the name of the key associated with an action */
-char *Amphora_GetActionKeyName(const char *action);
+const char *Amphora_GetActionKeyName(const char *action);
 /* Run a callback function for each defined action name */
 void Amphora_ForEachAction(void (*callback)(const char *, int));
 #ifdef __cplusplus

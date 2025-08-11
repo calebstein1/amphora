@@ -1,6 +1,8 @@
 #include "engine/internal/db.h"
+#include "engine/internal/error.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
+#include "engine/internal/lib.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
 
@@ -34,45 +36,47 @@ Amphora_LoadKeymap(void) {
 	int i;
 
 	/* Load the default keymap for any mappings that are missing */
-#define KMAP(action, key, gamepad)						\
-	sqlite3_prepare_v2(db, sql_write, sql_write_len, &stmt, NULL);		\
-        sqlite3_bind_int(stmt, 1, ACTION_##action);				\
-	sqlite3_bind_text(stmt, 2, #action, -1, NULL);				\
-	sqlite3_bind_int(stmt, 3, SDLK_##key);					\
-	sqlite3_bind_text(stmt, 4, SDL_GetKeyName(SDLK_##key), -1, NULL);	\
-	sqlite3_bind_int(stmt, 5, SDL_CONTROLLER_BUTTON_##gamepad);		\
-	sqlite3_bind_text(stmt, 6, #gamepad, -1, NULL);				\
-	sqlite3_step(stmt);							\
-	sqlite3_finalize(stmt);
+#define KMAP(action, key, gamepad)										\
+	(void)sqlite3_prepare_v2(db, sql_write, sql_write_len, &stmt, NULL);					\
+        (void)sqlite3_bind_int(stmt, 1, ACTION_##action);							\
+	(void)sqlite3_bind_text(stmt, 2, #action, -1, NULL);							\
+	(void)sqlite3_bind_int(stmt, 3, SDLK_##key);								\
+	(void)sqlite3_bind_text(stmt, 4, SDL_GetKeyName(SDLK_##key), -1, NULL);					\
+	(void)sqlite3_bind_int(stmt, 5, SDL_CONTROLLER_BUTTON_##gamepad);					\
+	(void)sqlite3_bind_text(stmt, 6, #gamepad, -1, NULL);							\
+	(void)sqlite3_step(stmt);										\
+	if (sqlite3_finalize(stmt) != SQLITE_OK) SDL_Log("Failed to write action %s to database\n", #action);
 	DEFAULT_KEYMAP
 #undef KMAP
 
-	sqlite3_prepare_v2(db, sql_read, (int)SDL_strlen(sql_read), &stmt, NULL);
+	(void)sqlite3_prepare_v2(db, sql_read, (int)SDL_strlen(sql_read), &stmt, NULL);
 	for (i = 0; i < ACTION_COUNT; i++) {
 		if (sqlite3_step(stmt) != SQLITE_ROW) {
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to read keymap for action: %s\n", action_names[i]);
-			sqlite3_finalize(stmt);
+			(void)sqlite3_finalize(stmt);
 			continue;
 		}
 		keys[i] = sqlite3_column_int(stmt, 0);
 		controller_buttons[i] = sqlite3_column_int(stmt, 1);
 	}
-	sqlite3_finalize(stmt);
+	(void)sqlite3_finalize(stmt);
 }
 
-void
+int
 Amphora_UpdateKeymap(const char *action, SDL_Keycode keycode) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "UPDATE key_map SET key=?, key_name=? WHERE action=?;";
 	const char *keyname = SDL_GetKeyName(keycode);
 
-	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, keycode);
-	sqlite3_bind_text(stmt, 2, keyname, -1, NULL);
-	sqlite3_bind_text(stmt, 3, action, -1, NULL);
-	sqlite3_step(stmt);
-	sqlite3_finalize(stmt);
+	(void)sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
+	(void)sqlite3_bind_int(stmt, 1, keycode);
+	(void)sqlite3_bind_text(stmt, 2, keyname, -1, NULL);
+	(void)sqlite3_bind_text(stmt, 3, action, -1, NULL);
+	(void)sqlite3_step(stmt);
+	if (sqlite3_finalize(stmt) != SQLITE_OK) return AMPHORA_STATUS_FAIL_UNDEFINED;
+
+	return AMPHORA_STATUS_OK;
 }
 
 bool
@@ -123,7 +127,7 @@ Amphora_ObjectHover(void *obj) {
 			return false;
 	}
 
-	SDL_GetMouseState(&x, &y);
+	(void)SDL_GetMouseState(&x, &y);
 
 	return SDL_PointInFRect(&(SDL_FPoint){ (float)x + camera.x, (float)y + camera.y }, rect);
 }
@@ -153,27 +157,30 @@ Amphora_GetRightJoystickState(void) {
 	return joystickr_state;
 }
 
-char *
+const char *
 Amphora_GetActionKeyName(const char *action) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT key_name FROM key_map WHERE action=?;";
-	const char *key_name;
-	char *key_name_r;
+	char *key_name_r = NULL;
 
-	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
-	sqlite3_bind_text(stmt, 1, action, -1, NULL);
+	Amphora_ValidatePtrNotNull(action, NULL);
+	(void)sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
+	(void)sqlite3_bind_text(stmt, 1, action, -1, NULL);
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
-		sqlite3_finalize(stmt);
+		(void)sqlite3_finalize(stmt);
 		return NULL;
 	}
-	key_name = (const char *)sqlite3_column_text(stmt, 0);
-	if (!((key_name_r = SDL_malloc(SDL_strlen(key_name) + 1)))) {
+	/*
+	 * TODO: Implement Amphora memory functions, use Amphora_HeapAllocFrame() here
+	 */
+	key_name_r = SDL_strdup((const char *)sqlite3_column_text(stmt, 1));
+	if (!key_name_r) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for string\n");
+		(void)sqlite3_finalize(stmt);
 		return NULL;
 	}
-	SDL_strlcpy(key_name_r, key_name, SDL_strlen(key_name) + 1);
-	sqlite3_finalize(stmt);
+	(void)sqlite3_finalize(stmt);
 
 	return key_name_r;
 }
@@ -202,11 +209,12 @@ Amphora_InitInput(void) {
 			  "key_name TEXT,"
 			  "gamepad INT,"
 			  "gamepad_name TEXT);";
-	char *err_msg;
+	char *err_msg = NULL;
 
-	sqlite3_exec(db, sql, NULL, NULL, &err_msg);
+	(void)sqlite3_exec(db, sql, NULL, NULL, &err_msg);
 	if (err_msg) {
-		SDL_Log("%s\n", err_msg);
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s\n", err_msg);
+		sqlite3_free(err_msg);
 		return -1;
 	}
 
@@ -325,7 +333,7 @@ Amphora_ProcessJoystickState(SDL_GameControllerAxis ax, SDL_GameControllerAxis a
 
 	if (magnitude <= deadzone) {
 		*jactive = false;
-		SDL_memset(js, 0, sizeof(Vector2f));
+		(void)SDL_memset(js, 0, sizeof(Vector2f));
 		return;
 	}
 	*jactive = true;
