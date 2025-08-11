@@ -103,10 +103,11 @@ Amphora_UpdateStringText(AmphoraString *msg, const char *fmt, ...) {
 	msg->len = SDL_strlen(text);
 	SDL_free(msg->text);
 	msg->len = SDL_strlen(text);
-	if (!((msg->text = SDL_malloc(msg->len + 1)))) {
+	msg->text = SDL_strdup(text);
+	if (!msg->text) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to set new string: %s", text);
 		return NULL;
 	}
-	SDL_strlcpy(msg->text, text, msg->len + 1);
 	SDL_DestroyTexture(msg->texture);
 	msg->texture = Amphora_RenderStringToTexture(msg);
 
