@@ -19,7 +19,7 @@ Amphora_RegisterEvent(const char *name, void (*func)(void)) {
 
 	if (++ev_count >= ev_max) {
 		ev_names = SDL_realloc(ev_names, ev_max * sizeof(char *) + EVENT_BLOCK_SIZE * sizeof(char *));
-		SDL_memset(ev_names + ev_max, 0, EVENT_BLOCK_SIZE * sizeof(char *));
+		(void)SDL_memset(ev_names + ev_max, 0, EVENT_BLOCK_SIZE * sizeof(char *));
 		ev_max += EVENT_BLOCK_SIZE;
 	}
 	for (i = 0; i < ev_max; i++) {
@@ -115,12 +115,10 @@ Amphora_ProcessEventLoop(SDL_Event *e) {
 void
 Amphora_ProcessRegisteredEvents(void) {
 	int i;
-	void (*func)(void);
 
 	for (i = 0; i < ev_max; i++) {
 		if (!ev_names[i]) continue;
 
-		func = (void(*)(void))HT_GetValue(ev_names[i], ev_table);
-		func();
+		((void(*)(void))HT_GetValue(ev_names[i], ev_table))();
 	}
 }
