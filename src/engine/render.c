@@ -144,7 +144,7 @@ Amphora_SetWindowWindowed(void) {
 }
 
 bool
-Ampohra_IsWindowFullscreen(void) {
+Amphora_IsWindowFullscreen(void) {
 	return SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
 }
 

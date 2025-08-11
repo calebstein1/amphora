@@ -51,7 +51,7 @@ void Amphora_SetWindowFullscreen(void);
 /* Sets the game window to windowed */
 void Amphora_SetWindowWindowed(void);
 /* Returns true if the game window is fullscreen, false if windowed */
-bool Ampohra_IsWindowFullscreen(void);
+bool Amphora_IsWindowFullscreen(void);
 #ifdef __cplusplus
 }
 #endif

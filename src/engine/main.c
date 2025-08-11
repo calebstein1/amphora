@@ -80,6 +80,9 @@ main(int argc, char **argv) {
 		return AMPHORA_STATUS_CORE_FAIL;
 	}
 #endif
+	/*
+	 * TODO: check Init* error codes
+	 */
 	Amphora_InitRand();
 	Amphora_InitDB();
 	Amphora_InitConfig();
@@ -190,10 +193,13 @@ Amphora_MainLoop(SDL_Event *e) {
 
 static void
 Amphora_SaveConfig(void) {
+	/*
+	 * TODO: Check Save* error codes
+	 */
 	Vector2 win_size = Amphora_GetResolution();
 	Uint32 win_flags = SDL_GetWindowFlags(Amphora_GetWindow());
 
-	if (!Ampohra_IsWindowFullscreen()) {
+	if (!Amphora_IsWindowFullscreen()) {
 		Amphora_SaveWinX(win_size.x);
 		Amphora_SaveWinY(win_size.y);
 	}

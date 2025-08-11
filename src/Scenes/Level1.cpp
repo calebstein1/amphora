@@ -115,7 +115,7 @@ Level1_Update(Uint32 frame, const InputState *key_actions) {
 
 	if (key_actions->toggle_fullscreen && !f_down) {
 		f_down = true;
-		Ampohra_IsWindowFullscreen() ? Amphora_SetWindowWindowed() : Amphora_SetWindowFullscreen();
+		Amphora_IsWindowFullscreen() ? Amphora_SetWindowWindowed() : Amphora_SetWindowFullscreen();
 	} else if (!key_actions->toggle_fullscreen && f_down) {
 		f_down = false;
 	}
