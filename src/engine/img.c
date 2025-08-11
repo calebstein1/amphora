@@ -107,7 +107,7 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 		.delay = delay,
 		.position_offset = (Vector2f){off_x, off_y }
 	};
-	HT_SetValue(name, spr->num_framesets, spr->framesets);
+	(void)HT_SetValue(name, spr->num_framesets, spr->framesets);
 	if (++spr->num_framesets == 1) {
 		spr->current_frameset = 0;
 		spr->rectangle.w = (float)spr->frameset_list[0].rectangle.w * spr->scale;
@@ -239,7 +239,7 @@ Amphora_ApplyFXToImage(AmphoraImage *img, void (*fx)(SDL_Surface *)) {
 
 void
 Amphora_ResetImage(AmphoraImage *img) {
-	SDL_memcpy(img->surface->pixels, img->surface_orig->pixels,
+	(void)SDL_memcpy(img->surface->pixels, img->surface_orig->pixels,
 		img->surface_orig->w * img->surface_orig->h * img->surface_orig->format->BytesPerPixel);
 	img->rerender = true;
 }
@@ -292,9 +292,9 @@ Amphora_FreeAllIMG(void) {
 			SDL_DestroyTexture(HT_GetRef(img_names[i], SDL_Texture, open_images));
 			SDL_FreeSurface(HT_GetRef(img_names[i], SDL_Surface, image_surfaces));
 			SDL_FreeSurface(HT_GetRef(img_names[i], SDL_Surface, image_surfaces_orig));
-			HT_SetValue(img_names[i], 0, open_images);
-			HT_SetValue(img_names[i], 0, image_surfaces);
-			HT_SetValue(img_names[i], 0, image_surfaces_orig);
+			(void)HT_SetValue(img_names[i], 0, open_images);
+			(void)HT_SetValue(img_names[i], 0, image_surfaces);
+			(void)HT_SetValue(img_names[i], 0, image_surfaces_orig);
 			HT_DeleteKey(img_names[i], open_images);
 			HT_DeleteKey(img_names[i], image_surfaces);
 			HT_DeleteKey(img_names[i], image_surfaces_orig);
@@ -329,7 +329,8 @@ Amphora_UpdateAndDrawSprite(AmphoraImage *spr) {
 	if (!(spr->render_list_node->display && spr->num_framesets > 0)) return;
 
 	if (spr->rerender) {
-		SDL_UpdateTexture(spr->image, NULL, spr->surface->pixels, spr->surface->pitch);
+		if (SDL_UpdateTexture(spr->image, NULL, spr->surface->pixels, spr->surface->pitch) < 0)
+			Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "SDL_UpdateTexture failed: %s", SDL_GetError());
 		spr->rerender = false;
 	}
 	if (cur_ms - frameset->last_change > frameset->delay) {
