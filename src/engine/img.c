@@ -1,6 +1,7 @@
 #include "engine/internal/error.h"
-#include "engine/internal/lib.h"
 #include "engine/internal/img.h"
+#include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 
 #include "config.h"
@@ -55,7 +56,7 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 
 	if (!HT_GetValue(image_name, open_images)) Amphora_LoadIMGTexture(image_name);
 
-	if ((spr = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
+	if ((spr = Amphora_HeapCalloc(1, sizeof(AmphoraImage))) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize sprite\n");
 
 		return NULL;
@@ -84,7 +85,7 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	SDL_Texture *override = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
-	if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
+	if (!((spr->frameset_list = Amphora_HeapRealloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
@@ -249,10 +250,10 @@ Amphora_FreeSprite(AmphoraImage *spr) {
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	if (spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
-	if (spr->frameset_list) SDL_free(spr->frameset_list);
+	if (spr->frameset_list) Amphora_HeapFree(spr->frameset_list);
 	HT_FreeTable(spr->framesets);
 	spr->render_list_node->garbage = true;
-	SDL_free(spr);
+	Amphora_HeapFree(spr);
 
 	return AMPHORA_STATUS_OK;
 }

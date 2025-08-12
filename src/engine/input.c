@@ -29,7 +29,7 @@ void
 Amphora_LoadKeymap(void) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
-	const char *sql_write = "INSERT INTO key_map (idx, action, key, key_name, gamepad, gamepad_name)"
+	const char *sql_write = "INSERT OR IGNORE INTO key_map (idx, action, key, key_name, gamepad, gamepad_name)"
 				"VALUES (?, ?, ?, ?, ?, ?)";
 	const char *sql_read = "SELECT key, gamepad FROM key_map ORDER BY idx";
 	int sql_write_len = (int)SDL_strlen(sql_write);

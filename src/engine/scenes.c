@@ -3,6 +3,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
@@ -63,7 +64,7 @@ Amphora_DoLoadScene(const char *name) {
 	fade_rect.w = screen_size.x;
 	fade_rect.h = screen_size.y;
 	transition_fader.frames = transition_fader.timer * Amphora_GetFPS() / 1000;
-	if (!((transition_fader.steps = SDL_malloc((transition_fader.frames >> 1) * sizeof(Uint8))))) {
+	if (!((transition_fader.steps = Amphora_HeapAlloc((transition_fader.frames >> 1) * sizeof(Uint8))))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
@@ -159,7 +160,7 @@ Amphora_SceneTransitionEvent(void) {
 		Amphora_SetCamera(0, 0);
 	}
 	if (transition_fader.idx == 0 && transition_fader.idx_mod == -1) {
-		SDL_free(transition_fader.steps);
+		Amphora_HeapFree(transition_fader.steps);
 		(void)Amphora_UnregisterEvent("amph_internal_scene_transition");
 	}
 }

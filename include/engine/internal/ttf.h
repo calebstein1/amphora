@@ -14,6 +14,7 @@ struct amphora_message_t {
 	size_t n;
 	SDL_Color color;
 	char *text;
+	char *n_buff;
 	struct render_list_node_t *render_list_node;
 };
 

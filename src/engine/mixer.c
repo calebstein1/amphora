@@ -66,7 +66,7 @@ Amphora_SetMusic(const char *name) {
 
 	if (Mix_PlayingMusic()) {
 		(void)Mix_HaltMusic();
-		(void)Mix_FreeMusic(current_music);
+		Mix_FreeMusic(current_music);
 		current_music = NULL;
 	}
 

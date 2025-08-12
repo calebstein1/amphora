@@ -2,6 +2,7 @@
 #include "engine/internal/events.h"
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/input.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 
 static char **ev_names;
@@ -18,13 +19,13 @@ Amphora_RegisterEvent(const char *name, void (*func)(void)) {
 	}
 
 	if (++ev_count >= ev_max) {
-		ev_names = SDL_realloc(ev_names, ev_max * sizeof(char *) + EVENT_BLOCK_SIZE * sizeof(char *));
+		ev_names = Amphora_HeapRealloc(ev_names, ev_max * sizeof(char *) + EVENT_BLOCK_SIZE * sizeof(char *));
 		(void)SDL_memset(ev_names + ev_max, 0, EVENT_BLOCK_SIZE * sizeof(char *));
 		ev_max += EVENT_BLOCK_SIZE;
 	}
 	for (i = 0; i < ev_max; i++) {
 		if (!ev_names[i]) {
-			ev_names[i] = SDL_strdup(name);
+			ev_names[i] = Amphora_HeapStrdup(name);
 			HT_StoreRef(name, func, ev_table);
 			break;
 		}
@@ -45,7 +46,7 @@ Amphora_UnregisterEvent(const char *name) {
 	}
 
 	ev_count--;
-	SDL_free(ev_names[i]);
+	Amphora_HeapFree(ev_names[i]);
 	ev_names[i] = NULL;
 	HT_StoreRef(name, NULL, ev_table);
 	HT_DeleteKey(name, ev_table);
@@ -59,7 +60,7 @@ Amphora_UnregisterEvent(const char *name) {
 
 void
 Amphora_InitEvents(void) {
-	if (!((ev_names = SDL_calloc(EVENT_BLOCK_SIZE, sizeof(char *))))) {
+	if (!((ev_names = Amphora_HeapCalloc(EVENT_BLOCK_SIZE, sizeof(char *))))) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to allocate event name table");
 		return;
 	}
@@ -71,9 +72,9 @@ Amphora_DeInitEvents(void) {
 	int i;
 
 	for (i = 0; i < ev_count; i++) {
-		if (ev_names[i]) SDL_free(ev_names[i]);
+		if (ev_names[i]) Amphora_HeapFree(ev_names[i]);
 	}
-	SDL_free(ev_names);
+	Amphora_HeapFree(ev_names);
 	HT_FreeTable(ev_table);
 }
 

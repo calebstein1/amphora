@@ -1,4 +1,5 @@
 #include "engine/internal/ht_hash.h"
+#include "engine/internal/memory.h"
 
 #include <errno.h>
 #include <stdarg.h>
@@ -10,7 +11,7 @@
 
 enum hash_status_e {
 	HT_DELETED = -1,
-	HT_FREE,
+	HT_Amphora_HeapFree,
 	HT_USED
 };
 
@@ -45,13 +46,13 @@ HT_HashTable
 HT_NewTable(void) {
 	HT_HashTable tbl;
 
-	if (!((tbl = malloc(sizeof(struct hash_table_t))))) {
+	if (!((tbl = Amphora_HeapAlloc(sizeof(struct hash_table_t))))) {
 		HT_SetError("Could not allocate table: %s", strerror(errno));
 		return NULL;
 	}
-	if (!((tbl->table_entries = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t))))) {
+	if (!((tbl->table_entries = Amphora_HeapCalloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t))))) {
 		HT_SetError("Could not allocate table data: %s", strerror(errno));
-		free(tbl);
+		Amphora_HeapFree(tbl);
 		return NULL;
 	}
 	tbl->count = 0;
@@ -65,14 +66,14 @@ HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
-	if (!((ntbl = calloc(tbl->size << 1, sizeof(struct hash_entry_t))))) {
+	if (!((ntbl = Amphora_HeapCalloc(tbl->size << 1, sizeof(struct hash_entry_t))))) {
 		HT_SetError("Failed to grow table: %s", strerror(errno));
 		return NULL;
 	}
 	tbl->count = 0;
 	otbl = tbl->table_entries, tbl->table_entries = ntbl;
 	for (i = 0, tbl->size <<= 1; i < tbl->size >> 1; i++) if (otbl[i].status) HT_SetValue(otbl[i].key, otbl[i].data, tbl);
-	free(otbl);
+	Amphora_HeapFree(otbl);
 
 	return tbl;
 }
@@ -192,6 +193,6 @@ HT_DeleteKey(const char *key, HT_HashTable t) {
 
 void
 HT_FreeTable(HT_HashTable tbl) {
-	free(tbl->table_entries);
-	free(tbl);
+	Amphora_HeapFree(tbl->table_entries);
+	Amphora_HeapFree(tbl);
 }

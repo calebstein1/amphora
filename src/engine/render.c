@@ -1,5 +1,6 @@
 #include "engine/internal/error.h"
 #include "engine/internal/img.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/particles.h"
 #include "engine/internal/prefs.h"
 #include "engine/internal/render.h"
@@ -93,7 +94,7 @@ Amphora_SetCameraZoom(Uint16 factor, Uint16 delay) {
 		if (factor == current_factor) return;
 
 		current_factor = factor;
-		if (!((scale_steps = SDL_malloc(delay * sizeof(Vector2))))) {
+		if (!((scale_steps = Amphora_HeapAlloc(delay * sizeof(Vector2))))) {
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate scale steps\n");
 			return;
 		}
@@ -105,7 +106,7 @@ Amphora_SetCameraZoom(Uint16 factor, Uint16 delay) {
 		}
 	}
 	if (scale_steps_index == scale_steps_count || factor != current_factor) {
-		SDL_free(scale_steps);
+		Amphora_HeapFree(scale_steps);
 		scale_steps = NULL;
 		scale_steps_index = 0;
 		scale_steps_count = 0;
@@ -214,7 +215,7 @@ Amphora_AddRenderListNode(int order) {
 
 	if (!render_list) Amphora_InitRenderList();
 
-	if ((new_render_list_node = SDL_calloc(1, sizeof(struct render_list_node_t))) == NULL) {
+	if ((new_render_list_node = Amphora_HeapCalloc(1, sizeof(struct render_list_node_t))) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to initialize new render list node\n");
 
 		return NULL;
@@ -249,7 +250,7 @@ Amphora_ProcessRenderList(void) {
 		while (render_list->next && render_list->next->garbage) {
 			garbage = render_list->next;
 			render_list->next = render_list->next->next;
-			SDL_free(garbage);
+			Amphora_HeapFree(garbage);
 			render_list_node_count--;
 		}
 		if (!render_list->display) {
@@ -285,7 +286,7 @@ Amphora_ProcessRenderList(void) {
 
 void
 Amphora_FreeRenderList(void) {
-	struct render_list_node_t **allocated_addrs = SDL_malloc(render_list_node_count * sizeof(struct render_list_node_t *));
+	struct render_list_node_t **allocated_addrs = Amphora_HeapAlloc(render_list_node_count * sizeof(struct render_list_node_t *));
 	Uint32 i = 0;
 
 	while (render_list) {
@@ -308,9 +309,9 @@ Amphora_FreeRenderList(void) {
 			default:
 				break;
 		}
-		SDL_free(allocated_addrs[i]);
+		Amphora_HeapFree(allocated_addrs[i]);
 	}
-	SDL_free(allocated_addrs);
+	Amphora_HeapFree(allocated_addrs);
 }
 
 void
@@ -349,7 +350,7 @@ Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_F
 
 int
 Amphora_InitRenderList(void) {
-	if ((render_list = SDL_malloc(sizeof(struct render_list_node_t))) == NULL) {
+	if ((render_list = Amphora_HeapAlloc(sizeof(struct render_list_node_t))) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize render list\n");
 
 		return AMPHORA_STATUS_ALLOC_FAIL;

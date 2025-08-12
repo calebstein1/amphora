@@ -39,6 +39,7 @@ Amphora_TypeString(AmphoraString *string, Uint32 ms, void (*callback)(int, char)
 	(void)Amphora_UpdateStringCharsDisplayed(string, ++typewriters[i].ticker);
 	if (typewriters[i].ticker == Amphora_GetStringLength(string)) {
 		typewriters[i].used = false;
+		typewriters[i].string = NULL;
 		typewriters_count--;
 
 		return TYPEWRITER_DONE;

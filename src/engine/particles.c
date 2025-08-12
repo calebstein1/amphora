@@ -1,4 +1,5 @@
 #include "engine/internal/error.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/particles.h"
 #include "engine/internal/random.h"
 #include "engine/internal/render.h"
@@ -16,7 +17,7 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 	SDL_FPoint position;
 	int i;
 
-	if ((emitter = SDL_malloc(sizeof(AmphoraEmitter))) == NULL) {
+	if ((emitter = Amphora_HeapAlloc(sizeof(AmphoraEmitter))) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize emitter");
 
 		return NULL;
@@ -27,16 +28,16 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 	if (!((emitter->texture = SDL_CreateTexture(Amphora_GetRenderer(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, (int)w, (int)h)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to create emitter texture");
 		render_list_node->garbage = true;
-		SDL_free(emitter);
+		Amphora_HeapFree(emitter);
 
 		return NULL;
 	}
 	emitter->rectangle = (SDL_FRect) { x, y, w, h };
-	if (!((emitter->particles = SDL_malloc(count * sizeof(AmphoraParticle))))) {
+	if (!((emitter->particles = Amphora_HeapAlloc(count * sizeof(AmphoraParticle))))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate particles");
 		render_list_node->garbage = true;
 		SDL_DestroyTexture(emitter->texture);
-		SDL_free(emitter);
+		Amphora_HeapFree(emitter);
 
 		return NULL;
 	}
@@ -75,9 +76,9 @@ Amphora_DestroyEmitter(AmphoraEmitter *emitter) {
 	if (!emitter) return AMPHORA_STATUS_FAIL_UNDEFINED;
 
 	SDL_DestroyTexture(emitter->texture);
-	SDL_free(emitter->particles);
+	Amphora_HeapFree(emitter->particles);
 	emitter->render_list_node->garbage = true;
-	SDL_free(emitter);
+	Amphora_HeapFree(emitter);
 
 	return AMPHORA_STATUS_OK;
 }
