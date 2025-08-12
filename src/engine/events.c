@@ -19,7 +19,7 @@ Amphora_RegisterEvent(const char *name, void (*func)(void)) {
 	}
 
 	if (++ev_count >= ev_max) {
-		ev_names = Amphora_HeapRealloc(ev_names, ev_max * sizeof(char *) + EVENT_BLOCK_SIZE * sizeof(char *));
+		ev_names = Amphora_HeapRealloc(ev_names, ev_max * sizeof(char *) + EVENT_BLOCK_SIZE * sizeof(char *), MEM_STRING);
 		(void)SDL_memset(ev_names + ev_max, 0, EVENT_BLOCK_SIZE * sizeof(char *));
 		ev_max += EVENT_BLOCK_SIZE;
 	}
@@ -60,7 +60,7 @@ Amphora_UnregisterEvent(const char *name) {
 
 void
 Amphora_InitEvents(void) {
-	if (!((ev_names = Amphora_HeapCalloc(EVENT_BLOCK_SIZE, sizeof(char *))))) {
+	if (!((ev_names = Amphora_HeapCalloc(EVENT_BLOCK_SIZE, sizeof(char *), MEM_STRING)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to allocate event name table");
 		return;
 	}

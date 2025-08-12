@@ -203,7 +203,7 @@ Amphora_GetUUID(void) {
 #ifdef DEBUG
 		SDL_Log("Loading UUID from file...\n");
 #endif
-		if (!((file_contents = Amphora_HeapAlloc(SDL_RWsize(rw))))) {
+		if (!((file_contents = Amphora_HeapAlloc(SDL_RWsize(rw), MEM_STRING)))) {
 			Amphora_HeapFree(path);
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for UUID!\n");
 			SDL_memset(&guid, 0, sizeof(guid));

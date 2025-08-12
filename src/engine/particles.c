@@ -17,7 +17,7 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 	SDL_FPoint position;
 	int i;
 
-	if ((emitter = Amphora_HeapAlloc(sizeof(AmphoraEmitter))) == NULL) {
+	if ((emitter = Amphora_HeapAlloc(sizeof(AmphoraEmitter), MEM_EMITTER)) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize emitter");
 
 		return NULL;
@@ -33,7 +33,7 @@ Amphora_CreateEmitter(float x, float y, float w, float h, float start_x, float s
 		return NULL;
 	}
 	emitter->rectangle = (SDL_FRect) { x, y, w, h };
-	if (!((emitter->particles = Amphora_HeapAlloc(count * sizeof(AmphoraParticle))))) {
+	if (!((emitter->particles = Amphora_HeapAlloc(count * sizeof(AmphoraParticle), MEM_EMITTER)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate particles");
 		render_list_node->garbage = true;
 		SDL_DestroyTexture(emitter->texture);

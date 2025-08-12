@@ -82,7 +82,7 @@ Amphora_HideMapLayer(const char *name, int t) {
 	transition_fader.timer = t;
 	transition_fader.frames = transition_fader.timer * Amphora_GetFPS() / 1000;
 	transition_fader.idx = 0;
-	if (!((transition_fader.steps = Amphora_HeapAlloc(transition_fader.frames * sizeof(Uint8))))) {
+	if (!((transition_fader.steps = Amphora_HeapAlloc(transition_fader.frames * sizeof(Uint8), MEM_MISC)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
@@ -111,7 +111,7 @@ Amphora_ShowMapLayer(const char *name, int t) {
 	transition_fader.timer = t;
 	transition_fader.frames = transition_fader.timer * Amphora_GetFPS() / 1000;
 	transition_fader.idx = 0;
-	if (!((transition_fader.steps = Amphora_HeapAlloc(transition_fader.frames * sizeof(Uint8))))) {
+	if (!((transition_fader.steps = Amphora_HeapAlloc(transition_fader.frames * sizeof(Uint8), MEM_MISC)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
@@ -142,7 +142,7 @@ Amphora_InitMaps(void) {
 	}
 
 	obj_groups.i = HT_NewTable();
-	if (!((obj_groups.rects = Amphora_HeapAlloc(HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *))))) {
+	if (!((obj_groups.rects = Amphora_HeapAlloc(HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *), MEM_TILEMAPS)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate object group rectangle list\n");
 		return -1;
 	}
@@ -179,7 +179,7 @@ Amphora_FreeObjectGroup(void) {
 
 	HT_FreeTable(obj_groups.i);
 	obj_groups.i = HT_NewTable();
-	obj_groups.rects = Amphora_HeapRealloc(obj_groups.rects, HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *));
+	obj_groups.rects = Amphora_HeapRealloc(obj_groups.rects, HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *), MEM_TILEMAPS);
 }
 
 void
@@ -224,11 +224,11 @@ Amphora_ParseMapToTexture(const char *name) {
 		if (SDL_strcmp(layer->type.ptr, "tilelayer") == 0) current_map.num_layers++;
 		layer = layer->next;
 	}
-	if (!((current_map.layers = Amphora_HeapAlloc(current_map.num_layers * sizeof(struct amphora_tilemap_layer_t))))) {
+	if (!((current_map.layers = Amphora_HeapAlloc(current_map.num_layers * sizeof(struct amphora_tilemap_layer_t), MEM_TILEMAPS)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate map layers\n");
 		return -1;
 	}
-	if (!((current_map.layer_names = Amphora_HeapAlloc(current_map.num_layers * sizeof(char *))))) {
+	if (!((current_map.layer_names = Amphora_HeapAlloc(current_map.num_layers * sizeof(char *), MEM_TILEMAPS)))) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate map layers labels\n");
 		return -1;
 	}
@@ -319,7 +319,7 @@ Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 	(void)HT_SetValue(layer->name.ptr, c, obj_groups.i);
 	if (s != HT_GetSize(obj_groups.i)) {
 		if (!((obj_groups.rects = Amphora_HeapRealloc(obj_groups.rects,
-						      HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *))))) {
+						      HT_GetSize(obj_groups.i) * sizeof(SDL_FRect *), MEM_TILEMAPS)))) {
 			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL,
 				     "Failed to reallocate object group rectangle list!");
 			return AMPHORA_STATUS_ALLOC_FAIL;
@@ -332,7 +332,7 @@ Amphora_ParseObjectGroup(const cute_tiled_layer_t *layer) {
 		object = object->next;
 	}
 	object = layer->objects;
-	if (!((obj_groups.rects[c] = Amphora_HeapAlloc(i * sizeof(SDL_FRect))))) {
+	if (!((obj_groups.rects[c] = Amphora_HeapAlloc(i * sizeof(SDL_FRect), MEM_TILEMAPS)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate object group rectangles!");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}

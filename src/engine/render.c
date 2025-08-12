@@ -94,7 +94,7 @@ Amphora_SetCameraZoom(Uint16 factor, Uint16 delay) {
 		if (factor == current_factor) return;
 
 		current_factor = factor;
-		if (!((scale_steps = Amphora_HeapAlloc(delay * sizeof(Vector2))))) {
+		if (!((scale_steps = Amphora_HeapAlloc(delay * sizeof(Vector2), MEM_MISC)))) {
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate scale steps\n");
 			return;
 		}
@@ -215,7 +215,7 @@ Amphora_AddRenderListNode(int order) {
 
 	if (!render_list) Amphora_InitRenderList();
 
-	if ((new_render_list_node = Amphora_HeapCalloc(1, sizeof(struct render_list_node_t))) == NULL) {
+	if ((new_render_list_node = Amphora_HeapCalloc(1, sizeof(struct render_list_node_t), MEM_RENDERABLE)) == NULL) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "Failed to initialize new render list node\n");
 
 		return NULL;
@@ -286,7 +286,7 @@ Amphora_ProcessRenderList(void) {
 
 void
 Amphora_FreeRenderList(void) {
-	struct render_list_node_t **allocated_addrs = Amphora_HeapAlloc(render_list_node_count * sizeof(struct render_list_node_t *));
+	struct render_list_node_t **allocated_addrs = Amphora_HeapAlloc(render_list_node_count * sizeof(struct render_list_node_t *), MEM_MISC);
 	Uint32 i = 0;
 
 	while (render_list) {
@@ -350,7 +350,7 @@ Amphora_RenderTexture(SDL_Texture *texture, const SDL_Rect *srcrect, const SDL_F
 
 int
 Amphora_InitRenderList(void) {
-	if ((render_list = Amphora_HeapAlloc(sizeof(struct render_list_node_t))) == NULL) {
+	if ((render_list = Amphora_HeapAlloc(sizeof(struct render_list_node_t), MEM_RENDERABLE)) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize render list\n");
 
 		return AMPHORA_STATUS_ALLOC_FAIL;

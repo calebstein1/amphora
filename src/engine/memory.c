@@ -11,6 +11,7 @@
 static AmphoraMemBlock *amphora_heap;
 static struct amphora_mem_block_metadata_t heap_metadata[AMPHORA_NUM_MEM_BLOCKS];
 static Uint8 current_block = 0;
+static Uint8 current_block_categories[MEM_COUNT];
 
 int
 Amphora_InitHeap(void) {
@@ -38,7 +39,7 @@ Amphora_DestroyHeap(void) {
 }
 
 void *
-Amphora_HeapAlloc(size_t size) {
+Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	Uint8 *addr;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
@@ -47,16 +48,19 @@ Amphora_HeapAlloc(size_t size) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation cannot exceed %d", sizeof(AmphoraMemBlock) - 2);
 		return NULL;
 	}
-	while (heap_metadata[current_block].addr + aligned_size + 8 >= sizeof(AmphoraMemBlock)) {
+	current_block = current_block_categories[category];
+	while ((heap_metadata[current_block].category != MEM_UNASSIGNED && heap_metadata[current_block].category != category)
+		|| heap_metadata[current_block].addr + aligned_size + 8 >= sizeof(AmphoraMemBlock)) {
 		current_block++;
 #ifdef DEBUG
 		SDL_Log("Changing current block to block %d\n", current_block);
 #endif
 		if (++i < AMPHORA_NUM_MEM_BLOCKS) continue;
-
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap full");
 		return NULL;
 	}
+	current_block_categories[category] = current_block;
+	heap_metadata[current_block].category = category;
 	heap_metadata[current_block].addr += 8;
 	amphora_heap[current_block][heap_metadata[current_block].addr - 2] = size & 0xFF;
 	amphora_heap[current_block][heap_metadata[current_block].addr - 1] = size >> 8;
@@ -68,7 +72,7 @@ Amphora_HeapAlloc(size_t size) {
 }
 
 void *
-Amphora_HeapAllocFrame(size_t size) {
+Amphora_HeapAllocFrame(size_t size, AmphoraMemBlockCategory category) {
 	/*
 	 * TODO: Like HeapAlloc but auto-free on the next render frame
 	 */
@@ -76,8 +80,8 @@ Amphora_HeapAllocFrame(size_t size) {
 }
 
 void *
-Amphora_HeapRealloc(void *ptr, size_t size) {
-	Uint8 *addr = Amphora_HeapAlloc(size);
+Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
+	Uint8 *addr = Amphora_HeapAlloc(size, category);
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
@@ -92,8 +96,8 @@ Amphora_HeapRealloc(void *ptr, size_t size) {
 }
 
 void *
-Amphora_HeapCalloc(size_t num, size_t size) {
-	Uint8 *addr = Amphora_HeapAlloc(num * size);
+Amphora_HeapCalloc(size_t num, size_t size, AmphoraMemBlockCategory category) {
+	Uint8 *addr = Amphora_HeapAlloc(num * size, category);
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
@@ -106,7 +110,7 @@ Amphora_HeapCalloc(size_t num, size_t size) {
 
 char *
 Amphora_HeapStrdup(const char *str) {
-	char *addr = Amphora_HeapAlloc(strlen(str) + 1);
+	char *addr = Amphora_HeapAlloc(strlen(str) + 1, MEM_STRING);
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
@@ -127,6 +131,8 @@ Amphora_HeapFree(void *ptr) {
 		return;
 	}
 	block = idx / sizeof(AmphoraMemBlock);
-	if (--heap_metadata[block].allocations == 0)
+	if (--heap_metadata[block].allocations == 0) {
 		heap_metadata[block].addr = 0;
+		heap_metadata[block].category = MEM_UNASSIGNED;
+	}
 }

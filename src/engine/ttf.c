@@ -48,13 +48,13 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 	va_start(args, fmt);
 	(void)SDL_vsnprintf(text, sizeof(text), fmt, args);
 
-	if (!((msg = Amphora_HeapAlloc(sizeof(struct amphora_message_t))))) {
+	if (!((msg = Amphora_HeapAlloc(sizeof(struct amphora_message_t), MEM_STRING)))) {
 		return NULL;
 	}
-	if (!((msg->text = Amphora_HeapAlloc(SDL_strlen(text) + 1)))) {
+	if (!((msg->text = Amphora_HeapAlloc(SDL_strlen(text) + 1, MEM_STRING)))) {
 		return NULL;
 	}
-	if (!((msg->n_buff = Amphora_HeapAlloc(SDL_strlen(text) + 1)))) {
+	if (!((msg->n_buff = Amphora_HeapAlloc(SDL_strlen(text) + 1, MEM_STRING)))) {
 		return NULL;
 	}
 
@@ -109,7 +109,7 @@ Amphora_UpdateStringText(AmphoraString *msg, const char *fmt, ...) {
 	Amphora_HeapFree(msg->text);
 	msg->len = SDL_strlen(text);
 	msg->text = Amphora_HeapStrdup(text);
-	if (!((msg->n_buff = Amphora_HeapRealloc(msg->n_buff, SDL_strlen(text) + 1)))) {
+	if (!((msg->n_buff = Amphora_HeapRealloc(msg->n_buff, SDL_strlen(text) + 1, MEM_STRING)))) {
 		return NULL;
 	}
 	if (!msg->text) {

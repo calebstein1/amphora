@@ -46,11 +46,11 @@ HT_HashTable
 HT_NewTable(void) {
 	HT_HashTable tbl;
 
-	if (!((tbl = Amphora_HeapAlloc(sizeof(struct hash_table_t))))) {
+	if (!((tbl = Amphora_HeapAlloc(sizeof(struct hash_table_t), MEM_HASHTABLE)))) {
 		HT_SetError("Could not allocate table: %s", strerror(errno));
 		return NULL;
 	}
-	if (!((tbl->table_entries = Amphora_HeapCalloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t))))) {
+	if (!((tbl->table_entries = Amphora_HeapCalloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t), MEM_HASHTABLE)))) {
 		HT_SetError("Could not allocate table data: %s", strerror(errno));
 		Amphora_HeapFree(tbl);
 		return NULL;
@@ -66,7 +66,7 @@ HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
-	if (!((ntbl = Amphora_HeapCalloc(tbl->size << 1, sizeof(struct hash_entry_t))))) {
+	if (!((ntbl = Amphora_HeapCalloc(tbl->size << 1, sizeof(struct hash_entry_t), MEM_HASHTABLE)))) {
 		HT_SetError("Failed to grow table: %s", strerror(errno));
 		return NULL;
 	}
