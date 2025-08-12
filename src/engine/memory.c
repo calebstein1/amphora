@@ -89,7 +89,7 @@ Amphora_HeapAllocFrame(size_t size) {
 	Uint8 *addr;
 	size_t aligned_size = size + 7 & ~7;
 
-	if (amphora_frame_heap.idx + aligned_size < sizeof(AmphoraMemBlock)) {
+	if (amphora_frame_heap.idx + aligned_size > sizeof(AmphoraMemBlock)) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation failed, per-frame heap full");
 		return NULL;
 	}
