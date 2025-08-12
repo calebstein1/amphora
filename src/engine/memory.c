@@ -1,4 +1,6 @@
 #if defined(__APPLE__) || defined(__linux__)
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/mman.h>
 #elif defined(_WIN32)
 #include <memoryapi.h>
@@ -73,7 +75,14 @@ Amphora_HeapPoke(uint8_t blk, uint16_t idx, uint8_t val) {
 int
 Amphora_InitHeap(void) {
 #if defined(__APPLE__) || defined(__linux__)
-	amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
+	int fd = shm_open("/amphora_heap", O_CREAT | O_RDWR, 0666);
+	if (ftruncate(fd, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) < 0) {
+		fputs("Failed to resize shared memory region, attempting to continue with private memory\n", stderr);
+		amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	} else {
+		amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	}
+	close(fd);
 #elif defined(_WIN32)
 	/*
 	 * TODO: Implement large pages support for Windows
@@ -85,6 +94,9 @@ Amphora_InitHeap(void) {
 
 	if (amphora_heap == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap");
+#if defined(__APPLE__) || defined(__linux__)
+		shm_unlink("/amphora_heap");
+#endif
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
 	return AMPHORA_STATUS_OK;
@@ -94,6 +106,7 @@ void
 Amphora_DestroyHeap(void) {
 #if defined(__APPLE__) || defined(__linux__)
 	munmap(amphora_heap, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
+	shm_unlink("/amphora_heap");
 #elif defined(_WIN32)
 	VirtualFree(amphora_heap, 0, MEM_RELEASE);
 #else
