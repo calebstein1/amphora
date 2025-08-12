@@ -41,20 +41,25 @@ void *
 Amphora_HeapAlloc(size_t size) {
 	Uint8 *addr;
 	int i = 0;
-	size_t aligned_size = (size + 7) & ~7;
+	size_t aligned_size = size + 7 & ~7;
 
-	if (size > sizeof(AmphoraMemBlock)) {
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation cannot exceed %d", sizeof(AmphoraMemBlock));
+	if (size + 2 > sizeof(AmphoraMemBlock)) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation cannot exceed %d", sizeof(AmphoraMemBlock) - 2);
 		return NULL;
 	}
-	while (heap_metadata[current_block].addr + aligned_size >= sizeof(AmphoraMemBlock)) {
+	while (heap_metadata[current_block].addr + aligned_size + 8 >= sizeof(AmphoraMemBlock)) {
 		current_block++;
-		SDL_Log("Incrementing current block to %d\n", current_block);
+#ifdef DEBUG
+		SDL_Log("Changing current block to block %d\n", current_block);
+#endif
 		if (++i < AMPHORA_NUM_MEM_BLOCKS) continue;
 
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap full");
 		return NULL;
 	}
+	heap_metadata[current_block].addr += 8;
+	amphora_heap[current_block][heap_metadata[current_block].addr - 2] = size & 0xFF;
+	amphora_heap[current_block][heap_metadata[current_block].addr - 1] = size >> 8;
 	addr = &amphora_heap[current_block][heap_metadata[current_block].addr];
 	heap_metadata[current_block].addr += aligned_size;
 	heap_metadata[current_block].allocations++;
@@ -71,14 +76,16 @@ Amphora_HeapAllocFrame(size_t size) {
 }
 
 void *
-Amphora_HeapRealloc(void *ptr, size_t nbytes, size_t size) {
+Amphora_HeapRealloc(void *ptr, size_t size) {
 	Uint8 *addr = Amphora_HeapAlloc(size);
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
 		return ptr;
 	}
-	(void)memcpy(addr, ptr, nbytes);
+	if (ptr == NULL) return addr;
+
+	(void)memcpy(addr, ptr, *((Uint8 *)ptr - 1) << 8 | *((Uint8 *)ptr - 2));
 	Amphora_HeapFree(ptr);
 
 	return addr;
@@ -89,7 +96,7 @@ Amphora_HeapCalloc(size_t num, size_t size) {
 	Uint8 *addr = Amphora_HeapAlloc(num * size);
 
 	if (addr == NULL) {
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
 		return NULL;
 	}
 	(void)memset(addr, 0, num * size);
@@ -102,7 +109,7 @@ Amphora_HeapStrdup(const char *str) {
 	char *addr = Amphora_HeapAlloc(strlen(str) + 1);
 
 	if (addr == NULL) {
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
 		return NULL;
 	}
 	(void)strcpy(addr, str);

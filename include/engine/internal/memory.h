@@ -16,7 +16,7 @@ int Amphora_InitHeap(void);
 void Amphora_DestroyHeap(void);
 void *Amphora_HeapAlloc(size_t size);
 void *Amphora_HeapAllocFrame(size_t size);
-void *Amphora_HeapRealloc(void *ptr, size_t nbytes, size_t size);
+void *Amphora_HeapRealloc(void *ptr, size_t size);
 void *Amphora_HeapCalloc(size_t num, size_t size);
 char *Amphora_HeapStrdup(const char *str);
 void Amphora_HeapFree(void *ptr);
