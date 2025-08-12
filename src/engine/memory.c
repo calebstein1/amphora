@@ -19,8 +19,7 @@ static struct {
 	uint16_t idx;
 } amphora_frame_heap;
 static struct amphora_mem_block_metadata_t heap_metadata[AMPHORA_NUM_MEM_BLOCKS];
-static Uint8 current_block = 0;
-static Uint8 current_block_categories[MEM_COUNT];
+static uint8_t current_block_categories[MEM_COUNT];
 
 int
 Amphora_InitHeap(void) {
@@ -57,6 +56,7 @@ Amphora_DestroyHeap(void) {
 void *
 Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	uint8_t *addr;
+	uint8_t current_block;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
 
