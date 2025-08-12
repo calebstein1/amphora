@@ -9,6 +9,10 @@
 
 /* File-scoped variables */
 static AmphoraMemBlock *amphora_heap;
+static struct {
+	AmphoraMemBlock data;
+	Uint16 idx;
+} amphora_frame_heap;
 static struct amphora_mem_block_metadata_t heap_metadata[AMPHORA_NUM_MEM_BLOCKS];
 static Uint8 current_block = 0;
 static Uint8 current_block_categories[MEM_COUNT];
@@ -72,11 +76,18 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 }
 
 void *
-Amphora_HeapAllocFrame(size_t size, AmphoraMemBlockCategory category) {
-	/*
-	 * TODO: Like HeapAlloc but auto-free on the next render frame
-	 */
-	return NULL;
+Amphora_HeapAllocFrame(size_t size) {
+	Uint8 *addr;
+	size_t aligned_size = size + 7 & ~7;
+
+	if (amphora_frame_heap.idx + aligned_size < sizeof(AmphoraMemBlock)) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation failed, per-frame heap full");
+		return NULL;
+	}
+	addr = &amphora_frame_heap.data[amphora_frame_heap.idx];
+	amphora_frame_heap.idx += aligned_size;
+
+	return addr;
 }
 
 void *
@@ -121,6 +132,19 @@ Amphora_HeapStrdup(const char *str) {
 	return addr;
 }
 
+char *
+Amphora_HeapStrdupFrame(const char *str) {
+	char *addr = Amphora_HeapAllocFrame(strlen(str) + 1);
+
+	if (addr == NULL) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
+		return NULL;
+	}
+	(void)strcpy(addr, str);
+
+	return addr;
+}
+
 void
 Amphora_HeapFree(void *ptr) {
 	const long idx = (Uint8 *)ptr - &amphora_heap[0][0];
@@ -135,4 +159,9 @@ Amphora_HeapFree(void *ptr) {
 		heap_metadata[block].addr = 0;
 		heap_metadata[block].category = MEM_UNASSIGNED;
 	}
+}
+
+void
+Amphora_HeapClearFrameHeap(void) {
+	amphora_frame_heap.idx = 0;
 }

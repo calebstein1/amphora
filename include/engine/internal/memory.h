@@ -29,10 +29,12 @@ struct amphora_mem_block_metadata_t {
 int Amphora_InitHeap(void);
 void Amphora_DestroyHeap(void);
 void *Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category);
-void *Amphora_HeapAllocFrame(size_t size, AmphoraMemBlockCategory category);
+void *Amphora_HeapAllocFrame(size_t size);
 void *Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category);
 void *Amphora_HeapCalloc(size_t num, size_t size, AmphoraMemBlockCategory category);
 char *Amphora_HeapStrdup(const char *str);
+char *Amphora_HeapStrdupFrame(const char *str);
 void Amphora_HeapFree(void *ptr);
+void Amphora_HeapClearFrameHeap(void);
 
 #endif /* MEMORY_INTERNAL_H */

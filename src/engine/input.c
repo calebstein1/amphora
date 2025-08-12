@@ -3,6 +3,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
 
@@ -171,10 +172,7 @@ Amphora_GetActionKeyName(const char *action) {
 		(void)sqlite3_finalize(stmt);
 		return NULL;
 	}
-	/*
-	 * TODO: Implement Amphora memory functions, use Amphora_HeapAllocFrame() here
-	 */
-	key_name_r = SDL_strdup((const char *)sqlite3_column_text(stmt, 1));
+	key_name_r = Amphora_HeapStrdupFrame((const char *)sqlite3_column_text(stmt, 1));
 	if (!key_name_r) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for string\n");
 		(void)sqlite3_finalize(stmt);

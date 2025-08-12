@@ -175,6 +175,7 @@ Amphora_MainLoop(SDL_Event *e) {
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();
 	Amphora_ProcessRegisteredEvents();
+	Amphora_HeapClearFrameHeap();
 
 	SDL_RenderPresent(Amphora_GetRenderer());
 
