@@ -1,5 +1,7 @@
 #if defined(__APPLE__) || defined(__linux__)
 #include <sys/mman.h>
+#elif defined(_WIN32)
+#include <memoryapi.h>
 #else
 #include <stdlib.h>
 #endif
@@ -21,6 +23,11 @@ int
 Amphora_InitHeap(void) {
 #if defined(__APPLE__) || defined(__linux__)
 	amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
+#elif defined(_WIN32)
+	/*
+	 * TODO: Implement large pages support for Windows
+	 */
+	amphora_heap = VirtualAlloc(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
 	amphora_heap = malloc(sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
 #endif
@@ -36,6 +43,8 @@ void
 Amphora_DestroyHeap(void) {
 #if defined(__APPLE__) || defined(__linux__)
 	munmap(amphora_heap, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
+#elif defined(_WIN32)
+	VirtualFree(amphora_heap, 0, MEM_RELEASE);
 #else
 	free(amphora_heap);
 #endif
