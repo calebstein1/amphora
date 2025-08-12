@@ -6,14 +6,17 @@
 #include <stdlib.h>
 #endif
 
+#include <stdint.h>
+
 #include "engine/internal/error.h"
 #include "engine/internal/memory.h"
+
 
 /* File-scoped variables */
 static AmphoraMemBlock *amphora_heap;
 static struct {
 	AmphoraMemBlock data;
-	Uint16 idx;
+	uint16_t idx;
 } amphora_frame_heap;
 static struct amphora_mem_block_metadata_t heap_metadata[AMPHORA_NUM_MEM_BLOCKS];
 static Uint8 current_block = 0;
@@ -53,7 +56,7 @@ Amphora_DestroyHeap(void) {
 
 void *
 Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
-	Uint8 *addr;
+	uint8_t *addr;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
 
@@ -86,7 +89,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 
 void *
 Amphora_HeapAllocFrame(size_t size) {
-	Uint8 *addr;
+	uint8_t *addr;
 	size_t aligned_size = size + 7 & ~7;
 
 	if (amphora_frame_heap.idx + aligned_size > sizeof(AmphoraMemBlock)) {
@@ -101,7 +104,7 @@ Amphora_HeapAllocFrame(size_t size) {
 
 void *
 Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
-	Uint8 *addr = Amphora_HeapAlloc(size, category);
+	uint8_t *addr = Amphora_HeapAlloc(size, category);
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
@@ -117,7 +120,7 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 
 void *
 Amphora_HeapCalloc(size_t num, size_t size, AmphoraMemBlockCategory category) {
-	Uint8 *addr = Amphora_HeapAlloc(num * size, category);
+	uint8_t *addr = Amphora_HeapAlloc(num * size, category);
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
@@ -156,7 +159,7 @@ Amphora_HeapStrdupFrame(const char *str) {
 
 void
 Amphora_HeapFree(void *ptr) {
-	const long idx = (Uint8 *)ptr - &amphora_heap[0][0];
+	const long idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
 	unsigned int block;
 
 	if (idx < 0 || idx > sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {

@@ -1,12 +1,11 @@
 #ifndef MEMORY_INTERNAL_H
 #define MEMORY_INTERNAL_H
 
-#include "SDL.h"
-
+#define AMPHORA_HEAP_SIZE 0x10000
 #define AMPHORA_NUM_MEM_BLOCKS 0x100
 _Static_assert(AMPHORA_NUM_MEM_BLOCKS <= 0x100);
 
-typedef Uint8 AmphoraMemBlock[0x10000];
+typedef uint8_t AmphoraMemBlock[AMPHORA_HEAP_SIZE];
 
 typedef enum {
 	MEM_UNASSIGNED,
@@ -21,8 +20,8 @@ typedef enum {
 } AmphoraMemBlockCategory;
 
 struct amphora_mem_block_metadata_t {
-	unsigned short addr;
-	unsigned short allocations;
+	uint16_t addr;
+	uint16_t allocations;
 	AmphoraMemBlockCategory category;
 };
 
