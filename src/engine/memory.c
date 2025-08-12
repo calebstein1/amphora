@@ -57,7 +57,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
 
-	if (size + 2 > sizeof(AmphoraMemBlock)) {
+	if (aligned_size + 8 > sizeof(AmphoraMemBlock)) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation cannot exceed %d", sizeof(AmphoraMemBlock) - 2);
 		return NULL;
 	}
