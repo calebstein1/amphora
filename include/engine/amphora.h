@@ -30,6 +30,7 @@
 #include "engine/events.h"
 #include "engine/img.h"
 #include "engine/input.h"
+#include "engine/memory.h"
 #include "engine/mixer.h"
 #include "engine/particles.h"
 #include "engine/random.h"

@@ -7,6 +7,7 @@
 #endif
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "engine/internal/error.h"
 #include "engine/internal/memory.h"
@@ -20,6 +21,54 @@ static struct {
 } amphora_frame_heap;
 static struct amphora_mem_block_metadata_t heap_metadata[AMPHORA_NUM_MEM_BLOCKS];
 static uint8_t current_block_categories[MEM_COUNT];
+static const char *category_names[] = {
+#define X(cat) #cat,
+	AMPHORA_MEM_CATEGORIES
+#undef X
+};
+
+void
+Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx) {
+	const long raw_idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
+
+	if (raw_idx < 0 || raw_idx > sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
+		return;
+	}
+	*blk = raw_idx / sizeof(AmphoraMemBlock);
+	*idx = raw_idx & sizeof(AmphoraMemBlock) - 1;
+}
+
+void *
+Amphora_HeapBlkIdxToPtr(int blk, int idx) {
+	return &amphora_heap[blk][idx];
+}
+
+void
+Amphora_HeapDumpBlock(uint8_t blk) {
+	int i;
+
+	printf("Memory block %d:\nCategory: %s\nAllocations: %d", blk, category_names[heap_metadata[blk].category], heap_metadata[blk].allocations);
+	for (i = 0; i < sizeof(AmphoraMemBlock); i++) {
+		if ((i & 15) == 0) printf("\n%5d: ", i);
+		printf("%02X ", amphora_heap[blk][i]);
+	}
+	fputs("\n", stdout);
+}
+
+uint8_t
+Amphora_HeapPeek(uint8_t blk, uint16_t idx) {
+	return amphora_heap[blk][idx];
+}
+
+void
+Amphora_HeapPoke(uint8_t blk, uint16_t idx, uint8_t val) {
+	amphora_heap[blk][idx] = val;
+}
+
+/*
+ * Internal functions
+ */
 
 int
 Amphora_InitHeap(void) {
