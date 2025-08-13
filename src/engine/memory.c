@@ -21,7 +21,7 @@ static struct {
 	AmphoraMemBlock data;
 	uint16_t idx;
 } amphora_frame_heap;
-static struct amphora_mem_block_metadata_t heap_metadata[AMPHORA_NUM_MEM_BLOCKS];
+static struct amphora_mem_block_metadata_t *heap_metadata;
 static uint8_t current_block_categories[MEM_COUNT];
 static const char *category_names[] = {
 #define X(cat) #cat,
@@ -99,11 +99,23 @@ Amphora_InitHeap(void) {
 #endif
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
-	return AMPHORA_STATUS_OK;
+
+	/* This bootstraps a metadata structure without metadata so that we can allocate one properly with metadata */
+	current_block_categories[MEM_META] = AMPHORA_NUM_MEM_BLOCKS - 1;
+	heap_metadata = (struct amphora_mem_block_metadata_t *)&amphora_heap[AMPHORA_NUM_MEM_BLOCKS - 1][8];
+
+	heap_metadata = Amphora_HeapAlloc(sizeof(struct amphora_mem_block_metadata_t) * AMPHORA_NUM_MEM_BLOCKS, MEM_META);
+	if (heap_metadata != NULL)  return AMPHORA_STATUS_OK;
+
+	/* We should never hit this code path */
+	Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap metadata");
+	Amphora_DestroyHeap();
+	return AMPHORA_STATUS_ALLOC_FAIL;
 }
 
 void
 Amphora_DestroyHeap(void) {
+	Amphora_HeapFree(heap_metadata);
 #if defined(__APPLE__) || defined(__linux__)
 	munmap(amphora_heap, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
 	shm_unlink("/amphora_heap");
