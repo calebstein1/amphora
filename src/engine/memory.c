@@ -186,7 +186,7 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 	}
 	if (ptr == NULL) return addr;
 
-	(void)memcpy(addr, ptr, *((Uint8 *)ptr - 1) << 8 | *((Uint8 *)ptr - 2));
+	(void)memcpy(addr, ptr, *((uint8_t *)ptr - 1) << 8 | *((uint8_t *)ptr - 2));
 	Amphora_HeapFree(ptr);
 
 	return addr;
