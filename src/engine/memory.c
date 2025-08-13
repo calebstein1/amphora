@@ -50,12 +50,12 @@ void
 Amphora_HeapDumpBlock(uint8_t blk) {
 	int i;
 
-	printf("Memory block %d:\nCategory: %s\nAllocations: %d", blk, category_names[heap_metadata[blk].category], heap_metadata[blk].allocations);
+	(void)printf("Memory block %d:\nCategory: %s\nAllocations: %d", blk, category_names[heap_metadata[blk].category], heap_metadata[blk].allocations);
 	for (i = 0; i < sizeof(AmphoraMemBlock); i++) {
 		if ((i & 15) == 0) printf("\n%5d: ", i);
-		printf("%02X ", amphora_heap[blk][i]);
+		(void)printf("%02X ", amphora_heap[blk][i]);
 	}
-	fputs("\n", stdout);
+	(void)fputs("\n", stdout);
 }
 
 uint8_t
@@ -77,12 +77,12 @@ Amphora_InitHeap(void) {
 #if defined(__APPLE__) || defined(__linux__)
 	int fd = shm_open("/amphora_heap", O_CREAT | O_RDWR, 0666);
 	if (ftruncate(fd, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) < 0) {
-		fputs("Failed to resize shared memory region, attempting to continue with private memory\n", stderr);
+		(void)fputs("Failed to resize shared memory region, attempting to continue with private memory\n", stderr);
 		amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	} else {
 		amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	}
-	close(fd);
+	(void)close(fd);
 #elif defined(_WIN32)
 	/*
 	 * TODO: Implement large pages support for Windows
@@ -95,7 +95,7 @@ Amphora_InitHeap(void) {
 	if (amphora_heap == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap");
 #if defined(__APPLE__) || defined(__linux__)
-		shm_unlink("/amphora_heap");
+		(void)shm_unlink("/amphora_heap");
 #endif
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
@@ -117,8 +117,8 @@ void
 Amphora_DestroyHeap(void) {
 	Amphora_HeapFree(heap_metadata);
 #if defined(__APPLE__) || defined(__linux__)
-	munmap(amphora_heap, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
-	shm_unlink("/amphora_heap");
+	(void)munmap(amphora_heap, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
+	(void)shm_unlink("/amphora_heap");
 #elif defined(_WIN32)
 	VirtualFree(amphora_heap, 0, MEM_RELEASE);
 #else
@@ -143,7 +143,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 		|| heap_metadata[current_block].addr + aligned_size + 8 >= sizeof(AmphoraMemBlock)) {
 		current_block++;
 #ifdef DEBUG
-		SDL_Log("Changing current block to block %d\n", current_block);
+		(void)printf("Changing current block to block %d\n", current_block);
 #endif
 		if (++i < AMPHORA_NUM_MEM_BLOCKS) continue;
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap full");
