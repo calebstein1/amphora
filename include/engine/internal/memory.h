@@ -17,7 +17,7 @@
 
 #define AMPHORA_HEAP_SIZE 0x10000
 #define AMPHORA_NUM_MEM_BLOCKS 0x100
-_Static_assert(AMPHORA_NUM_MEM_BLOCKS <= 0x100);
+_Static_assert(AMPHORA_NUM_MEM_BLOCKS <= 0x100, "Too many memory blocks requested");
 
 typedef uint8_t AmphoraMemBlock[AMPHORA_HEAP_SIZE];
 
