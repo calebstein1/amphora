@@ -52,7 +52,7 @@ Amphora_HeapDumpBlock(uint8_t blk) {
 
 	(void)printf("Memory block %d:\nCategory: %s\nAllocations: %d", blk, category_names[heap_metadata[blk].category], heap_metadata[blk].allocations);
 	for (i = 0; i < sizeof(AmphoraMemBlock); i++) {
-		if ((i & 15) == 0) printf("\n%5d: ", i);
+		if ((i & 15) == 0) (void)printf("\n%5d: ", i);
 		(void)printf("%02X ", amphora_heap[blk][i]);
 	}
 	(void)fputs("\n", stdout);
