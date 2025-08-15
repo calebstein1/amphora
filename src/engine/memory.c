@@ -9,7 +9,6 @@
 #endif
 
 #include <stdint.h>
-#include <stdio.h>
 
 #include "engine/internal/error.h"
 #include "engine/internal/memory.h"
@@ -33,12 +32,12 @@ void
 Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx) {
 	const long raw_idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
 
-	if (raw_idx < 0 || raw_idx > sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
+	if (raw_idx < 0 || raw_idx > (long)sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
 		return;
 	}
-	*blk = raw_idx / sizeof(AmphoraMemBlock);
-	*idx = raw_idx & sizeof(AmphoraMemBlock) - 1;
+	*blk = (int)raw_idx / (int)sizeof(AmphoraMemBlock);
+	*idx = (int)raw_idx & (int)sizeof(AmphoraMemBlock) - 1;
 }
 
 void *
@@ -48,7 +47,7 @@ Amphora_HeapBlkIdxToPtr(int blk, int idx) {
 
 void
 Amphora_HeapDumpBlock(uint8_t blk) {
-	int i;
+	unsigned int i;
 
 	(void)printf("Memory block %d:\nCategory: %s\nAllocations: %d", blk, category_names[heap_metadata[blk].category], heap_metadata[blk].allocations);
 	for (i = 0; i < sizeof(AmphoraMemBlock); i++) {
@@ -250,7 +249,7 @@ Amphora_HeapFree(void *ptr) {
 	unsigned int block;
 	struct amphora_mem_allocation_header_t *header;
 
-	if (idx < 0 || idx > sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
+	if (idx < 0 || idx > (long)sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
 		return;
 	}
