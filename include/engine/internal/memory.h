@@ -3,6 +3,8 @@
 
 #include "engine/memory.h"
 
+#define MAGIC 0xEFBE
+
 #define AMPHORA_MEM_CATEGORIES	\
 	X(MEM_UNASSIGNED)	\
 	X(MEM_RENDERABLE)	\
@@ -12,8 +14,7 @@
 	X(MEM_STRING)		\
 	X(MEM_HASHTABLE)	\
 	X(MEM_MISC)		\
-	X(MEM_META)		\
-	X(MEM_COUNT)
+	X(MEM_META)
 
 #define AMPHORA_HEAP_SIZE 0x10000
 #define AMPHORA_NUM_MEM_BLOCKS 0x100
@@ -25,7 +26,18 @@ typedef enum {
 #define X(cat) cat,
 	AMPHORA_MEM_CATEGORIES
 #undef X
+	MEM_COUNT,
+	MEM_EXT = 0x80
 } AmphoraMemBlockCategory;
+
+struct amphora_mem_allocation_header_t {
+	uint16_t magic;
+	uint8_t scope; /* unimplemented */
+	uint8_t free : 1;
+	uint8_t large : 1; /* unimplemented */
+	uint32_t size;
+};
+_Static_assert(sizeof(struct amphora_mem_allocation_header_t) == 8, "Allocation header must be exactly 8 bytes");
 
 struct amphora_mem_block_metadata_t {
 	uint16_t addr;

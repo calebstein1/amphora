@@ -133,9 +133,19 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	uint8_t current_block;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
+	struct amphora_mem_allocation_header_t header = {
+		.magic = MAGIC,
+		.scope = 0,
+		.free = 0,
+		.large = 0,
+		.size = aligned_size
+	};
 
 	if (aligned_size + 8 > sizeof(AmphoraMemBlock)) {
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation cannot exceed %d", sizeof(AmphoraMemBlock) - 2);
+		/*
+		 * TODO: support large allocations
+		 */
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Allocation cannot exceed %d", sizeof(AmphoraMemBlock) - 8);
 		return NULL;
 	}
 	current_block = current_block_categories[category];
@@ -148,9 +158,8 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	}
 	current_block_categories[category] = current_block;
 	heap_metadata[current_block].category = category;
-	heap_metadata[current_block].addr += 8;
-	amphora_heap[current_block][heap_metadata[current_block].addr - 2] = size & 0xFF;
-	amphora_heap[current_block][heap_metadata[current_block].addr - 1] = size >> 8;
+	(void)memcpy(&amphora_heap[current_block][heap_metadata[current_block].addr], &header, sizeof(header));
+	heap_metadata[current_block].addr += sizeof(header);
 	addr = &amphora_heap[current_block][heap_metadata[current_block].addr];
 	heap_metadata[current_block].addr += aligned_size;
 	heap_metadata[current_block].allocations++;
@@ -176,6 +185,7 @@ Amphora_HeapAllocFrame(size_t size) {
 void *
 Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 	uint8_t *addr = Amphora_HeapAlloc(size, category);
+	struct amphora_mem_allocation_header_t *header;
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
@@ -183,7 +193,13 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 	}
 	if (ptr == NULL) return addr;
 
-	(void)memcpy(addr, ptr, *((uint8_t *)ptr - 1) << 8 | *((uint8_t *)ptr - 2));
+	header = (struct amphora_mem_allocation_header_t *)ptr - 1;
+	if (header->magic != MAGIC) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Invalid allocation header");
+		return ptr;
+	}
+
+	(void)memcpy(addr, ptr, header->size);
 	Amphora_HeapFree(ptr);
 
 	return addr;
@@ -232,11 +248,18 @@ void
 Amphora_HeapFree(void *ptr) {
 	const long idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
 	unsigned int block;
+	struct amphora_mem_allocation_header_t *header;
 
 	if (idx < 0 || idx > sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
 		return;
 	}
+	header = (struct amphora_mem_allocation_header_t *)ptr - 1;
+	if (header->magic != MAGIC) {
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Invalid allocation header");
+		return;
+	}
+	header->free = 1;
 	block = idx / sizeof(AmphoraMemBlock);
 	if (--heap_metadata[block].allocations == 0) {
 		heap_metadata[block].addr = 0;
