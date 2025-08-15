@@ -142,9 +142,6 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	while ((heap_metadata[current_block].category != MEM_UNASSIGNED && heap_metadata[current_block].category != category)
 		|| heap_metadata[current_block].addr + aligned_size + 8 >= sizeof(AmphoraMemBlock)) {
 		current_block++;
-#ifdef DEBUG
-		(void)printf("Changing current block to block %d\n", current_block);
-#endif
 		if (++i < AMPHORA_NUM_MEM_BLOCKS) continue;
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap full");
 		return NULL;
