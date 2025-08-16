@@ -249,6 +249,8 @@ Amphora_HeapFree(void *ptr) {
 	unsigned int block;
 	struct amphora_mem_allocation_header_t *header;
 
+	if (ptr == NULL) return;
+
 	if (idx < 0 || idx > (long)sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
 		return;
@@ -258,6 +260,8 @@ Amphora_HeapFree(void *ptr) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Invalid allocation header");
 		return;
 	}
+	if (header->free) return;
+
 	header->free = 1;
 	block = idx / sizeof(AmphoraMemBlock);
 	if (--heap_metadata[block].allocations == 0) {
