@@ -73,6 +73,8 @@ Amphora_HeapPoke(uint8_t blk, uint16_t idx, uint8_t val) {
 
 int
 Amphora_InitHeap(void) {
+	int i;
+	struct amphora_mem_allocation_header_t *header;
 #if defined(__APPLE__) || defined(__linux__)
 	int fd = shm_open("/amphora_heap", O_CREAT | O_RDWR, 0666);
 	if (ftruncate(fd, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) < 0) {
@@ -99,17 +101,33 @@ Amphora_InitHeap(void) {
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
 
+	for (i = 0; i < AMPHORA_NUM_MEM_BLOCKS; i++) {
+		header = (struct amphora_mem_allocation_header_t *)&amphora_heap[i][0];
+		header->magic = MAGIC;
+		header->scope = 0;
+		header->free = 1;
+		header->large = 0;
+		header->off_f = sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t);
+		header->off_b = 0;
+	}
+
 	/* This bootstraps a metadata structure without metadata so that we can allocate one properly with metadata */
 	current_block_categories[MEM_META] = AMPHORA_NUM_MEM_BLOCKS - 1;
 	heap_metadata = (struct amphora_mem_block_metadata_t *)&amphora_heap[AMPHORA_NUM_MEM_BLOCKS - 1][8];
+	heap_metadata[AMPHORA_NUM_MEM_BLOCKS - 1].largest_free = sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t);
 
 	heap_metadata = Amphora_HeapAlloc(sizeof(struct amphora_mem_block_metadata_t) * AMPHORA_NUM_MEM_BLOCKS, MEM_META);
-	if (heap_metadata != NULL)  return AMPHORA_STATUS_OK;
+	if (heap_metadata == NULL) {
+		/* We should never hit this code path */
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap metadata");
+		Amphora_DestroyHeap();
+		return AMPHORA_STATUS_ALLOC_FAIL;
+	}
+	for (i = 0; i < AMPHORA_NUM_MEM_BLOCKS; i++) {
+		heap_metadata[i].largest_free = sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t);
+	}
 
-	/* We should never hit this code path */
-	Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap metadata");
-	Amphora_DestroyHeap();
-	return AMPHORA_STATUS_ALLOC_FAIL;
+	return AMPHORA_STATUS_OK;
 }
 
 void
@@ -132,13 +150,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	uint8_t current_block;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
-	struct amphora_mem_allocation_header_t header = {
-		.magic = MAGIC,
-		.scope = 0,
-		.free = 0,
-		.large = 0,
-		.size = aligned_size
-	};
+	struct amphora_mem_allocation_header_t *header, *next_header;
 
 	if (aligned_size + 8 > sizeof(AmphoraMemBlock)) {
 		/*
@@ -149,7 +161,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	}
 	current_block = current_block_categories[category];
 	while ((heap_metadata[current_block].category != MEM_UNASSIGNED && heap_metadata[current_block].category != category)
-		|| heap_metadata[current_block].addr + aligned_size + 8 >= sizeof(AmphoraMemBlock)) {
+		|| heap_metadata[current_block].largest_free < aligned_size + sizeof(struct amphora_mem_allocation_header_t)) {
 		current_block++;
 		if (++i < AMPHORA_NUM_MEM_BLOCKS) continue;
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap full");
@@ -157,10 +169,37 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	}
 	current_block_categories[category] = current_block;
 	heap_metadata[current_block].category = category;
-	(void)memcpy(&amphora_heap[current_block][heap_metadata[current_block].addr], &header, sizeof(header));
-	heap_metadata[current_block].addr += sizeof(header);
-	addr = &amphora_heap[current_block][heap_metadata[current_block].addr];
-	heap_metadata[current_block].addr += aligned_size;
+
+	header = (struct amphora_mem_allocation_header_t *)&amphora_heap[current_block][0];
+	while (header->free == 0 || header->off_f < aligned_size) {
+		/* If we hit this path, we're likely in a state of utter pandemonium and there's no sense in continuing */
+		if ((uintptr_t)header > (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
+			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap corrupted");
+			return NULL;
+		}
+		/* Since sizeof(header) == 8, this is faster than division and safe because of our 8-byte alignment */
+		header += 1 + (header->off_f >> 3);
+	}
+	next_header = header + 1 + (aligned_size >> 3);
+	if ((uintptr_t)next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)) {
+		if (header->off_f > aligned_size) {
+			next_header->off_f = header->off_f - aligned_size - sizeof(struct amphora_mem_allocation_header_t);
+			next_header->free = 1;
+		}
+		next_header->off_b = aligned_size;
+	}
+	/*
+	 *TODO: recalculate largest free properly
+	 */
+	if (heap_metadata[current_block].largest_free == header->off_f)
+		heap_metadata[current_block].largest_free -= aligned_size - sizeof(struct amphora_mem_allocation_header_t);
+
+	header->magic = MAGIC;
+	header->scope = 0;
+	header->free = 0;
+	header->large = 0;
+	header->off_f = aligned_size;
+	addr = (uint8_t *)header + sizeof(struct amphora_mem_allocation_header_t);
 	heap_metadata[current_block].allocations++;
 
 	return addr;
@@ -198,7 +237,7 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 		return ptr;
 	}
 
-	(void)memcpy(addr, ptr, header->size);
+	(void)memcpy(addr, ptr, header->off_f);
 	Amphora_HeapFree(ptr);
 
 	return addr;
@@ -207,12 +246,14 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 void *
 Amphora_HeapCalloc(size_t num, size_t size, AmphoraMemBlockCategory category) {
 	uint8_t *addr = Amphora_HeapAlloc(num * size, category);
+	struct amphora_mem_allocation_header_t *header;
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate space on heap");
 		return NULL;
 	}
-	(void)memset(addr, 0, num * size);
+	header = (struct amphora_mem_allocation_header_t *)addr - 1;
+	(void)memset(addr, 0, header->off_f);
 
 	return addr;
 }
@@ -245,6 +286,9 @@ Amphora_HeapStrdupFrame(const char *str) {
 
 void
 Amphora_HeapFree(void *ptr) {
+	/*
+	 * TODO: Coalesce adjacent blocks on free
+	 */
 	const long idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
 	unsigned int block;
 	struct amphora_mem_allocation_header_t *header;
@@ -262,10 +306,10 @@ Amphora_HeapFree(void *ptr) {
 	}
 	if (header->free) return;
 
-	header->free = 1;
 	block = idx / sizeof(AmphoraMemBlock);
+	if (header->off_f > heap_metadata[block].largest_free) heap_metadata[block].largest_free = header->off_f;
+	header->free = 1;
 	if (--heap_metadata[block].allocations == 0) {
-		heap_metadata[block].addr = 0;
 		heap_metadata[block].category = MEM_UNASSIGNED;
 	}
 }

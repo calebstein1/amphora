@@ -26,8 +26,7 @@ typedef enum {
 #define X(cat) cat,
 	AMPHORA_MEM_CATEGORIES
 #undef X
-	MEM_COUNT,
-	MEM_EXT = 0x80
+	MEM_COUNT
 } AmphoraMemBlockCategory;
 
 struct amphora_mem_allocation_header_t {
@@ -35,12 +34,13 @@ struct amphora_mem_allocation_header_t {
 	uint8_t scope; /* unimplemented */
 	uint8_t free : 1;
 	uint8_t large : 1; /* unimplemented */
-	uint32_t size;
+	uint16_t off_b;
+	uint16_t off_f;
 };
 _Static_assert(sizeof(struct amphora_mem_allocation_header_t) == 8, "Allocation header must be exactly 8 bytes");
 
 struct amphora_mem_block_metadata_t {
-	uint16_t addr;
+	uint16_t largest_free;
 	uint16_t allocations;
 	AmphoraMemBlockCategory category;
 };
