@@ -2,6 +2,10 @@
 #include "engine/internal/typewriter.h"
 #include "engine/internal/ttf.h"
 
+/*
+ * TODO: fix memory leak in typewriters when a typewriter gets interrupted before finishing
+ */
+
 static struct amphora_typewriter_t typewriters[MAX_CONCURRENT_TYPEWRITERS];
 static unsigned int typewriters_count;
 
