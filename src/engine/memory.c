@@ -30,11 +30,11 @@ static const char *category_names[] = {
 
 int
 Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx) {
-	const long raw_idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
-	int b = (int)raw_idx / (int)sizeof(AmphoraMemBlock);
-	int i = (int)raw_idx & (int)sizeof(AmphoraMemBlock) - 1;
+	const ptrdiff_t raw_idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
+	const int b = (int)raw_idx / (int)sizeof(AmphoraMemBlock);
+	const int i = (int)raw_idx & (int)sizeof(AmphoraMemBlock) - 1;
 
-	if (raw_idx < 0 || raw_idx > (long)sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
+	if (raw_idx < 0 || raw_idx >= (long)sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
 		return -1;
 	}
@@ -321,7 +321,7 @@ Amphora_HeapStrdupFrame(const char *str) {
 
 void
 Amphora_HeapFree(void *ptr) {
-	const long idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
+	const  ptrdiff_t idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
 	unsigned int block;
 	struct amphora_mem_allocation_header_t *header;
 
