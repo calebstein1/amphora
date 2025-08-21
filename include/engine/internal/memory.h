@@ -43,6 +43,7 @@ struct amphora_mem_block_metadata_t {
 	uint16_t largest_free;
 	uint16_t allocations;
 	AmphoraMemBlockCategory category;
+	uint8_t corrupted : 1;
 };
 
 int Amphora_InitHeap(void);

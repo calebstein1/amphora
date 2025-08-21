@@ -11,6 +11,7 @@
 
 #include "engine/internal/error.h"
 #include "engine/internal/memory.h"
+#include "engine/util.h"
 
 
 /* File-scoped variables */
@@ -150,6 +151,8 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
 	struct amphora_mem_allocation_header_t *header, *next_header;
+	bool split = false;
+	bool recovery_success = false;
 
 	if (aligned_size + 8 > sizeof(AmphoraMemBlock)) {
 		/*
@@ -160,7 +163,8 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	}
 	current_block = current_block_categories[category];
 	while ((heap_metadata[current_block].category != MEM_UNASSIGNED && heap_metadata[current_block].category != category)
-		|| heap_metadata[current_block].largest_free < aligned_size + sizeof(struct amphora_mem_allocation_header_t)) {
+		|| heap_metadata[current_block].largest_free < aligned_size + sizeof(struct amphora_mem_allocation_header_t)
+		|| heap_metadata[current_block].corrupted) {
 		current_block++;
 		if (++i < AMPHORA_NUM_MEM_BLOCKS) continue;
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap full");
@@ -173,23 +177,48 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	while (header->free == 0 || header->off_f < aligned_size) {
 		/* If we hit this path, we're likely in a state of utter pandemonium and there's no sense in continuing */
 		if ((uintptr_t)header > (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
-			Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap corrupted");
-			return NULL;
+			goto corrupt_fail;
 		}
 		/* Since sizeof(header) == 8, this is faster than division and safe because of our 8-byte alignment */
-		header += 1 + (header->off_f >> 3);
+		next_header = header + 1 + (header->off_f >> 3);
+		if (next_header->magic != MAGIC) {
+			/* It's a disaster if we're doing this */
+#ifdef DEBUG
+			fprintf(stderr, "Heap corrupted: attempting recovery on block %d... don't hold your breath\n", current_block);
+#endif
+			while ((uintptr_t)next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
+				next_header++;
+				if (next_header->magic != MAGIC ||
+					(uintptr_t)next_header - (uintptr_t)header != next_header->off_b)
+					continue;
+				header->off_f = next_header->off_b - sizeof(struct amphora_mem_allocation_header_t);
+				recovery_success = true;
+				break;
+			}
+			if (!recovery_success) goto corrupt_fail;
+		}
+		header = next_header;
+		continue;
+
+		corrupt_fail:
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap corrupted: unrecoverable, lost block %d", current_block);
+		heap_metadata[current_block].corrupted = 1;
+		return NULL;
 	}
-	next_header = header + 1 + (aligned_size >> 3);
-	if ((uintptr_t)next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)) {
-		if (header->off_f > aligned_size) {
+	/* If we have room for a next header in the current block */
+	if ((uintptr_t)header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock) - 2 * sizeof(struct amphora_mem_allocation_header_t)) {
+		/* If there's room to split the block, let's */
+		if (header->off_f > aligned_size + sizeof(struct amphora_mem_allocation_header_t)) split = true;
+		next_header = split ? header + 1 + (aligned_size >> 3) : header + 1 + (header->off_f >> 3);
+		if (split) {
+			(void)memset(next_header, 0, sizeof(struct amphora_mem_allocation_header_t));
+			next_header->magic = MAGIC;
 			next_header->off_f = header->off_f - aligned_size - sizeof(struct amphora_mem_allocation_header_t);
 			next_header->free = 1;
+			next_header->off_b = aligned_size + sizeof(struct amphora_mem_allocation_header_t);
 		}
-		next_header->off_b = aligned_size;
 	}
-	/*
-	 *TODO: recalculate largest free properly
-	 */
+	/* We take care of this calculation properly in the housekeeping tasks, this is quick and dirty */
 	if (heap_metadata[current_block].largest_free == header->off_f)
 		heap_metadata[current_block].largest_free -= aligned_size - sizeof(struct amphora_mem_allocation_header_t);
 
@@ -197,7 +226,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	header->scope = 0;
 	header->free = 0;
 	header->large = 0;
-	header->off_f = aligned_size;
+	header->off_f = split ? aligned_size : header->off_f;
 	addr = (uint8_t *)header + sizeof(struct amphora_mem_allocation_header_t);
 	heap_metadata[current_block].allocations++;
 
@@ -341,6 +370,13 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 		}
 		if (header->free && next_header->free) {
 			header->off_f += next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
+			next_header = header + 1 + (header->off_f >> 3);
+			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
+			blk_last_update = blk;
+			continue;
+		}
+		if (next_header->off_f == 0) {
+			header->off_f += sizeof(struct amphora_mem_allocation_header_t);
 			next_header = header + 1 + (header->off_f >> 3);
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 			blk_last_update = blk;
