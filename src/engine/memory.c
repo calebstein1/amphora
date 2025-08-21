@@ -179,14 +179,14 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 
 	header = (struct amphora_mem_allocation_header_t *)&amphora_heap[current_block][0];
 	while (header->free == 0 || header->off_f < aligned_size) {
-		/* If we hit this path, we're likely in a state of utter pandemonium and there's no sense in continuing */
 		if ((uintptr_t)header > (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
+			/* If we hit this path, we're likely in a state of utter pandemonium and there's no sense in continuing */
 			goto corrupt_fail;
 		}
 		/* Since sizeof(header) == 8, this is faster than division and safe because of our 8-byte alignment */
 		next_header = header + 1 + (header->off_f >> 3);
 		if (next_header->magic != MAGIC) {
-			/* It's a disaster if we're doing this */
+			/* It's a disaster if we're trying this */
 #ifdef DEBUG
 			(void)fprintf(stderr, "HEAP CORRUPTED: attempting recovery on block %d... don't hold your breath\n", current_block);
 #endif
@@ -262,14 +262,14 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 
 	if (addr == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate space on heap");
-		return ptr;
+		return NULL;
 	}
 	if (ptr == NULL) return addr;
 
 	header = (struct amphora_mem_allocation_header_t *)ptr - 1;
 	if (header->magic != MAGIC) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Invalid allocation header");
-		return ptr;
+		return NULL;
 	}
 
 	(void)memcpy(addr, ptr, header->off_f < size ? header->off_f : size);
