@@ -184,7 +184,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 		if (next_header->magic != MAGIC) {
 			/* It's a disaster if we're doing this */
 #ifdef DEBUG
-			fprintf(stderr, "HEAP CORRUPTED: attempting recovery on block %d... don't hold your breath\n", current_block);
+			(void)fprintf(stderr, "HEAP CORRUPTED: attempting recovery on block %d... don't hold your breath\n", current_block);
 #endif
 			while ((uintptr_t)next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
 				next_header++;
@@ -373,6 +373,9 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 			continue;
 		}
 		if (header->free && next_header->free) {
+#ifdef DEBUG
+			(void)printf("Coalescing regions in block %d\n", blk);
+#endif
 			header->off_f += next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 			next_header = header + 1 + (header->off_f >> 3);
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
@@ -380,6 +383,9 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 			continue;
 		}
 		if (next_header->off_f == 0) {
+#ifdef DEBUG
+			(void)printf("Removing 0-sized header from block %d\n", blk);
+#endif
 			header->off_f += sizeof(struct amphora_mem_allocation_header_t);
 			next_header = header + 1 + (header->off_f >> 3);
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
@@ -387,6 +393,9 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 			continue;
 		}
 		if (header->off_f > heap_metadata[blk].largest_free) {
+#ifdef DEBUG
+			(void)printf("Updating largest_free in block %d\n", blk);
+#endif
 			heap_metadata[blk].largest_free = header->off_f;
 			blk_last_update = blk;
 		}
