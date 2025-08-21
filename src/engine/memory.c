@@ -81,7 +81,7 @@ Amphora_InitHeap(void) {
 	struct amphora_mem_allocation_header_t *header;
 #if defined(__APPLE__) || defined(__linux__)
 	int fd = shm_open("/amphora_heap", O_CREAT | O_RDWR, 0666);
-	if (ftruncate(fd, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) < 0) {
+	if (fd == -1 || ftruncate(fd, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) == -1) {
 		(void)fputs("Failed to resize shared memory region, attempting to continue with private memory\n", stderr);
 		amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	} else {
