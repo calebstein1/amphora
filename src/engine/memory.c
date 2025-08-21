@@ -28,16 +28,20 @@ static const char *category_names[] = {
 #undef X
 };
 
-void
+int
 Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx) {
 	const long raw_idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
+	int b = (int)raw_idx / (int)sizeof(AmphoraMemBlock);
+	int i = (int)raw_idx & (int)sizeof(AmphoraMemBlock) - 1;
 
 	if (raw_idx < 0 || raw_idx > (long)sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Address supplied outside heap range");
-		return;
+		return -1;
 	}
-	*blk = (int)raw_idx / (int)sizeof(AmphoraMemBlock);
-	*idx = (int)raw_idx & (int)sizeof(AmphoraMemBlock) - 1;
+	if (blk) *blk = b;
+	if (idx) *idx = i;
+
+	return b;
 }
 
 void *

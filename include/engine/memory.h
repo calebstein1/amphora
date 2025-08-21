@@ -4,8 +4,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Convert a raw pointer address to a AmphoraHeap block, index addressing format */
-void Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx);
+/* Convert a raw pointer address to a AmphoraHeap block, index addressing format, returns the block */
+int Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx);
 /* Convert an AmphoraHeap block, index address to a raw pointer */
 void *Amphora_HeapBlkIdxToPtr(int blk, int idx);
 /* Dump the contents of a heap memory block to the console */
