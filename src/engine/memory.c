@@ -317,9 +317,6 @@ Amphora_HeapStrdupFrame(const char *str) {
 
 void
 Amphora_HeapFree(void *ptr) {
-	/*
-	 * TODO: Coalesce adjacent blocks on free
-	 */
 	const long idx = (intptr_t)ptr - (intptr_t)&amphora_heap[0][0];
 	unsigned int block;
 	struct amphora_mem_allocation_header_t *header;
