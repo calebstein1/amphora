@@ -1,3 +1,4 @@
+#include <stdint.h>
 #if defined(__APPLE__) || defined(__linux__)
 #include <fcntl.h>
 #include <unistd.h>
@@ -7,8 +8,6 @@
 #else
 #include <stdlib.h>
 #endif
-
-#include <stdint.h>
 
 #include "engine/internal/error.h"
 #include "engine/internal/memory.h"
@@ -317,4 +316,42 @@ Amphora_HeapFree(void *ptr) {
 void
 Amphora_HeapClearFrameHeap(void) {
 	amphora_frame_heap.idx = 0;
+}
+
+uint32_t
+Amphora_HeapHousekeeping(uint32_t ms) {
+	static uint8_t blk = 0, blk_last_update = 0;
+	static struct amphora_mem_allocation_header_t *header = NULL;
+
+	struct amphora_mem_allocation_header_t *next_header;
+	uint32_t leave_time = SDL_GetTicks() + ms;
+
+	if (header == NULL)
+		header = (struct amphora_mem_allocation_header_t *)&amphora_heap[0][0];
+
+	if (ms == 0) return 0;
+
+	while (SDL_GetTicks() < leave_time) {
+		next_header = header + 1 + (header->off_f >> 3);
+		if (heap_metadata[blk].category == MEM_UNASSIGNED || (uintptr_t)next_header > (uintptr_t)amphora_heap[blk] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)) {
+			if (blk == blk_last_update - 1) return leave_time - SDL_GetTicks();
+			blk++;
+			header = (struct amphora_mem_allocation_header_t *)&amphora_heap[blk][0];
+			continue;
+		}
+		if (header->free && next_header->free) {
+			header->off_f += next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
+			next_header = header + 1 + (header->off_f >> 3);
+			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
+			blk_last_update = blk;
+			continue;
+		}
+		if (header->off_f > heap_metadata[blk].largest_free) {
+			heap_metadata[blk].largest_free = header->off_f;
+			blk_last_update = blk;
+		}
+		header = next_header;
+	}
+
+	return 0;
 }

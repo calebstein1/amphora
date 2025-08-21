@@ -55,5 +55,6 @@ char *Amphora_HeapStrdup(const char *str);
 char *Amphora_HeapStrdupFrame(const char *str);
 void Amphora_HeapFree(void *ptr);
 void Amphora_HeapClearFrameHeap(void);
+uint32_t Amphora_HeapHousekeeping(uint32_t ms);
 
 #endif /* MEMORY_INTERNAL_H */

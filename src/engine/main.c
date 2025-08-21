@@ -145,7 +145,7 @@ Amphora_GetFPS(void) {
 static int
 Amphora_MainLoop(SDL_Event *e) {
 	static Uint32 frame_start, frame_end;
-	static Uint32 frame_time;
+	static Uint32 frame_time, remaining_time;
 
 	frame_start = SDL_GetTicks();
 	frame_count++;
@@ -180,8 +180,10 @@ Amphora_MainLoop(SDL_Event *e) {
 	SDL_RenderPresent(Amphora_GetRenderer());
 
 	frame_end = SDL_GetTicks64();
-	if ((frame_time = (frame_end - frame_start)) < (1000 / framerate)) {
-		SDL_Delay((1000 / framerate) - frame_time);
+	if ((frame_time = frame_end - frame_start) < 1000 / framerate) {
+		remaining_time = 1000 / framerate - frame_time;
+		remaining_time = Amphora_HeapHousekeeping(remaining_time);
+		SDL_Delay(remaining_time);
 #ifdef DEBUG
 	} else if (frame_time > (1000 / framerate)) {
 		SDL_Log("Lag on frame %u (frame took %u ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 /
