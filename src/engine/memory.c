@@ -150,7 +150,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	uint8_t current_block;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
-	struct amphora_mem_allocation_header_t *header, *next_header;
+	struct amphora_mem_allocation_header_t *header, *next_header, *next_next_header;
 	bool split = false;
 	bool recovery_success = false;
 
@@ -184,7 +184,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 		if (next_header->magic != MAGIC) {
 			/* It's a disaster if we're doing this */
 #ifdef DEBUG
-			fprintf(stderr, "Heap corrupted: attempting recovery on block %d... don't hold your breath\n", current_block);
+			fprintf(stderr, "HEAP CORRUPTED: attempting recovery on block %d... don't hold your breath\n", current_block);
 #endif
 			while ((uintptr_t)next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
 				next_header++;
@@ -216,6 +216,9 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 			next_header->off_f = header->off_f - aligned_size - sizeof(struct amphora_mem_allocation_header_t);
 			next_header->free = 1;
 			next_header->off_b = aligned_size + sizeof(struct amphora_mem_allocation_header_t);
+			next_next_header = next_header + 1 + (next_header->off_f >> 3);
+			if ((uintptr_t)next_next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock))
+				next_next_header->off_b = next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 		}
 	}
 	/* We take care of this calculation properly in the housekeeping tasks, this is quick and dirty */
@@ -265,7 +268,7 @@ Amphora_HeapRealloc(void *ptr, size_t size, AmphoraMemBlockCategory category) {
 		return ptr;
 	}
 
-	(void)memcpy(addr, ptr, header->off_f);
+	(void)memcpy(addr, ptr, header->off_f < size ? header->off_f : size);
 	Amphora_HeapFree(ptr);
 
 	return addr;
@@ -338,7 +341,9 @@ Amphora_HeapFree(void *ptr) {
 	if (header->off_f > heap_metadata[block].largest_free) heap_metadata[block].largest_free = header->off_f;
 	header->free = 1;
 	if (--heap_metadata[block].allocations == 0) {
+		heap_metadata[block].largest_free = sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t);
 		heap_metadata[block].category = MEM_UNASSIGNED;
+		heap_metadata[block].corrupted = 0;
 	}
 }
 
@@ -362,7 +367,9 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 
 	while (SDL_GetTicks() < leave_time) {
 		next_header = header + 1 + (header->off_f >> 3);
-		if (heap_metadata[blk].category == MEM_UNASSIGNED || (uintptr_t)next_header > (uintptr_t)amphora_heap[blk] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)) {
+		if (heap_metadata[blk].category == MEM_UNASSIGNED
+			|| (uintptr_t)next_header > (uintptr_t)amphora_heap[blk] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)
+			|| heap_metadata[blk].corrupted) {
 			if (blk == blk_last_update - 1) return leave_time - SDL_GetTicks();
 			blk++;
 			header = (struct amphora_mem_allocation_header_t *)&amphora_heap[blk][0];
