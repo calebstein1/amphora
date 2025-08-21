@@ -355,19 +355,19 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 	static struct amphora_mem_allocation_header_t *header = NULL;
 
 	struct amphora_mem_allocation_header_t *next_header;
-	uint32_t leave_time = SDL_GetTicks() + ms;
+	uint32_t start_time = SDL_GetTicks();
 
 	if (header == NULL)
 		header = (struct amphora_mem_allocation_header_t *)&amphora_heap[0][0];
 
 	if (ms == 0) return 0;
 
-	while (SDL_GetTicks() < leave_time) {
+	while (SDL_GetTicks() - start_time < ms) {
 		next_header = header + 1 + (header->off_f >> 3);
 		if (heap_metadata[blk].category == MEM_UNASSIGNED
 			|| (uintptr_t)next_header > (uintptr_t)amphora_heap[blk] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)
 			|| heap_metadata[blk].corrupted) {
-			if (blk == blk_last_update - 1) return leave_time - SDL_GetTicks();
+			if (blk == blk_last_update - 1) return ms - (SDL_GetTicks() - start_time);
 			blk++;
 			header = (struct amphora_mem_allocation_header_t *)&amphora_heap[blk][0];
 			continue;
