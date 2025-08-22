@@ -153,7 +153,7 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	uint8_t current_block;
 	int i = 0;
 	size_t aligned_size = size + 7 & ~7;
-	struct amphora_mem_allocation_header_t *header, *next_header, *next_next_header;
+	struct amphora_mem_allocation_header_t *header = NULL, *next_header = NULL, *next_next_header = NULL;
 	bool split = false;
 	bool recovery_success = false;
 
@@ -225,8 +225,8 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 		}
 	}
 	/* We take care of this calculation properly in the housekeeping tasks, this is quick and dirty */
-	if (heap_metadata[current_block].largest_free == header->off_f)
-		heap_metadata[current_block].largest_free -= aligned_size - sizeof(struct amphora_mem_allocation_header_t);
+	if (heap_metadata[current_block].largest_free == header->off_f && next_header)
+		heap_metadata[current_block].largest_free = next_header->off_f;
 
 	header->magic = MAGIC;
 	header->scope = 0;
