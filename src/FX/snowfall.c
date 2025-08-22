@@ -2,25 +2,25 @@
 #include "snowfall.h"
 
 void
-Snowfall(AmphoraParticle *particle, const SDL_FRect *rect) {
-	if (!particle->data3) {
-		particle->vx = Amphora_GetRandomF() - 0.5f;
-		particle->vy = Amphora_GetRandomF();
-		particle->data1 = particle->x;
-		particle->data3 = particle->vx > 0 ? 1 : 0;
+Snowfall(int i, int c, AmphoraParticle *p, AmphoraParticleExt *d, const SDL_FRect *rect) {
+	if (!d[i].data3) {
+		p[i].vx = Amphora_GetRandomF() - 0.5f;
+		p[i].vy = Amphora_GetRandomF();
+		d[i].data1 = p[i].x;
+		d[i].data3 = p[i].vx > 0 ? 1 : 0;
 	}
 
-	particle->y += particle->vy;
-	particle->color.a = (Uint8)(255.0f * (1.0f - particle->y / rect->h));
-	if (particle->color.a < 128) particle->color.a = 128;
+	p[i].y += p[i].vy;
+	p[i].color.a = (Uint8)(255.0f * (1.0f - p[i].y / rect->h));
+	if (p[i].color.a < 128) p[i].color.a = 128;
 
-	if (particle->data3 == 1) {
-		particle->x += particle->vx * 0.5f;
-		if (particle->x > particle->data1 + 3) particle->data3 = -1;
+	if (d[i].data3 == 1) {
+		p[i].x += p[i].vx * 0.5f;
+		if (p[i].x > d[i].data1 + 3) d[i].data3 = -1;
 	} else {
-		particle->x -= particle->vx * 0.5f;
-		if (particle->x < particle->data1 - 3) particle->data3 = 1;
+		p[i].x -= p[i].vx * 0.5f;
+		if (p[i].x < d[i].data1 - 3) d[i].data3 = 1;
 	}
 
-	if (particle->y > rect->h) particle->y = 0;
+	if (p[i].y > rect->h) p[i].y = 0;
 }
