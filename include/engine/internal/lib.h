@@ -13,7 +13,7 @@ typedef struct {
 	Uint16 timer;
 	Uint16 frames;
 	int idx;
-	int idx_mod;
+	int idx_mod; /* Used to modify idx by arbitrary amounts, good for fade-in/fade-out (see scenes.c) */
 	Uint8 *steps;
 } AmphoraFader;
 

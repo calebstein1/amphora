@@ -61,6 +61,10 @@ Amphora_DoLoadScene(const char *name) {
 		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "No scene %s", name);
 		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
+	if (Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent) == AMPHORA_STATUS_FAIL_UNDEFINED) {
+		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Scene transition event registration failed");
+		return AMPHORA_STATUS_FAIL_UNDEFINED;
+	}
 	fade_rect.w = screen_size.x;
 	fade_rect.h = screen_size.y;
 	transition_fader.frames = transition_fader.timer * Amphora_GetFPS() / 1000;
@@ -73,7 +77,6 @@ Amphora_DoLoadScene(const char *name) {
 	}
 	transition_fader.idx = 0;
 	transition_fader.idx_mod = 1;
-	(void)Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent);
 
 	return AMPHORA_STATUS_OK;
 }
