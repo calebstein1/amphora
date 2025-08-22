@@ -385,7 +385,7 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 		}
 		/* Coalesce free blocks */
 		if (header->free && next_header->free) {
-			next_header->magic = 0;
+			next_header->magic = 0; /* This isn't strictly necessary, but it makes the memory dumps in memxplore cleaner */
 			header->off_f += next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 			next_header = header + 1 + (header->off_f >> 3);
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
