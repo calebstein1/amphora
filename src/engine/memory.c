@@ -370,32 +370,30 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 		if (heap_metadata[blk].category == MEM_UNASSIGNED
 			|| (uintptr_t)next_header > (uintptr_t)amphora_heap[blk] + sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t)
 			|| heap_metadata[blk].corrupted) {
-			if (blk == blk_last_update - 1) return ms - (SDL_GetTicks() - start_time);
+			if (blk == blk_last_update - 1) {
+				blk_last_update = blk;
+				return ms - (SDL_GetTicks() - start_time);
+			}
 			blk++;
 			header = (struct amphora_mem_allocation_header_t *)&amphora_heap[blk][0];
 			continue;
 		}
+		/* Update largest_free */
 		if (header->off_f > heap_metadata[blk].largest_free) {
-#ifdef DEBUG
-			(void)printf("Updating largest_free in block %d\n", blk);
-#endif
 			heap_metadata[blk].largest_free = header->off_f;
 			blk_last_update = blk;
 		}
+		/* Coalesce free blocks */
 		if (header->free && next_header->free) {
-#ifdef DEBUG
-			(void)printf("Coalescing regions in block %d\n", blk);
-#endif
+			next_header->magic = 0;
 			header->off_f += next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 			next_header = header + 1 + (header->off_f >> 3);
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 			blk_last_update = blk;
 			continue;
 		}
+		/* Remove zero-size headers */
 		if (next_header->off_f == 0) {
-#ifdef DEBUG
-			(void)printf("Removing 0-sized header from block %d\n", blk);
-#endif
 			header->off_f += sizeof(struct amphora_mem_allocation_header_t);
 			next_header = header + 1 + (header->off_f >> 3);
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
