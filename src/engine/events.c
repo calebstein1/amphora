@@ -18,6 +18,9 @@ Amphora_RegisterEvent(const char *name, void (*func)(void)) {
 		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
 
+#ifdef DEBUG
+	SDL_Log("Registering event: %s\n", name);
+#endif
 	if (++ev_count >= ev_max) {
 		ev_names = Amphora_HeapRealloc(ev_names, ev_max * sizeof(char *) + EVENT_BLOCK_SIZE * sizeof(char *), MEM_STRING);
 		(void)SDL_memset(ev_names + ev_max, 0, EVENT_BLOCK_SIZE * sizeof(char *));
@@ -45,6 +48,9 @@ Amphora_UnregisterEvent(const char *name) {
 		}
 	}
 
+#ifdef DEBUG
+	SDL_Log("Unregistering event: %s\n", name);
+#endif
 	ev_count--;
 	Amphora_HeapFree(ev_names[i]);
 	ev_names[i] = NULL;
