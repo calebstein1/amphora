@@ -224,9 +224,18 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 				next_next_header->off_b = next_header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 		}
 	}
-	/* We take care of this calculation properly in the housekeeping tasks, this is quick and dirty */
-	if (heap_metadata[current_block].largest_free == header->off_f && next_header)
-		heap_metadata[current_block].largest_free = next_header->off_f;
+	/*
+	 * This is quick and dirty to handle multiple same-category allocations before housekeeping runs.
+	 * If we split the largest block and there are further allocations, the largest size temporarily becomes the remaining split space.
+	 * If we split the remaining free space at the end of a block, we subtract the allocated size plus a header from that space.
+	 * This is imperfect but is enough to avoid over-commiting memory blocks when making many large allocations quickly.
+	 * Housekeeping will ultimately update this to the actual correct value.
+	 */
+	if (heap_metadata[current_block].largest_free == header->off_f) {
+		heap_metadata[current_block].largest_free = next_header && (uintptr_t)next_header - (uintptr_t)&amphora_heap[current_block] < sizeof(AmphoraMemBlock)
+			? next_header->off_f
+			: header->off_f - aligned_size - sizeof(struct amphora_mem_allocation_header_t);
+	}
 
 	header->magic = MAGIC;
 	header->scope = 0;
