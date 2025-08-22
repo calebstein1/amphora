@@ -21,11 +21,15 @@ static struct {
 } amphora_frame_heap;
 static struct amphora_mem_block_metadata_t *heap_metadata;
 static uint8_t current_block_categories[MEM_COUNT];
+static bool shm_linked;
 static const char *category_names[] = {
 #define X(cat) #cat,
 	AMPHORA_MEM_CATEGORIES
 #undef X
 };
+
+/* Prototypes for private functions */
+int attempt_recovery(int blk, struct amphora_mem_allocation_header_t *header, struct amphora_mem_allocation_header_t *corrupt);
 
 int
 Amphora_HeapPtrToBlkIdx(void *ptr, int *blk, int *idx) {
@@ -87,6 +91,7 @@ Amphora_InitHeap(void) {
 		amphora_heap = mmap(NULL, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	}
 	(void)close(fd);
+	shm_linked = true;
 #elif defined(_WIN32)
 	/*
 	 * TODO: Implement large pages support for Windows
@@ -119,7 +124,7 @@ Amphora_InitHeap(void) {
 	heap_metadata = (struct amphora_mem_block_metadata_t *)&amphora_heap[AMPHORA_NUM_MEM_BLOCKS - 1][8];
 	heap_metadata[AMPHORA_NUM_MEM_BLOCKS - 1].largest_free = sizeof(AmphoraMemBlock) - sizeof(struct amphora_mem_allocation_header_t);
 
-	heap_metadata = Amphora_HeapAlloc(sizeof(struct amphora_mem_block_metadata_t) * AMPHORA_NUM_MEM_BLOCKS, MEM_META);
+	heap_metadata = Amphora_HeapCalloc(AMPHORA_NUM_MEM_BLOCKS, sizeof(struct amphora_mem_block_metadata_t), MEM_META);
 	if (heap_metadata == NULL) {
 		/* We should never hit this code path */
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap metadata");
@@ -138,7 +143,7 @@ Amphora_DestroyHeap(void) {
 	Amphora_HeapFree(heap_metadata);
 #if defined(__APPLE__) || defined(__linux__)
 	(void)munmap(amphora_heap, sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
-	(void)shm_unlink("/amphora_heap");
+	if (shm_linked) (void)shm_unlink("/amphora_heap");
 #elif defined(_WIN32)
 	VirtualFree(amphora_heap, 0, MEM_RELEASE);
 #else
@@ -155,7 +160,6 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	size_t aligned_size = size + 7 & ~7;
 	struct amphora_mem_allocation_header_t *header = NULL, *next_header = NULL, *next_next_header = NULL;
 	bool split = false;
-	bool recovery_success = false;
 
 	if (aligned_size + 8 > sizeof(AmphoraMemBlock)) {
 		/*
@@ -179,34 +183,39 @@ Amphora_HeapAlloc(size_t size, AmphoraMemBlockCategory category) {
 	header = (struct amphora_mem_allocation_header_t *)&amphora_heap[current_block][0];
 	while (header->free == 0 || header->off_f < aligned_size) {
 		if ((uintptr_t)header > (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
-			/* If we hit this path, we're likely in a state of utter pandemonium and there's no sense in continuing */
+			/*
+			 * If we hit this path, we're likely in a state of utter pandemonium and there's no sense in continuing.
+			 * Metadata told us we would find a suitable region in this block, but there was none.
+			 */
 			goto corrupt_fail;
 		}
 		/* Since sizeof(header) == 8, this is faster than division and safe because of our 8-byte alignment */
 		next_header = header + 1 + (header->off_f >> 3);
-		if (next_header->magic != MAGIC) {
-			/* It's a disaster if we're trying this */
-#ifdef DEBUG
-			(void)fprintf(stderr, "HEAP CORRUPTED: attempting recovery on block %d... don't hold your breath\n", current_block);
-#endif
-			while ((uintptr_t)next_header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock)) {
-				next_header++;
-				if (next_header->magic != MAGIC ||
-					(uintptr_t)next_header - (uintptr_t)header != next_header->off_b)
-					continue;
-				header->off_f = next_header->off_b - sizeof(struct amphora_mem_allocation_header_t);
-				recovery_success = true;
-				break;
-			}
-			if (!recovery_success) goto corrupt_fail;
-		}
+
+		if (next_header->magic != MAGIC)
+			if (attempt_recovery(current_block, header, next_header) < 0) goto corrupt_fail;
+
 		header = next_header;
 		continue;
 
 		corrupt_fail:
-		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Heap corrupted: unrecoverable, lost block %d", current_block);
+#ifdef DEBUG
+		(void)fprintf(stderr, "Unrecoverable corruption on block %d, block unavailable for further allocations", current_block);
+#endif
+		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Unrecoverable corruption on block %d, block unavailable for further allocations", current_block);
 		heap_metadata[current_block].corrupted = 1;
+		/*
+		 * In production builds, we unlink the shared memory region now since a crash is likely incoming.
+		 * We don't do this in debug builds so that memxplore can be used to inspect the fail memory state.
+		 * Unlink it manually using `memxplore -r`.
+		 */
+#if !defined(DEBUG) && (defined(__APPLE__) || defined(__linux__))
+		(void)shm_unlink("/amphora_heap");
+		shm_linked = false;
+#elif !defined(DEBUG) && defined(_WIN32)
+#endif
 		return NULL;
+		/* End corrupt_fail */
 	}
 	/* If we have room for a next header in the current block */
 	if ((uintptr_t)header < (uintptr_t)amphora_heap[current_block] + sizeof(AmphoraMemBlock) - 2 * sizeof(struct amphora_mem_allocation_header_t)) {
@@ -411,6 +420,49 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 		}
 		header = next_header;
 	}
+
+	return 0;
+}
+
+/*
+ * Private functions
+ */
+
+int
+attempt_recovery(int blk, struct amphora_mem_allocation_header_t *header, struct amphora_mem_allocation_header_t *corrupt) {
+	/*
+	 * It's a disaster if we're trying this.
+	 * We're going to attempt to recover the damaged list, but the reality is that for this type of
+	 * corruption, the corrupt_fail above path is usually our best option, or just crashing.
+	 */
+	struct amphora_mem_allocation_header_t *next_header = corrupt;
+	bool recovery_success = false;
+
+	if (++heap_metadata[blk].recovery_count > 5) {
+#ifdef DEBUG
+		(void)fprintf(stderr, "HEAP CORRUPTED: too many recovery attempts, giving up\n");
+#endif
+		return -1;
+	}
+#ifdef DEBUG
+	(void)fprintf(stderr, "HEAP CORRUPTED: attempting recovery on block %d... don't hold your breath\n", blk);
+#endif
+	next_header = corrupt;
+	while ((uintptr_t)next_header < (uintptr_t)amphora_heap[blk] + sizeof(AmphoraMemBlock)) {
+		next_header++;
+		if (next_header->magic != MAGIC ||
+			(uintptr_t)next_header - (uintptr_t)corrupt + sizeof(struct amphora_mem_allocation_header_t) != next_header->off_b)
+			continue;
+		corrupt->magic = MAGIC;
+		corrupt->off_f = next_header->off_b - sizeof(struct amphora_mem_allocation_header_t);
+		corrupt->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
+		recovery_success = true;
+		break;
+	}
+	if (!recovery_success) return -1;
+#ifdef DEBUG
+	(void)fprintf(stderr, "Recovery apparently succeeded on block %d, attempting to continuing as normal\n", blk);
+#endif
 
 	return 0;
 }

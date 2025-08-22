@@ -44,6 +44,7 @@ struct amphora_mem_block_metadata_t {
 	uint16_t allocations;
 	AmphoraMemBlockCategory category;
 	uint8_t corrupted : 1;
+	uint8_t recovery_count : 3;
 };
 
 int Amphora_InitHeap(void);
