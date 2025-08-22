@@ -13,7 +13,6 @@
 #include "engine/internal/memory.h"
 #include "engine/util.h"
 
-
 /* File-scoped variables */
 static AmphoraMemBlock *amphora_heap;
 static struct {
@@ -376,6 +375,13 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 			header = (struct amphora_mem_allocation_header_t *)&amphora_heap[blk][0];
 			continue;
 		}
+		if (header->off_f > heap_metadata[blk].largest_free) {
+#ifdef DEBUG
+			(void)printf("Updating largest_free in block %d\n", blk);
+#endif
+			heap_metadata[blk].largest_free = header->off_f;
+			blk_last_update = blk;
+		}
 		if (header->free && next_header->free) {
 #ifdef DEBUG
 			(void)printf("Coalescing regions in block %d\n", blk);
@@ -395,13 +401,6 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 			next_header->off_b = header->off_f + sizeof(struct amphora_mem_allocation_header_t);
 			blk_last_update = blk;
 			continue;
-		}
-		if (header->off_f > heap_metadata[blk].largest_free) {
-#ifdef DEBUG
-			(void)printf("Updating largest_free in block %d\n", blk);
-#endif
-			heap_metadata[blk].largest_free = header->off_f;
-			blk_last_update = blk;
 		}
 		header = next_header;
 	}
