@@ -101,7 +101,7 @@ Amphora_InitHeap(void) {
 	amphora_heap = malloc(sizeof(AmphoraMemBlock) * AMPHORA_NUM_MEM_BLOCKS);
 #endif
 
-	if (amphora_heap == NULL) {
+	if (amphora_heap == MAP_FAILED) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize heap");
 #if defined(__APPLE__) || defined(__linux__)
 		(void)shm_unlink("/amphora_heap");
@@ -397,7 +397,7 @@ Amphora_HeapHousekeeping(uint32_t ms) {
 			continue;
 		}
 		/* Update largest_free */
-		if (header->off_f > heap_metadata[blk].largest_free) {
+		if (header->free && header->off_f > heap_metadata[blk].largest_free) {
 			heap_metadata[blk].largest_free = header->off_f;
 			blk_last_update = blk;
 		}
