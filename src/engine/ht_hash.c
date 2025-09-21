@@ -100,7 +100,9 @@ HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set) {
 		if (i == end_idx) return -1;
 		if (++i == len) i = 0;
 	}
-	return set && t->table_entries[i].hash != hash && p > -1 ? p : i;
+	if (!set) return t->table_entries[i].status == HT_DELETED ? -1 : i;
+
+	return t->table_entries[i].hash != hash && p > -1 ? p : i;
 }
 
 intptr_t
@@ -115,6 +117,8 @@ HT_GetValue(const char *key, HT_HashTable t) {
 		return t->table_entries[i].data;
 	}
 	i = HT_ProbeForBucket(t, hash, i, 0);
+	if (i == -1) return -1;
+
 	if (t->table_entries[i].hash != hash) {
 		HT_SetError("Key %s does not exist in table", key);
 		return -1;
