@@ -13,7 +13,7 @@ int
 Amphora_RegisterEvent(const char *name, void (*func)(void)) {
 	int i;
 
-	if (HT_GetValue(name, ev_table)) {
+	if (HT_GetValue(name, ev_table) != -1) {
 		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Event %s is already used", name);
 		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}

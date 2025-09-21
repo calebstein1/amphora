@@ -34,11 +34,11 @@ Amphora_CreateString(const char *font_name, const int pt, const float x, const f
 	char text[AMPHORA_MAX_STR_LEN];
 	va_list args;
 
-	if (!HT_GetValue(font_name, fonts)) {
+	if (HT_GetValue(font_name, fonts) == -1) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to locate font %s\n", font_name);
 		return NULL;
 	}
-	if (!HT_GetValue(font_name, open_fonts)) {
+	if (HT_GetValue(font_name, open_fonts) == -1) {
 #ifdef DEBUG
 		SDL_Log("Loading font: %s\n", font_name);
 #endif
@@ -195,7 +195,7 @@ Amphora_FreeAllFonts(void) {
 	int i;
 
 	for (i = 0; i < FONTS_COUNT; i++) {
-		if (HT_GetValue(font_names[i], open_fonts)) {
+		if (HT_GetValue(font_names[i], open_fonts) != -1) {
 #ifdef DEBUG
             SDL_Log("Unloading font: %s\n", font_names[i]);
 #endif

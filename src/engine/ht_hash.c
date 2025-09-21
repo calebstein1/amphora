@@ -109,11 +109,15 @@ HT_GetValue(const char *key, HT_HashTable t) {
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key) return 0;
-	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0) return t->table_entries[i].data;
+	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0) {
+		if (t->table_entries[i].status == HT_DELETED) return -1;
+
+		return t->table_entries[i].data;
+	}
 	i = HT_ProbeForBucket(t, hash, i, 0);
 	if (t->table_entries[i].hash != hash) {
 		HT_SetError("Key %s does not exist in table", key);
-		return 0;
+		return -1;
 	}
 	return t->table_entries[i].data;
 }

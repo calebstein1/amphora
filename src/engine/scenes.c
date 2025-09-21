@@ -49,18 +49,16 @@ static SDL_Rect fade_rect;
 int
 Amphora_DoLoadScene(const char *name) {
 	Vector2 screen_size = Amphora_GetResolution();
+	long idx;
 	int i;
 
-	for (i = 0; i < SCENES_COUNT; i++) {
-		if (SDL_strcmp(name, scene_names[i]) == 0) {
-			current_scene_name = i;
-			break;
-		}
-	}
-	if (i == SCENES_COUNT) {
+	idx = HT_GetValue(name, scenes);
+	if (idx == -1) {
 		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "No scene %s", name);
 		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
+	current_scene_name = (int)idx;
+
 	if (Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent) == AMPHORA_STATUS_FAIL_UNDEFINED) {
 		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Scene transition event registration failed");
 		return AMPHORA_STATUS_FAIL_UNDEFINED;

@@ -54,7 +54,7 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 	AmphoraImage *spr = NULL;
 	struct render_list_node_t *render_list_node = NULL;
 
-	if (!HT_GetValue(image_name, open_images)) Amphora_LoadIMGTexture(image_name);
+	if (HT_GetValue(image_name, open_images) == -1) Amphora_LoadIMGTexture(image_name);
 
 	if ((spr = Amphora_HeapCalloc(1, sizeof(AmphoraImage), MEM_IMAGE)) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize sprite\n");
@@ -91,7 +91,7 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	}
 
 	if (override_img) {
-        if (!HT_GetValue(override_img, open_images)) {
+        if (HT_GetValue(override_img, open_images) == -1) {
         	Amphora_LoadIMGTexture(override_img);
         }
 		override = HT_GetRef(override_img, SDL_Texture, open_images);
@@ -286,7 +286,7 @@ Amphora_FreeAllIMG(void) {
 	int i;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
-		if (HT_GetValue(img_names[i], open_images)) {
+		if (HT_GetValue(img_names[i], open_images) != -1) {
 #ifdef DEBUG
 			SDL_Log("Unloading image: %s\n", img_names[i]);
 #endif
@@ -313,7 +313,7 @@ Amphora_CloseIMG(void) {
 
 SDL_Texture *
 Amphora_GetIMGTextureByName(const char *name) {
-	if (!HT_GetValue(name, open_images)) Amphora_LoadIMGTexture(name);
+	if (HT_GetValue(name, open_images) == -1) Amphora_LoadIMGTexture(name);
 
 	return HT_GetRef(name, SDL_Texture, open_images);
 }
