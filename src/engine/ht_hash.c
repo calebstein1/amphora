@@ -11,7 +11,7 @@
 
 enum hash_status_e {
 	HT_DELETED = -1,
-	HT_Amphora_HeapFree,
+	HT_FREE,
 	HT_USED
 };
 
