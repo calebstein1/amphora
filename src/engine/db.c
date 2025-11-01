@@ -1,6 +1,7 @@
 #include "engine/internal/error.h"
 #include "engine/internal/db.h"
 #include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 
 #include "config.h"
 
@@ -17,14 +18,14 @@ Amphora_GetDB(void) {
 
 int
 Amphora_InitDB(void) {
-	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
+	char *path = Amphora_HeapStrdup(SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE));
 
 	(void)Amphora_ConcatString(&path, "amphora.db");
 	if (sqlite3_open_v2(path, &game_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) != SQLITE_OK) {
-		SDL_free(path);
+		Amphora_HeapFree(path);
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
-	SDL_free(path);
+	Amphora_HeapFree(path);
 
 	return AMPHORA_STATUS_OK;
 }

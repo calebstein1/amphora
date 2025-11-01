@@ -1,4 +1,5 @@
 #include "engine/internal/ht_hash.h"
+#include "engine/internal/memory.h"
 
 #include <errno.h>
 #include <stdarg.h>
@@ -8,20 +9,23 @@
 #define INIT_TBL_SIZE 8
 #define MSG_LEN 256
 
-enum hash_status_e {
+enum hash_status_e
+{
 	HT_DELETED = -1,
 	HT_FREE,
 	HT_USED
 };
 
-struct hash_entry_t {
+struct hash_entry_t
+{
 	intptr_t data;
 	unsigned hash;
 	enum hash_status_e status;
 	char key[MAX_KEY_LEN];
 };
 
-struct hash_table_t {
+struct hash_table_t
+{
 	int size, count;
 	struct hash_entry_t *table_entries;
 };
@@ -29,7 +33,8 @@ struct hash_table_t {
 static char msg[MSG_LEN];
 
 void
-HT_SetError(char *fmt, ...) {
+HT_SetError(char *fmt, ...)
+{
 	va_list args;
 
 	va_start(args, fmt);
@@ -37,21 +42,27 @@ HT_SetError(char *fmt, ...) {
 }
 
 const char *
-HT_GetError(void) {
+HT_GetError(void)
+{
 	return msg;
 }
 
 HT_HashTable
-HT_NewTable(void) {
+HT_NewTable(void)
+{
 	HT_HashTable tbl;
 
-	if (!((tbl = malloc(sizeof(struct hash_table_t))))) {
+	tbl = Amphora_HeapAlloc(sizeof(struct hash_table_t), MEM_HASHTABLE);
+	if (tbl == NULL)
+	{
 		HT_SetError("Could not allocate table: %s", strerror(errno));
 		return NULL;
 	}
-	if (!((tbl->table_entries = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t))))) {
+	tbl->table_entries = Amphora_HeapCalloc(INIT_TBL_SIZE,sizeof(struct hash_entry_t), MEM_HASHTABLE);
+	if (tbl->table_entries == NULL)
+	{
 		HT_SetError("Could not allocate table data: %s", strerror(errno));
-		free(tbl);
+		Amphora_HeapFree(tbl);
 		return NULL;
 	}
 	tbl->count = 0;
@@ -65,25 +76,37 @@ HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
-	if (!((ntbl = calloc(tbl->size << 1, sizeof(struct hash_entry_t))))) {
+	ntbl = Amphora_HeapCalloc(tbl->size << 1, sizeof(struct hash_entry_t), MEM_HASHTABLE);
+	if (ntbl == NULL)
+	{
 		HT_SetError("Failed to grow table: %s", strerror(errno));
 		return NULL;
 	}
 	tbl->count = 0;
 	otbl = tbl->table_entries, tbl->table_entries = ntbl;
-	for (i = 0, tbl->size <<= 1; i < tbl->size >> 1; i++) if (otbl[i].status) HT_SetValue(otbl[i].key, otbl[i].data, tbl);
-	free(otbl);
+	tbl->size <<= 1;
+	for (i = 0; i < tbl->size >> 1; i++)
+	{
+		if (otbl[i].status > 0)
+		{
+			(void)HT_SetValue(otbl[i].key, otbl[i].data, tbl);
+			(void)HT_SetStatus(otbl[i].key, otbl[i].status, tbl);
+		}
+	}
+	Amphora_HeapFree(otbl);
 
 	return tbl;
 }
 
 unsigned
-HT_GetHash(const char *data) {
+HT_GetHash(const char *data)
+{
 	unsigned hash = OFFSET;
 	char *d = (char *)data;
 
 	if (!d) return 0;
-	while (*d) {
+	while (*d)
+	{
 		hash ^= *d++;
 		hash *= PRIME;
 	}
@@ -91,42 +114,58 @@ HT_GetHash(const char *data) {
 }
 
 int
-HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set) {
+HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set)
+{
 	int len = t->size, end_idx = i ? i - 1 : len, p = -1;
 
-	while (t->table_entries[i].status && t->table_entries[i].hash != hash) {
+	while (t->table_entries[i].status && t->table_entries[i].hash != hash)
+	{
 		if (set && t->table_entries[i].status == HT_DELETED && p == -1) p = i;
 		if (i == end_idx) return -1;
 		if (++i == len) i = 0;
 	}
-	return set && t->table_entries[i].hash != hash && p > -1 ? p : i;
+	if (!set) return t->table_entries[i].status == HT_DELETED ? -1 : i;
+
+	return t->table_entries[i].hash != hash && p > -1 ? p : i;
 }
 
 intptr_t
-HT_GetValue(const char *key, HT_HashTable t) {
+HT_GetValue(const char *key, HT_HashTable t)
+{
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key) return 0;
-	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0) return t->table_entries[i].data;
+	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0)
+	{
+		if (t->table_entries[i].status == HT_DELETED) return -1;
+
+		return t->table_entries[i].data;
+	}
 	i = HT_ProbeForBucket(t, hash, i, 0);
-	if (t->table_entries[i].hash != hash) {
+	if (i == -1) return -1;
+
+	if (t->table_entries[i].hash != hash)
+	{
 		HT_SetError("Key %s does not exist in table", key);
-		return 0;
+		return -1;
 	}
 	return t->table_entries[i].data;
 }
 
 unsigned
-HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
+HT_SetValue(const char *key, intptr_t val, HT_HashTable t)
+{
 	unsigned hash = HT_GetHash(key);
 	int i;
 
 	if (!key) return 0;
-	if (t->count >= (t->size * 7) / 10) HT_IncreaseSizeRehash(t);
+	if (t->count >= (t->size * 7) / 10) (void)HT_IncreaseSizeRehash(t);
 	i = (int)(hash & (t->size - 1));
-	if (t->table_entries[i].hash && (t->table_entries[i].hash != hash || strcmp(t->table_entries[i].key, key) != 0)) i = HT_ProbeForBucket(t, hash, i, 1);
-	if (i == -1) {
+	if (t->table_entries[i].hash && (t->table_entries[i].hash != hash || strcmp(t->table_entries[i].key, key) != 0))
+		i = HT_ProbeForBucket(t, hash, i, 1);
+	if (i == -1)
+	{
 		HT_SetError("Table full, cannot accept key %s", key);
 		return 0;
 	}
@@ -137,14 +176,17 @@ HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
 }
 
 int
-HT_GetStatus(const char *key, HT_HashTable t) {
+HT_GetStatus(const char *key, HT_HashTable t)
+{
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key) return 0;
-	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0) return t->table_entries[i].status;
+	if (t->table_entries[i].hash == hash && strcmp(t->table_entries[i].key, key) == 0)
+		return t->table_entries[i].status;
 	i = HT_ProbeForBucket(t, hash, i, 0);
-	if (t->table_entries[i].hash != hash) {
+	if (t->table_entries[i].hash != hash)
+	{
 		HT_SetError("Key %s does not exist in table", key);
 		return 0;
 	}
@@ -152,12 +194,14 @@ HT_GetStatus(const char *key, HT_HashTable t) {
 }
 
 unsigned
-HT_SetStatus(const char *key, int val, HT_HashTable t) {
+HT_SetStatus(const char *key, int val, HT_HashTable t)
+{
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key || !t->table_entries[i].status) return 0;
-	if (t->table_entries[i].hash && (t->table_entries[i].hash != hash || strcmp(t->table_entries[i].key, key) != 0)) i = HT_ProbeForBucket(t, hash, i, 1);
+	if (t->table_entries[i].hash && (t->table_entries[i].hash != hash || strcmp(t->table_entries[i].key, key) != 0))
+		i = HT_ProbeForBucket(t, hash, i, 1);
 
 	t->table_entries[i].status = val;
 
@@ -165,24 +209,28 @@ HT_SetStatus(const char *key, int val, HT_HashTable t) {
 }
 
 unsigned
-HT_GetCount(HT_HashTable t) {
+HT_GetCount(HT_HashTable t)
+{
 	return t->count;
 }
 
 unsigned
-HT_GetSize(HT_HashTable t) {
+HT_GetSize(HT_HashTable t)
+{
 	return t->size;
 }
 
 void
-HT_DeleteKey(const char *key, HT_HashTable t) {
+HT_DeleteKey(const char *key, HT_HashTable t)
+{
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->size - 1));
 
 	if (!key) return;
 	if (t->table_entries[i].hash != hash || strcmp(t->table_entries[i].key, key) != 0)
 		i = HT_ProbeForBucket(t, hash, i, 0);
-	if (t->table_entries[i].status != HT_USED || t->table_entries[i].hash != hash) {
+	if (t->table_entries[i].status != HT_USED || t->table_entries[i].hash != hash)
+	{
 		HT_SetError("Key %s does not exist in table", key);
 		return;
 	}
@@ -191,7 +239,8 @@ HT_DeleteKey(const char *key, HT_HashTable t) {
 }
 
 void
-HT_FreeTable(HT_HashTable tbl) {
-	free(tbl->table_entries);
-	free(tbl);
+HT_FreeTable(HT_HashTable tbl)
+{
+	Amphora_HeapFree(tbl->table_entries);
+	Amphora_HeapFree(tbl);
 }

@@ -4,6 +4,7 @@
 #include "engine/internal/events.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/prefs.h"
 #include "engine/internal/random.h"
@@ -36,6 +37,10 @@ main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 
+	/*
+	 * TODO: check Init* error codes
+	 */
+	Amphora_InitHeap();
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
 		Amphora_SetError(AMPHORA_STATUS_CORE_FAIL, "Failed to init SDL: %s", SDL_GetError());
 		return AMPHORA_STATUS_CORE_FAIL;
@@ -80,9 +85,6 @@ main(int argc, char **argv) {
 		return AMPHORA_STATUS_CORE_FAIL;
 	}
 #endif
-	/*
-	 * TODO: check Init* error codes
-	 */
 	Amphora_InitRand();
 	Amphora_InitDB();
 	Amphora_InitConfig();
@@ -143,7 +145,7 @@ Amphora_GetFPS(void) {
 static int
 Amphora_MainLoop(SDL_Event *e) {
 	static Uint32 frame_start, frame_end;
-	static Uint32 frame_time;
+	static Uint32 frame_time, remaining_time;
 
 	frame_start = SDL_GetTicks();
 	frame_count++;
@@ -173,12 +175,15 @@ Amphora_MainLoop(SDL_Event *e) {
 	Amphora_ProcessRenderList();
 	Amphora_UpdateCamera();
 	Amphora_ProcessRegisteredEvents();
+	Amphora_HeapClearFrameHeap();
 
 	SDL_RenderPresent(Amphora_GetRenderer());
 
 	frame_end = SDL_GetTicks64();
-	if ((frame_time = (frame_end - frame_start)) < (1000 / framerate)) {
-		SDL_Delay((1000 / framerate) - frame_time);
+	if ((frame_time = frame_end - frame_start) < 1000 / framerate) {
+		remaining_time = 1000 / framerate - frame_time;
+		remaining_time = Amphora_HeapHousekeeping(remaining_time);
+		SDL_Delay(remaining_time);
 #ifdef DEBUG
 	} else if (frame_time > (1000 / framerate)) {
 		SDL_Log("Lag on frame %u (frame took %u ticks, %d ticks per frame)\n", frame_count, frame_end - frame_start, 1000 /
@@ -228,4 +233,5 @@ Amphora_CleanResources(void) {
 	Amphora_CloseRender();
 	Amphora_ReleaseControllers();
 	Amphora_CloseDB();
+	Amphora_DestroyHeap();
 }

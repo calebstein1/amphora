@@ -1,6 +1,7 @@
 #include "engine/internal/error.h"
-#include "engine/internal/lib.h"
 #include "engine/internal/img.h"
+#include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 
 #include "config.h"
@@ -53,9 +54,9 @@ Amphora_CreateSprite(const char *image_name, const float x, const float y, const
 	AmphoraImage *spr = NULL;
 	struct render_list_node_t *render_list_node = NULL;
 
-	if (!HT_GetValue(image_name, open_images)) Amphora_LoadIMGTexture(image_name);
+	if (HT_GetValue(image_name, open_images) == -1) Amphora_LoadIMGTexture(image_name);
 
-	if ((spr = SDL_calloc(1, sizeof(AmphoraImage))) == NULL) {
+	if ((spr = Amphora_HeapCalloc(1, sizeof(AmphoraImage), MEM_IMAGE)) == NULL) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to initialize sprite\n");
 
 		return NULL;
@@ -84,13 +85,13 @@ Amphora_AddFrameset(AmphoraImage *spr, const char *name, const char *override_im
 	SDL_Texture *override = NULL;
 
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
-	if (!((spr->frameset_list = SDL_realloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t))))) {
+	if (!((spr->frameset_list = Amphora_HeapRealloc(spr->frameset_list, (spr->num_framesets + 1) * sizeof(struct frameset_t), MEM_IMAGE)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to reallocate framesets\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
 
 	if (override_img) {
-        if (!HT_GetValue(override_img, open_images)) {
+        if (HT_GetValue(override_img, open_images) == -1) {
         	Amphora_LoadIMGTexture(override_img);
         }
 		override = HT_GetRef(override_img, SDL_Texture, open_images);
@@ -249,10 +250,10 @@ Amphora_FreeSprite(AmphoraImage *spr) {
 	Amphora_ValidatePtrNotNull(spr, AMPHORA_STATUS_FAIL_UNDEFINED)
 
 	if (spr == Amphora_GetCameraTarget()) Amphora_SetCameraTarget(NULL);
-	if (spr->frameset_list) SDL_free(spr->frameset_list);
+	if (spr->frameset_list) Amphora_HeapFree(spr->frameset_list);
 	HT_FreeTable(spr->framesets);
 	spr->render_list_node->garbage = true;
-	SDL_free(spr);
+	Amphora_HeapFree(spr);
 
 	return AMPHORA_STATUS_OK;
 }
@@ -285,7 +286,7 @@ Amphora_FreeAllIMG(void) {
 	int i;
 
 	for (i = 0; i < IMAGES_COUNT; i++) {
-		if (HT_GetValue(img_names[i], open_images)) {
+		if (HT_GetValue(img_names[i], open_images) != -1) {
 #ifdef DEBUG
 			SDL_Log("Unloading image: %s\n", img_names[i]);
 #endif
@@ -312,7 +313,7 @@ Amphora_CloseIMG(void) {
 
 SDL_Texture *
 Amphora_GetIMGTextureByName(const char *name) {
-	if (!HT_GetValue(name, open_images)) Amphora_LoadIMGTexture(name);
+	if (HT_GetValue(name, open_images) == -1) Amphora_LoadIMGTexture(name);
 
 	return HT_GetRef(name, SDL_Texture, open_images);
 }

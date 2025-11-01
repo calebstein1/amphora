@@ -8,6 +8,7 @@
 
 #include "engine/internal/db.h"
 #include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/prefs.h"
 
 #include "config.h"
@@ -191,19 +192,19 @@ Amphora_LoadFPS(void) {
 
 static SDL_GUID
 Amphora_GetUUID(void) {
-	char *path = SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE);
+	char *path = Amphora_HeapStrdup(SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE));
 	SDL_RWops *rw;
 	char *file_contents;
 	SDL_GUID guid;
 	char guid_str[33];
 
 	Amphora_ConcatString(&path, "uuid");
-
 	if ((rw = SDL_RWFromFile(path, "rb"))) {
 #ifdef DEBUG
 		SDL_Log("Loading UUID from file...\n");
 #endif
-		if (!((file_contents = SDL_malloc(SDL_RWsize(rw))))) {
+		if (!((file_contents = Amphora_HeapAlloc(SDL_RWsize(rw), MEM_STRING)))) {
+			Amphora_HeapFree(path);
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to allocate space for UUID!\n");
 			SDL_memset(&guid, 0, sizeof(guid));
 
@@ -211,7 +212,7 @@ Amphora_GetUUID(void) {
 		}
 		SDL_RWread(rw, file_contents, SDL_RWsize(rw), 1);
 		SDL_memcpy(&guid.data, file_contents, sizeof(guid.data));
-		SDL_free(file_contents);
+		Amphora_HeapFree(file_contents);
 		SDL_RWclose(rw);
 
 #ifdef DEBUG
@@ -246,6 +247,7 @@ Amphora_GetUUID(void) {
 	rw = SDL_RWFromFile(path, "w+b");
 	SDL_RWwrite(rw, &guid.data, sizeof(guid.data), 1);
 	SDL_RWclose(rw);
+	Amphora_HeapFree(path);
 
 #ifdef DEBUG
 	SDL_GUIDToString(guid, guid_str, sizeof(guid_str));

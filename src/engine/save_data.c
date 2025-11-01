@@ -1,4 +1,5 @@
 #include "engine/internal/db.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/save_data.h"
 
 int
@@ -55,7 +56,6 @@ Ampohra_LoadString(const char *attribute, char **out_string) {
 	sqlite3 *db = Amphora_GetDB();
 	sqlite3_stmt *stmt;
 	const char *sql = "SELECT value FROM save_data WHERE attribute=?";
-	const unsigned char *val;
 
 	sqlite3_prepare_v2(db, sql, (int)SDL_strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 1, attribute, -1, NULL);
@@ -63,13 +63,7 @@ Ampohra_LoadString(const char *attribute, char **out_string) {
 		sqlite3_finalize(stmt);
 		return -1;
 	}
-	val = sqlite3_column_text(stmt, 0);
-	if (!((*out_string = SDL_malloc(sqlite3_column_bytes(stmt, 0) + 1)))) {
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Could not allocate space for string\n");
-		sqlite3_finalize(stmt);
-		return -1;
-	}
-	SDL_memcpy(*out_string, val, sqlite3_column_bytes(stmt, 0) + 1);
+	*out_string = Amphora_HeapStrdupFrame((char *)sqlite3_column_text(stmt, 0));
 	sqlite3_finalize(stmt);
 
 	return 0;

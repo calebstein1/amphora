@@ -3,6 +3,7 @@
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
 #include "engine/internal/lib.h"
+#include "engine/internal/memory.h"
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
@@ -48,22 +49,24 @@ static SDL_Rect fade_rect;
 int
 Amphora_DoLoadScene(const char *name) {
 	Vector2 screen_size = Amphora_GetResolution();
+	long idx;
 	int i;
 
-	for (i = 0; i < SCENES_COUNT; i++) {
-		if (SDL_strcmp(name, scene_names[i]) == 0) {
-			current_scene_name = i;
-			break;
-		}
-	}
-	if (i == SCENES_COUNT) {
+	idx = HT_GetValue(name, scenes);
+	if (idx == -1) {
 		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "No scene %s", name);
+		return AMPHORA_STATUS_FAIL_UNDEFINED;
+	}
+	current_scene_name = (int)idx;
+
+	if (Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent) == AMPHORA_STATUS_FAIL_UNDEFINED) {
+		Amphora_SetError(AMPHORA_STATUS_FAIL_UNDEFINED, "Scene transition event registration failed");
 		return AMPHORA_STATUS_FAIL_UNDEFINED;
 	}
 	fade_rect.w = screen_size.x;
 	fade_rect.h = screen_size.y;
 	transition_fader.frames = transition_fader.timer * Amphora_GetFPS() / 1000;
-	if (!((transition_fader.steps = SDL_malloc((transition_fader.frames >> 1) * sizeof(Uint8))))) {
+	if (!((transition_fader.steps = Amphora_HeapAlloc((transition_fader.frames >> 1) * sizeof(Uint8), MEM_MISC)))) {
 		Amphora_SetError(AMPHORA_STATUS_ALLOC_FAIL, "Failed to allocate memory for fade steps\n");
 		return AMPHORA_STATUS_ALLOC_FAIL;
 	}
@@ -72,7 +75,6 @@ Amphora_DoLoadScene(const char *name) {
 	}
 	transition_fader.idx = 0;
 	transition_fader.idx_mod = 1;
-	(void)Amphora_RegisterEvent("amph_internal_scene_transition", Amphora_SceneTransitionEvent);
 
 	return AMPHORA_STATUS_OK;
 }
@@ -159,7 +161,7 @@ Amphora_SceneTransitionEvent(void) {
 		Amphora_SetCamera(0, 0);
 	}
 	if (transition_fader.idx == 0 && transition_fader.idx_mod == -1) {
-		SDL_free(transition_fader.steps);
+		Amphora_HeapFree(transition_fader.steps);
 		(void)Amphora_UnregisterEvent("amph_internal_scene_transition");
 	}
 }

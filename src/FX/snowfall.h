@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void Snowfall(AmphoraParticle *particle, const SDL_FRect *rect);
+void Snowfall(int i, int c, AmphoraParticle *p, AmphoraParticleExt *d, const SDL_FRect *rect);
 #ifdef __cplusplus
 }
 #endif

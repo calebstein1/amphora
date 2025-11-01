@@ -39,7 +39,7 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 	Mix_Chunk *sfx_chunk = NULL;
 	int v;
 
-	if (!HT_GetValue(name, open_sfx)) {
+	if (HT_GetValue(name, open_sfx) == -1) {
 #ifdef DEBUG
 		SDL_Log("Loading sfx: %s\n", name);
 #endif
@@ -55,7 +55,7 @@ Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
 
 void
 Amphora_SetSFXVolume(const char *name, int volume) {
-	if (!HT_GetValue(name, sfx)) return;
+	if (HT_GetValue(name, sfx) == -1) return;
 
 	(void)HT_SetStatus(name, volume, sfx);
 }
@@ -66,7 +66,7 @@ Amphora_SetMusic(const char *name) {
 
 	if (Mix_PlayingMusic()) {
 		(void)Mix_HaltMusic();
-		(void)Mix_FreeMusic(current_music);
+		Mix_FreeMusic(current_music);
 		current_music = NULL;
 	}
 
@@ -158,7 +158,7 @@ Amphora_FreeAllSFX(void) {
 	int i;
 
 	for (i = 0; i < SFX_COUNT; i++) {
-		if (HT_GetValue(sfx_names[i], open_sfx)) {
+		if (HT_GetValue(sfx_names[i], open_sfx) != -1) {
 #ifdef DEBUG
 			SDL_Log("Unloading sfx: %s\n", sfx_names[i]);
 #endif
