@@ -1,4 +1,10 @@
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 #include "engine/internal/error.h"
+#include "engine/internal/events.h"
 #include "engine/internal/ht_hash.h"
 #include "engine/internal/img.h"
 #include "engine/internal/input.h"
@@ -7,39 +13,18 @@
 #include "engine/internal/mixer.h"
 #include "engine/internal/render.h"
 #include "engine/internal/scenes.h"
-
-#include <engine/internal/ttf.h>
-
+#include "engine/internal/ttf.h"
 #include "engine/internal/tilemap.h"
-
-#include "scene_list.h"
-#include "engine/events.h"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-#define SCENE(name) extern void name##_Init(void); extern void name##_Update(Uint32, const InputState *); extern void name##_Destroy(void);
-	SCENES
-#undef SCENE
-#ifdef __cplusplus
-}
-#endif
 
 /* Prototypes for private functions */
 static void Amphora_SceneTransitionEvent(void);
 
 /* File-scoped variables */
+static void (*Amphora_GetSceneData)(AmphoraScene **, char ***, int *);
 static HT_HashTable scenes;
-static AmphoraScene scene_structs[] = {
-#define SCENE(name) { .init_func = name##_Init, .update_func = name##_Update, .destroy_func = name##_Destroy },
-	SCENES
-#undef SCENE
-};
-static char *scene_names[] = {
-#define SCENE(name) #name,
-	SCENES
-#undef SCENE
-};
+static AmphoraScene *scene_structs;
+static char **scene_names;
+static int scenes_count;
 static long current_scene_idx = 0;
 static int current_scene_name = 0;
 static AmphoraFader transition_fader;
@@ -95,8 +80,16 @@ void
 Amphora_InitSceneManager(void) {
 	int i;
 
+	/* TODO: Move main() to non-library code, avoid this nonsense */
+#ifdef _WIN32
+	Amphora_GetSceneData = (void (*)(AmphoraScene **, char ***, int *))GetProcAddress(GetModuleHandle(NULL), "Amphora_GetSceneData");
+#else
+	Amphora_GetSceneData = (void (*)(AmphoraScene **, char ***, int *))dlsym(RTLD_DEFAULT, "Amphora_GetSceneData");
+#endif
+
+	Amphora_GetSceneData(&scene_structs, &scene_names, &scenes_count);
 	scenes = HT_NewTable();
-	for (i = 0; i < SCENES_COUNT; i++) {
+	for (i = 0; i < scenes_count; i++) {
 		(void)HT_SetValue(scene_names[i], i, scenes);
 	}
 }
