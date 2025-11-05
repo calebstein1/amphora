@@ -1,7 +1,6 @@
 #ifndef INPUT_INTERNAL_H
 #define INPUT_INTERNAL_H
 
-#include "engine/internal/render.h"
 #include "engine/input.h"
 
 union input_state_u {
