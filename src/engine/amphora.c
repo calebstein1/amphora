@@ -30,12 +30,8 @@ static Uint32 framerate;
 static bool quit_requested = false;
 
 int
-main(int argc, char **argv) {
+Amphora_StartEngine(void) {
 	SDL_Event e;
-
-	/* SDL requires these but we're not actually using them */
-	(void)argc;
-	(void)argv;
 
 	/*
 	 * TODO: check Init* error codes

@@ -1,8 +1,3 @@
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
 #include "engine/internal/error.h"
 #include "engine/internal/events.h"
 #include "engine/internal/ht_hash.h"
@@ -20,7 +15,6 @@
 static void Amphora_SceneTransitionEvent(void);
 
 /* File-scoped variables */
-static void (*Amphora_GetSceneData)(AmphoraScene **, char ***, int *);
 static HT_HashTable scenes;
 static AmphoraScene *scene_structs;
 static char **scene_names;
@@ -80,14 +74,6 @@ void
 Amphora_InitSceneManager(void) {
 	int i;
 
-	/* TODO: Move main() to non-library code, avoid this nonsense */
-#ifdef _WIN32
-	Amphora_GetSceneData = (void (*)(AmphoraScene **, char ***, int *))GetProcAddress(GetModuleHandle(NULL), "Amphora_GetSceneData");
-#else
-	Amphora_GetSceneData = (void (*)(AmphoraScene **, char ***, int *))dlsym(RTLD_DEFAULT, "Amphora_GetSceneData");
-#endif
-
-	Amphora_GetSceneData(&scene_structs, &scene_names, &scenes_count);
 	scenes = HT_NewTable();
 	for (i = 0; i < scenes_count; i++) {
 		(void)HT_SetValue(scene_names[i], i, scenes);
@@ -157,4 +143,16 @@ Amphora_SceneTransitionEvent(void) {
 		Amphora_HeapFree(transition_fader.steps);
 		(void)Amphora_UnregisterEvent("amph_internal_scene_transition");
 	}
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterSceneData(AmphoraScene *scenes_list, char **names, int count)
+{
+	scene_structs = scenes_list;
+	scene_names = names;
+	scenes_count = count;
 }

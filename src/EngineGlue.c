@@ -1,12 +1,15 @@
 /*
  * DO NOT TOUCH THIS FILE!
  *
- * The engine requires this file in this format to dynamically read game scenes
+ * The engine requires this file in this format to dynamically read game data
  */
 
 #include "engine/internal/scenes.h"
 #include "engine/input.h"
 #include "scene_list.h"
+
+int Amphora_StartEngine(void);
+void Amphora_RegisterSceneData(AmphoraScene *, char **, int);
 
 enum scene_list_e {
 #define SCENE(name) name,
@@ -30,16 +33,13 @@ static char *scene_names[] = {
 #undef SCENE
 };
 static int scenes_count = SCENES_COUNT;
-static int loaded = 0;
 
-void
-Amphora_GetSceneData(AmphoraScene **scenes, char ***names, int *count)
+int
+main(int argc, char *argv[])
 {
-	if (scenes == NULL || names == NULL || count == NULL) return;
-	if (loaded == 1) return;
+	(void)argc, (void)argv;
 
-	*scenes = scene_structs;
-	*names = scene_names;
-	*count = scenes_count;
-	loaded = 1;
+	Amphora_RegisterSceneData(scene_structs, scene_names, scenes_count);
+
+	Amphora_StartEngine();
 }

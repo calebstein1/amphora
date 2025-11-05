@@ -1,5 +1,5 @@
 add_library(amphora_engine SHARED
-	main.c
+	amphora.c
 	render.c
 	img.c
 	input.c

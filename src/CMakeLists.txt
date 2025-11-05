@@ -1,12 +1,12 @@
 add_subdirectory(engine)
 
-add_executable(${CMAKE_PROJECT_NAME} Scenes/Level1.cpp
+add_executable(${CMAKE_PROJECT_NAME} EngineGlue.c
+	Scenes/Level1.cpp
 	Scenes/Level2.c
 	FX/motion_blur.c
 	FX/snowfall.c
 	Entities/Player.cpp
-	Entities/Player.h
-	Scenes/SceneList.c)
+	Entities/Player.h)
 
 if(EMSCRIPTEN)
 	target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
