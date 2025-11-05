@@ -11,13 +11,17 @@
 #include "engine/internal/memory.h"
 #include "engine/internal/prefs.h"
 
-#include "config.h"
-
 /* Prototypes for private functions */
 static SDL_GUID Amphora_GetUUID(void);
 
 /* File-scoped variables */
 static char uuid[33];
+const char *game_author;
+const char *game_title;
+static int window_x;
+static int window_y;
+static unsigned int window_flags;
+static int framerate;
 
 /*
  * Internal functions
@@ -121,12 +125,12 @@ Amphora_LoadWinX(void) {
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
 		sqlite3_finalize(stmt);
-		return WINDOW_X;
+		return window_x;
 	}
 	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
-	return val ? val : WINDOW_X;
+	return val ? val : window_x;
 }
 
 Sint32
@@ -140,12 +144,12 @@ Amphora_LoadWinY(void) {
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
 		sqlite3_finalize(stmt);
-		return WINDOW_Y;
+		return window_y;
 	}
 	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
-	return val ? val : WINDOW_Y;
+	return val ? val : window_y;
 }
 
 Uint32
@@ -159,12 +163,12 @@ Amphora_LoadWinFlags(void) {
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
 		sqlite3_finalize(stmt);
-		return WINDOW_MODE;
+		return window_flags;
 	}
 	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
-	return val ? (Uint32)val : WINDOW_MODE;
+	return val ? (Uint32)val : window_flags;
 }
 
 Sint32
@@ -178,12 +182,12 @@ Amphora_LoadFPS(void) {
 	sqlite3_bind_text(stmt, 1, uuid, -1, NULL);
 	if (sqlite3_step(stmt) != SQLITE_ROW) {
 		sqlite3_finalize(stmt);
-		return FRAMERATE;
+		return framerate;
 	}
 	val = (Sint32)sqlite3_column_int64(stmt, 0);
 	sqlite3_finalize(stmt);
 
-	return val ? val : FRAMERATE;
+	return val ? val : framerate;
 }
 
 /*
@@ -192,7 +196,7 @@ Amphora_LoadFPS(void) {
 
 static SDL_GUID
 Amphora_GetUUID(void) {
-	char *path = Amphora_HeapStrdup(SDL_GetPrefPath(GAME_AUTHOR, GAME_TITLE));
+	char *path = Amphora_HeapStrdup(SDL_GetPrefPath(game_author, game_title));
 	SDL_RWops *rw;
 	char *file_contents;
 	SDL_GUID guid;
@@ -255,4 +259,19 @@ Amphora_GetUUID(void) {
 #endif
 
 	return guid;
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterPrefs(const char *auth, const char *title, int win_x, int win_y, unsigned int win_flags, int fr)
+{
+	game_author = auth;
+	game_title = title;
+	window_x = win_x;
+	window_y = win_y;
+	window_flags = win_flags;
+	framerate = fr;
 }

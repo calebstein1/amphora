@@ -6,10 +6,14 @@
 
 #include "engine/internal/scenes.h"
 #include "engine/input.h"
+#include "config.h"
 #include "resources.h"
 #include "scene_list.h"
 
 int Amphora_StartEngine(void);
+void Amphora_RegisterGameData(const char *, const char *);
+void Amphora_RegisterWindowTitle(const char *);
+void Amphora_RegisterPrefs(const char *, const char *, int, int, unsigned int, int);
 void Amphora_RegisterSceneData(const AmphoraScene *, const char **, int);
 void Amphora_RegisterImageData(const char **, const char **, int);
 void Amphora_RegisterFontData(const char **, const char **, int);
@@ -146,6 +150,9 @@ main(int argc, char *argv[])
 {
 	(void)argc, (void)argv;
 
+	Amphora_RegisterGameData(GAME_AUTHOR, GAME_TITLE);
+	Amphora_RegisterWindowTitle(GAME_TITLE);
+	Amphora_RegisterPrefs(GAME_AUTHOR, GAME_TITLE, WINDOW_X, WINDOW_Y, WINDOW_MODE, FRAMERATE);
 	Amphora_RegisterSceneData(scene_structs, scene_names, SCENES_COUNT);
 	Amphora_RegisterImageData(img_names, img_paths, IMAGES_COUNT);
 	Amphora_RegisterFontData(font_names, font_paths, FONTS_COUNT);

@@ -7,14 +7,13 @@
 #include "engine/internal/tilemap.h"
 #include "engine/internal/ttf.h"
 
-#include "config.h"
-
 /* Prototypes for private functions */
 int Amphora_InitRenderList(void);
 
 /* File-scoped variables */
 static SDL_Renderer *renderer;
 static SDL_Window *window;
+static const char *window_title;
 static Camera camera = { 0, 0 };
 static enum camera_mode_e camera_mode = CAM_MANUAL;
 static SDL_Color bg = { 0, 0, 0, 0xff };
@@ -155,7 +154,7 @@ Amphora_IsWindowFullscreen(void) {
 
 int
 Amphora_InitRender(void) {
-	if (!((window = SDL_CreateWindow(GAME_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+	if (!((window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 					 (int) Amphora_LoadWinX(), (int) Amphora_LoadWinY(), (Uint32) Amphora_LoadWinFlags())))) {
 		SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Failed to create window: %s\n", SDL_GetError());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Failed to create window", SDL_GetError(), 0);
@@ -363,4 +362,14 @@ Amphora_InitRenderList(void) {
 	render_list_node_count = 1;
 
 	return AMPHORA_STATUS_OK;
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterWindowTitle(const char *title)
+{
+	window_title = title;
 }
