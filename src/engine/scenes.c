@@ -16,8 +16,8 @@ static void Amphora_SceneTransitionEvent(void);
 
 /* File-scoped variables */
 static HT_HashTable scenes;
-static AmphoraScene *scene_structs;
-static char **scene_names;
+static const AmphoraScene *scene_structs;
+static const char **scene_names;
 static int scenes_count;
 static long current_scene_idx = 0;
 static int current_scene_name = 0;
@@ -150,7 +150,7 @@ Amphora_SceneTransitionEvent(void) {
  */
 
 void
-Amphora_RegisterSceneData(AmphoraScene *scenes_list, char **names, int count)
+Amphora_RegisterSceneData(const AmphoraScene *scenes_list, const char **names, int count)
 {
 	scene_structs = scenes_list;
 	scene_names = names;

@@ -4,8 +4,6 @@
 #include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 
-#include "config.h"
-
 /* Prototypes for private functions */
 static void Amphora_LoadIMGTexture(const char *name);
 
@@ -14,16 +12,9 @@ static HT_HashTable images;
 static HT_HashTable image_surfaces;
 static HT_HashTable image_surfaces_orig;
 static HT_HashTable open_images;
-static const char *img_names[] = {
-#define LOADIMG(name, path) #name,
-	IMAGES
-#undef LOADIMG
-};
-static const char *img_paths[] = {
-#define LOADIMG(name, path) #path,
-	IMAGES
-#undef LOADIMG
-};
+static const char **img_names;
+static const char **img_paths;
+static int img_count;
 
 Vector2f
 Amphora_GetSpritePosition(const AmphoraImage *spr) {
@@ -271,7 +262,7 @@ Amphora_InitIMG(void) {
 	image_surfaces = HT_NewTable();
 	image_surfaces_orig = HT_NewTable();
 
-	for (i = 0; i < IMAGES_COUNT; i++) {
+	for (i = 0; i < img_count; i++) {
 		HT_StoreRef(img_names[i], img_paths[i], images);
 #ifdef DEBUG
 		SDL_Log("Found image %s\n", img_names[i]);
@@ -285,7 +276,7 @@ void
 Amphora_FreeAllIMG(void) {
 	int i;
 
-	for (i = 0; i < IMAGES_COUNT; i++) {
+	for (i = 0; i < img_count; i++) {
 		if (HT_GetValue(img_names[i], open_images) != -1) {
 #ifdef DEBUG
 			SDL_Log("Unloading image: %s\n", img_names[i]);
@@ -388,4 +379,16 @@ Amphora_LoadIMGTexture(const char *name) {
 	HT_StoreRef(name, SDL_CreateTextureFromSurface(Amphora_GetRenderer(), surface), open_images);
 	HT_StoreRef(name, surface, image_surfaces);
 	HT_StoreRef(name, surface_orig, image_surfaces_orig);
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterImageData(const char **names, const char **paths, int count)
+{
+	img_names = names;
+	img_paths = paths;
+	img_count = count;
 }

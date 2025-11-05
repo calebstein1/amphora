@@ -7,16 +7,6 @@
 
 #include "engine/render.h"
 
-#include "config.h"
-#include "resources.h"
-
-enum fonts_e {
-#define LOADFONT(name, path) name##_ft,
-	FONTS
-#undef LOADFONT
-	FONTS_COUNT
-};
-
 #ifdef __cplusplus
 extern "C" {
 #endif

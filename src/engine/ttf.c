@@ -3,7 +3,6 @@
 #include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 #include "engine/internal/ttf.h"
-#include "config.h"
 
 #ifndef DISABLE_FONTS
 
@@ -15,16 +14,9 @@ static SDL_Texture *Amphora_RenderStringToTexture(AmphoraString *msg);
 /* File-scoped variables */
 static HT_HashTable fonts;
 static HT_HashTable open_fonts;
-static const char *font_names[] = {
-#define LOADFONT(name, path) #name,
-	FONTS
-#undef LOADFONT
-};
-static const char *font_paths[] = {
-#define LOADFONT(name, path) #path,
-	FONTS
-#undef LOADFONT
-};
+static const char **font_names;
+static const char **font_paths;
+static int font_count;
 
 AmphoraString *
 Amphora_CreateString(const char *font_name, const int pt, const float x, const float y, const int order, const SDL_Color color, const bool stationary, const char *fmt, ...) {
@@ -180,7 +172,7 @@ Amphora_InitFonts(void) {
 
 	fonts = HT_NewTable();
 	open_fonts = HT_NewTable();
-	for (i = 0; i < FONTS_COUNT; i++) {
+	for (i = 0; i < font_count; i++) {
 		HT_StoreRef(font_names[i], font_paths[i], fonts);
 #ifdef DEBUG
 		SDL_Log("Found font %s\n", font_names[i]);
@@ -194,7 +186,7 @@ void
 Amphora_FreeAllFonts(void) {
 	int i;
 
-	for (i = 0; i < FONTS_COUNT; i++) {
+	for (i = 0; i < font_count; i++) {
 		if (HT_GetValue(font_names[i], open_fonts) != -1) {
 #ifdef DEBUG
             SDL_Log("Unloading font: %s\n", font_names[i]);
@@ -242,6 +234,18 @@ Amphora_RenderStringToTexture(AmphoraString *msg) {
 	SDL_FreeSurface(surface);
 
 	return texture;
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterFontData(const char **names, const char **paths, int count)
+{
+	font_names = names;
+	font_paths = paths;
+	font_count = count;
 }
 
 #endif

@@ -1,6 +1,5 @@
 #include "engine/internal/mixer.h"
 #include "engine/internal/ht_hash.h"
-#include "config.h"
 
 #ifndef DISABLE_MIXER
 
@@ -12,26 +11,12 @@ static HT_HashTable sfx;
 static HT_HashTable music;
 static HT_HashTable open_sfx;
 static Mix_Music *current_music;
-static const char *sfx_names[] = {
-#define LOADSFX(name, path) #name,
-	SFX
-#undef LOADSFX
-};
-static const char *sfx_paths[] = {
-#define LOADSFX(name, path) #path,
-	SFX
-#undef LOADSFX
-};
-static const char *music_names[] = {
-#define LOADMUSIC(name, path) #name,
-	MUSIC
-#undef LOADMUSIC
-};
-static const char *music_paths[] = {
-#define LOADMUSIC(name, path) #path,
-	MUSIC
-#undef LOADMUSIC
-};
+static const char **sfx_names;
+static const char **sfx_paths;
+static int sfx_count;
+static const char **music_names;
+static const char **music_paths;
+static int music_count;
 
 void
 Amphora_PlaySFX(const char *name, const int channel, const int repeat) {
@@ -126,7 +111,7 @@ Amphora_InitSFX(void) {
 
 	sfx = HT_NewTable();
 	open_sfx = HT_NewTable();
-	for (i = 0; i < SFX_COUNT; i++) {
+	for (i = 0; i < sfx_count; i++) {
 		HT_StoreRef(sfx_names[i], sfx_paths[i], sfx);
 		(void)HT_SetStatus(sfx_names[i], MIX_MAX_VOLUME, sfx);
 #ifdef DEBUG
@@ -142,7 +127,7 @@ Amphora_InitMusic(void) {
 	int i;
 
 	music = HT_NewTable();
-	for (i = 0; i < MUSIC_COUNT; i++) {
+	for (i = 0; i < music_count; i++) {
 		HT_StoreRef(music_names[i], music_paths[i], music);
 #ifdef DEBUG
 		SDL_Log("Found music %s\n", music_names[i]);
@@ -157,7 +142,7 @@ void
 Amphora_FreeAllSFX(void) {
 	int i;
 
-	for (i = 0; i < SFX_COUNT; i++) {
+	for (i = 0; i < sfx_count; i++) {
 		if (HT_GetValue(sfx_names[i], open_sfx) != -1) {
 #ifdef DEBUG
 			SDL_Log("Unloading sfx: %s\n", sfx_names[i]);
@@ -192,6 +177,26 @@ static void
 Amphora_FreeMusic(void) {
 	Mix_FreeMusic(current_music);
 	current_music = NULL;
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterSFXData(const char **names, const char **paths, int count)
+{
+	sfx_names = names;
+	sfx_paths = paths;
+	sfx_count = count;
+}
+
+void
+Amphora_RegisterMusicData(const char **names, const char **paths, int count)
+{
+	music_names = names;
+	music_paths = paths;
+	music_count = count;
 }
 
 #endif

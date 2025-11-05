@@ -7,15 +7,6 @@
 #include "engine/util.h"
 #include "engine/render.h"
 
-#include "resources.h"
-
-typedef enum images_e {
-#define LOADIMG(name, path) name##_im,
-	IMAGES
-#undef LOADIMG
-	IMAGES_COUNT
-} ImageName;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

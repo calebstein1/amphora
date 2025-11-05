@@ -6,7 +6,6 @@
 #include "engine/internal/memory.h"
 #include "engine/internal/render.h"
 #include "engine/internal/tilemap.h"
-#include "config.h"
 
 #ifndef DISABLE_TILEMAP
 
@@ -21,16 +20,9 @@ static int Amphora_GetMapLayerByName(const char *name);
 static void Amphora_ProcessDeferredTransition(void);
 
 /* File-scoped variables */
-static char *map_names[] = {
-#define LOADMAP(name, path) #name,
-	MAPS
-#undef LOADMAP
-};
-static char *map_paths[] = {
-#define LOADMAP(name, path) #path,
-	MAPS
-#undef LOADMAP
-};
+static const char **map_names;
+static const char **map_paths;
+static int map_count;
 static HT_HashTable map_data;
 static struct amphora_tilemap_t current_map;
 static AmphoraFader transition_fader;
@@ -134,7 +126,7 @@ Amphora_InitMaps(void) {
 	int i;
 
 	map_data = HT_NewTable();
-	for (i = 0; i < MAPS_COUNT; i++) {
+	for (i = 0; i < map_count; i++) {
 		HT_StoreRef(map_names[i], map_paths[i], map_data);
 #ifdef DEBUG
 		SDL_Log("Found map %s\n", map_names[i]);
@@ -369,6 +361,18 @@ Amphora_ProcessDeferredTransition(void) {
 	tilemap_flags.transitioning = false;
 	Amphora_HeapFree(transition_fader.steps);
 	(void)Amphora_UnregisterEvent("amph_internal_map_layer_fade");
+}
+
+/*
+ * Dependency Injection functions
+ */
+
+void
+Amphora_RegisterMapData(const char **names, const char **paths, int count)
+{
+	map_names = names;
+	map_paths = paths;
+	map_count = count;
 }
 
 #endif
