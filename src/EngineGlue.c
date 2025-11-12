@@ -1,7 +1,7 @@
 /*
  * DO NOT TOUCH THIS FILE!
  *
- * The engine requires this file in this format to dynamically read game data
+ * Initializes the engine with required data and starts the main loop
  */
 
 #include "engine/internal/scenes.h"
@@ -10,16 +10,16 @@
 #include "resources.h"
 #include "scene_list.h"
 
-int Amphora_StartEngine(void);
-void Amphora_RegisterGameData(const char *, const char *);
-void Amphora_RegisterWindowTitle(const char *);
-void Amphora_RegisterPrefs(const char *, const char *, int, int, unsigned int, int);
-void Amphora_RegisterSceneData(const AmphoraScene *, const char **, int);
-void Amphora_RegisterImageData(const char **, const char **, int);
-void Amphora_RegisterFontData(const char **, const char **, int);
-void Amphora_RegisterMapData(const char **, const char **, int);
-void Amphora_RegisterSFXData(const char **, const char **, int);
-void Amphora_RegisterMusicData(const char **, const char **, int);
+extern int Amphora_StartEngine(void);
+extern void Amphora_RegisterGameData(const char *, const char *);
+extern void Amphora_RegisterWindowTitle(const char *);
+extern void Amphora_RegisterPrefs(const char *, const char *, int, int, unsigned int, int);
+extern void Amphora_RegisterSceneData(const AmphoraScene *, const char **, int);
+extern void Amphora_RegisterImageData(const char **, const char **, int);
+extern void Amphora_RegisterFontData(const char **, const char **, int);
+extern void Amphora_RegisterMapData(const char **, const char **, int);
+extern void Amphora_RegisterSFXData(const char **, const char **, int);
+extern void Amphora_RegisterMusicData(const char **, const char **, int);
 
 /* Scene data */
 
