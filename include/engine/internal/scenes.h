@@ -1,7 +1,7 @@
 #ifndef AMPHORA_SCENES_INTERNAL_H
 #define AMPHORA_SCENES_INTERNAL_H
 
-#include "engine/internal/input.h"
+typedef struct input_state_t InputState;
 
 typedef struct amphora_scene_t {
 	void (*init_func)(void);

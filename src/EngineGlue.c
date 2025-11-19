@@ -4,8 +4,8 @@
  * Initializes the engine with required data and starts the main loop
  */
 
+#include "engine/amphora.h"
 #include "engine/internal/scenes.h"
-#include "engine/input.h"
 #include "config.h"
 #include "resources.h"
 #include "scene_list.h"
@@ -14,12 +14,54 @@ extern int Amphora_StartEngine(void);
 extern void Amphora_RegisterGameData(const char *, const char *);
 extern void Amphora_RegisterWindowTitle(const char *);
 extern void Amphora_RegisterPrefs(const char *, const char *, int, int, unsigned int, int);
+extern void Amphora_RegisterActionData(Uint32 *, const char **, SDL_Keycode *, SDL_GameControllerButton *, const char **, int);
 extern void Amphora_RegisterSceneData(const AmphoraScene *, const char **, int);
 extern void Amphora_RegisterImageData(const char **, const char **, int);
 extern void Amphora_RegisterFontData(const char **, const char **, int);
 extern void Amphora_RegisterMapData(const char **, const char **, int);
 extern void Amphora_RegisterSFXData(const char **, const char **, int);
 extern void Amphora_RegisterMusicData(const char **, const char **, int);
+
+/* Controller data */
+
+enum input_actions {
+#define KMAP(action, ...) ACTION_##action,
+	DEFAULT_KEYMAP
+#undef KMAP
+	ACTION_COUNT
+};
+_Static_assert(ACTION_COUNT <= 32, "Cannot define more than 32 actions");
+
+union input_state_u {
+	struct input_state_t state;
+	Uint32 bits;
+};
+
+static const char *action_names[] = {
+#define KMAP(action, key, gamepad) #action,
+	DEFAULT_KEYMAP
+#undef KMAP
+};
+
+static SDL_Keycode keys[] = {
+#define KMAP(action, key, gamepad) SDLK_##key,
+	DEFAULT_KEYMAP
+#undef KMAP
+};
+
+static SDL_GameControllerButton controller_buttons[] = {
+#define KMAP(action, key, gamepad) SDL_CONTROLLER_BUTTON_##gamepad,
+	DEFAULT_KEYMAP
+#undef KMAP
+};
+
+static const char *controller_button_names[] = {
+#define KMAP(action, key, gamepad) #gamepad,
+	DEFAULT_KEYMAP
+#undef KMAP
+};
+
+static union input_state_u input_state;
 
 /* Scene data */
 
@@ -153,6 +195,7 @@ main(int argc, char *argv[])
 	Amphora_RegisterGameData(GAME_AUTHOR, GAME_TITLE);
 	Amphora_RegisterWindowTitle(GAME_TITLE);
 	Amphora_RegisterPrefs(GAME_AUTHOR, GAME_TITLE, WINDOW_X, WINDOW_Y, WINDOW_MODE, FRAMERATE);
+	Amphora_RegisterActionData(&input_state.bits, action_names, keys, controller_buttons, controller_button_names, ACTION_COUNT);
 	Amphora_RegisterSceneData(scene_structs, scene_names, SCENES_COUNT);
 	Amphora_RegisterImageData(img_names, img_paths, IMAGES_COUNT);
 	Amphora_RegisterFontData(font_names, font_paths, FONTS_COUNT);

@@ -3,6 +3,12 @@
 
 #include "config.h"
 
+typedef struct input_state_t {
+#define KMAP(action, ...) bool action : 1;
+	DEFAULT_KEYMAP
+#undef KMAP
+} InputState;
+
 #ifdef EXPOSE_INTERNAL_DEFINITIONS_AND_FUNCTIONS
 #include "engine/internal/collision.h"
 #include "engine/internal/db.h"

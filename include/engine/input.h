@@ -5,14 +5,6 @@
 
 #include "engine/img.h"
 
-#include "config.h"
-
-typedef struct input_state_t {
-#define KMAP(action, ...) bool action : 1;
-	DEFAULT_KEYMAP
-#undef KMAP
-} InputState;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
